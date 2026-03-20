@@ -1,0 +1,182 @@
+# VESSIQ — CSV Terminal Export Normalization Mapping
+# ----------------------------------------------------
+# Maps raw CSV column names (after key normalization) to the VESSIQ unified
+# VesselEvent schema fields.
+#
+# Key normalization applied before matching:
+#   - Lowercased
+#   - Spaces → underscores
+#   - Hyphens/dots → underscores
+#
+# Add source-specific column aliases under `column_aliases` for each terminal.
+# The engine tries aliases in order and uses the first match found in the row.
+#
+# Structure:
+#   column_map:      normalized_csv_column → VesselEvent field
+#   column_aliases:  VesselEvent field → [list of possible csv column names]
+#   event_type_map:  raw event type string → EventType enum value
+#   date_formats:    date format strings to try
+
+# Primary column mapping (canonical column names → schema fields)
+column_map:
+  vessel_name:        vessel_name
+  vessel:             vessel_name
+  ship_name:          vessel_name
+  imo:                vessel_imo
+  imo_number:         vessel_imo
+  vessel_imo:         vessel_imo
+  voyage:             voyage_number
+  voyage_number:      voyage_number
+  voyage_no:          voyage_number
+  voy:                voyage_number
+  container:          container_number
+  container_number:   container_number
+  container_no:       container_number
+  cntr:               container_number
+  cntr_no:            container_number
+  booking:            booking_number
+  booking_number:     booking_number
+  booking_no:         booking_number
+  bkg:                booking_number
+  bol:                bill_of_lading
+  bill_of_lading:     bill_of_lading
+  b/l:                bill_of_lading
+  bl_number:          bill_of_lading
+  port_code:          port_locode
+  port_locode:        port_locode
+  locode:             port_locode
+  un_locode:          port_locode
+  port:               port_name
+  port_name:          port_name
+  discharge_port:     port_name
+  terminal:           terminal_name
+  terminal_name:      terminal_name
+  terminal_code:      terminal_code
+  event:              event_type_raw
+  event_type:         event_type_raw
+  status:             event_type_raw
+  activity:           event_type_raw
+  move_type:          event_type_raw
+  event_date:         event_timestamp_raw
+  event_time:         event_time_raw
+  event_datetime:     event_timestamp_raw
+  timestamp:          event_timestamp_raw
+  date:               event_timestamp_raw
+  eta:                estimated_arrival_raw
+  etd:                estimated_departure_raw
+  estimated_arrival:  estimated_arrival_raw
+  estimated_departure: estimated_departure_raw
+
+# Aliases: additional column name variants per target field
+# (covers common terminal-specific naming conventions)
+column_aliases:
+  vessel_name:
+    - vessel_name
+    - vessel
+    - ship
+    - ship_name
+    - v_name
+    - vsl_name
+    - vsl
+  voyage_number:
+    - voyage
+    - voyage_number
+    - voyage_no
+    - voy_no
+    - voy
+    - voyage_nbr
+  container_number:
+    - container
+    - container_number
+    - container_no
+    - cntr_no
+    - cntr
+    - unit_no
+    - unit_number
+  event_type_raw:
+    - event
+    - event_type
+    - status
+    - activity
+    - move_type
+    - transaction_type
+    - txn_type
+  event_timestamp_raw:
+    - event_date
+    - event_datetime
+    - timestamp
+    - date
+    - activity_date
+    - move_date
+    - txn_date
+
+# Terminal event type values → VESSIQ EventType
+# Covers common TOS (Navis N4, SPARCS) move codes + plain text values
+event_type_map:
+  # Vessel events
+  vessel_arrival:     ARRIVAL
+  arrival:            ARRIVAL
+  arr:                ARRIVAL
+  vessel_departure:   DEPARTURE
+  departure:          DEPARTURE
+  dep:                DEPARTURE
+  sail:               DEPARTURE
+  sailed:             DEPARTURE
+  berthed:            BERTHING
+  berthing:           BERTHING
+  berth:              BERTHING
+
+  # Container gate events (Navis codes)
+  gate_in:            GATE_IN
+  gatein:             GATE_IN
+  gi:                 GATE_IN
+  ingate:             GATE_IN
+  in_gate:            GATE_IN
+  gate_out:           GATE_OUT
+  gateout:            GATE_OUT
+  go:                 GATE_OUT
+  outgate:            GATE_OUT
+  out_gate:           GATE_OUT
+  delivery:           GATE_OUT
+  delivered:          GATE_OUT
+
+  # Load/discharge
+  load:               LOADED
+  loaded:             LOADED
+  lod:                LOADED
+  discharge:          DISCHARGED
+  discharged:         DISCHARGED
+  dsc:                DISCHARGED
+  unload:             DISCHARGED
+  unloaded:           DISCHARGED
+
+  # Availability
+  available:          AVAILABLE
+  avail:              AVAILABLE
+  av:                 AVAILABLE
+  ready:              AVAILABLE
+
+  # ETA/ETD
+  eta_update:         ETA_UPDATE
+  etd_update:         ETD_UPDATE
+
+  # Customs
+  customs_released:   CUSTOMS_RELEASED
+  customs_release:    CUSTOMS_RELEASED
+  released:           CUSTOMS_RELEASED
+
+# Date/time formats to try when parsing raw timestamp strings
+date_formats:
+  - "%Y-%m-%d %H:%M:%S"
+  - "%Y-%m-%dT%H:%M:%S"
+  - "%Y-%m-%d %H:%M"
+  - "%Y-%m-%d"
+  - "%m/%d/%Y %H:%M:%S"
+  - "%m/%d/%Y %H:%M"
+  - "%m/%d/%Y"
+  - "%d/%m/%Y %H:%M"
+  - "%d/%m/%Y"
+  - "%d-%b-%Y %H:%M"
+  - "%d-%b-%Y"
+  - "%Y%m%d%H%M"
+  - "%Y%m%d"

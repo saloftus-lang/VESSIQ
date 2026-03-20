@@ -1,0 +1,70 @@
+# VESSIQ — EDI 315 Normalization Mapping
+# ----------------------------------------
+# Maps raw parsed EDI 315 fields to the VESSIQ unified VesselEvent schema.
+#
+# Structure:
+#   field_map:      raw_field_name → canonical VesselEvent field name
+#   status_codes:   EDI B4 status code → EventType enum value
+#   date_formats:   List of date formats to try when parsing status_date
+#
+# To support a new carrier variant, add/override entries here — no Python needed.
+
+field_map:
+  vessel_name:      vessel_name
+  vessel_imo:       vessel_imo
+  voyage_number:    voyage_number
+  container_number: container_number
+  booking_number:   booking_number
+  bill_of_lading:   bill_of_lading
+  port_locode:      port_locode
+  port_name:        port_name
+
+# EDI 315 B4 Shipment Status Codes → VESSIQ EventType
+# Reference: X12 004010 315 Transaction Set
+status_codes:
+  # Vessel arrival/departure
+  VE: ARRIVAL           # Vessel Arrival
+  VD: DEPARTURE         # Vessel Departure
+  OO: DEPARTURE         # Vessel Departed Port (alternate)
+  OA: ARRIVAL           # Out of Arrival Port / Arrived
+
+  # Berth
+  VB: BERTHING          # Vessel Berthed (non-standard but common)
+
+  # Container load/discharge
+  AL: LOADED            # Loaded on Vessel
+  UV: DISCHARGED        # Unloaded from Vessel (Discharged)
+  LA: LOADED            # Loaded on Barge
+
+  # Gate events
+  RD: GATE_IN           # Received at Terminal / Gate-In
+  DL: GATE_OUT          # Delivered / Gate-Out
+  OD: GATE_OUT          # Out of Port of Discharge
+
+  # Availability
+  EA: AVAILABLE         # Available at Terminal
+  AV: AVAILABLE         # Available for Delivery
+
+  # ETA/ETD updates
+  EI: ETA_UPDATE        # Estimated Time of Arrival (update)
+  ED: ETD_UPDATE        # Estimated Departure
+
+  # Customs
+  CP: CUSTOMS_RELEASED  # Customs Released/Permit
+  AE: CUSTOMS_RELEASED  # Arrival at Customs Entry
+
+  # Transit
+  AG: UNKNOWN           # En Route (no direct mapping)
+  DE: DEPARTURE         # Departed
+
+# Date formats to attempt when parsing raw date strings from EDI
+date_formats:
+  - "%Y%m%d"      # CCYYMMDD (preferred X12 format)
+  - "%y%m%d"      # YYMMDD (legacy)
+  - "%Y-%m-%d"    # ISO fallback
+
+# Time formats for parsing raw time strings
+time_formats:
+  - "%H%M"        # HHMM
+  - "%H:%M"       # HH:MM
+  - "%H%M%S"      # HHMMSS

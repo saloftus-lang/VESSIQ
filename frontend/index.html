@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VESSIQ — Maritime Data Normalization & EDI Translation API</title>
+  <meta name="description" content="VESSIQ is the maritime data normalization layer that translates EDI 315, terminal CSV exports, and carrier feeds into a single clean JSON schema via REST API. Built for logistics operators, freight forwarders, and BCOs." />
+  <meta name="keywords" content="maritime data normalization, EDI 315 translation, vessel event data, logistics data standardization, maritime API, shipping data integration, terminal data normalization, freight data API, container tracking data, maritime EDI translator" />
+  <link rel="canonical" href="https://vessiq.net/" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="VESSIQ" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://vessiq.net/" />
+  <meta property="og:title" content="VESSIQ — Maritime Data Normalization & EDI Translation API" />
+  <meta property="og:description" content="Translate EDI 315, terminal CSVs, and carrier data feeds into one unified vessel event schema." />
+  <meta property="og:site_name" content="VESSIQ" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"VESSIQ","url":"https://vessiq.net","description":"Maritime data normalization and EDI translation infrastructure.","contactPoint":{"@type":"ContactPoint","email":"hello@vessiq.com","contactType":"sales"}},{"@type":"SoftwareApplication","name":"VESSIQ Normalization API","applicationCategory":"BusinessApplication","operatingSystem":"Web","description":"REST API that normalizes EDI 315 and terminal CSV data into a unified VesselEvent JSON schema."}]}</script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── Design Tokens ─── */
+    :root {
+      /* Ocean navy palette */
+      --bg:       #040d18;
+      --bg1:      #071220;
+      --bg2:      #0a1a2e;
+      --bg3:      #0f2340;
+      --surface:  #0c1829;
+
+      /* Borders */
+      --b0:  rgba(255,255,255,.04);
+      --b1:  rgba(255,255,255,.07);
+      --b2:  rgba(255,255,255,.11);
+
+      /* Text */
+      --t1:  #f0f6ff;
+      --t2:  #7e99bb;
+      --t3:  #3d5572;
+
+      /* Brand */
+      --blue:   #3b82f6;
+      --blue2:  #2563eb;
+      --cyan:   #06b6d4;
+      --cyan2:  #0891b2;
+
+      /* Glows */
+      --glow-blue: rgba(59,130,246,.18);
+      --glow-cyan: rgba(6,182,212,.12);
+
+      --r:  8px;
+      --r2: 14px;
+      --r3: 24px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--t1);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* ─── Wrap ─── */
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+    .sr-only { position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0); }
+
+    /* ─── Subtle grid background ─── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(6,182,212,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(6,182,212,.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 20%, transparent 100%);
+    }
+    header, main, footer { position: relative; z-index: 1; }
+
+    /* ─── Nav ─── */
+    header {
+      position: sticky; top: 0; z-index: 200;
+      border-bottom: 1px solid var(--b1);
+      background: rgba(4,13,24,.82);
+      backdrop-filter: blur(20px);
+    }
+    nav {
+      display: flex; align-items: center;
+      justify-content: space-between; height: 62px;
+    }
+    .logo {
+      font-size: 17px; font-weight: 900;
+      letter-spacing: .4px; color: var(--t1);
+      display: flex; align-items: center; gap: 2px;
+    }
+    .logo-v { color: var(--cyan); }
+    .nav-links {
+      display: flex; align-items: center;
+      gap: 32px; list-style: none;
+    }
+    .nav-links a {
+      font-size: 13px; font-weight: 500;
+      color: var(--t2); transition: color .15s;
+    }
+    .nav-links a:hover { color: var(--t1); }
+    .nav-cta {
+      background: var(--blue); color: #fff;
+      padding: 8px 18px; border-radius: var(--r);
+      font-size: 13px; font-weight: 700; border: none; cursor: pointer;
+      transition: background .15s, box-shadow .15s;
+      display: inline-block;
+      box-shadow: 0 0 0 1px rgba(59,130,246,.3), 0 4px 16px rgba(59,130,246,.2);
+    }
+    .nav-cta:hover { background: var(--blue2); box-shadow: 0 0 0 1px rgba(59,130,246,.5), 0 4px 24px rgba(59,130,246,.35); }
+    .mob-btn { display:none; background:none; border:none; cursor:pointer; color:var(--t2); padding:4px; }
+
+    /* ─── Hero ─── */
+    .hero {
+      padding: 110px 28px 90px;
+      position: relative; text-align: center;
+    }
+    /* Radial glow behind hero text */
+    .hero-glow {
+      position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 600px; pointer-events: none;
+      background: radial-gradient(ellipse at center, rgba(6,182,212,.07) 0%, rgba(59,130,246,.06) 35%, transparent 70%);
+    }
+
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1px solid rgba(6,182,212,.25);
+      background: rgba(6,182,212,.06);
+      border-radius: 100px; padding: 5px 15px;
+      font-size: 11px; font-weight: 700; letter-spacing: .8px;
+      text-transform: uppercase; color: var(--cyan);
+      margin-bottom: 32px;
+    }
+    .dot { width: 5px; height: 5px; background: var(--cyan); border-radius: 50%; box-shadow: 0 0 8px var(--cyan); }
+
+    h1 {
+      font-size: clamp(40px, 5.8vw, 68px);
+      font-weight: 900; line-height: 1.06;
+      letter-spacing: -2.5px; color: var(--t1);
+      margin-bottom: 24px; position: relative;
+    }
+    h1 em { color: var(--cyan); font-style: normal; }
+
+    .hero-sub {
+      font-size: clamp(15px, 1.9vw, 17px);
+      color: var(--t2); line-height: 1.8;
+      max-width: 520px; margin: 0 auto 44px;
+      font-weight: 400;
+    }
+
+    .hero-btns {
+      display: flex; justify-content: center;
+      gap: 10px; flex-wrap: wrap; margin-bottom: 56px;
+    }
+    .btn-primary {
+      background: var(--blue); color: #fff;
+      padding: 12px 24px; border-radius: var(--r);
+      font-size: 14px; font-weight: 700; border: none; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 7px;
+      transition: all .15s;
+      box-shadow: 0 0 0 1px rgba(59,130,246,.4), 0 8px 24px rgba(59,130,246,.25);
+    }
+    .btn-primary:hover {
+      background: var(--blue2); transform: translateY(-1px);
+      box-shadow: 0 0 0 1px rgba(59,130,246,.6), 0 12px 32px rgba(59,130,246,.35);
+    }
+    .btn-ghost {
+      background: transparent; color: var(--t2);
+      padding: 12px 24px; border-radius: var(--r);
+      font-size: 14px; font-weight: 600;
+      border: 1px solid var(--b2); cursor: pointer;
+      display: inline-flex; align-items: center; gap: 7px;
+      transition: all .15s;
+    }
+    .btn-ghost:hover { color: var(--t1); border-color: rgba(255,255,255,.2); background: var(--b0); }
+
+    /* Trust strip */
+    .trust {
+      display: flex; flex-wrap: wrap;
+      justify-content: center; gap: 22px;
+    }
+    .trust-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--t3); font-weight: 500;
+    }
+    .chk {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: rgba(6,182,212,.1); border: 1px solid rgba(6,182,212,.2);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+
+    /* ─── Stats ─── */
+    .stats {
+      border-top: 1px solid var(--b1);
+      border-bottom: 1px solid var(--b1);
+      background: var(--bg1);
+    }
+    .stats-row {
+      display: grid; grid-template-columns: repeat(4,1fr);
+      max-width: 840px; margin: 0 auto; padding: 44px 28px;
+      text-align: center;
+    }
+    .stat { padding: 0 24px; }
+    .stat + .stat { border-left: 1px solid var(--b1); }
+    .stat-n {
+      font-size: 38px; font-weight: 900; letter-spacing: -1.5px;
+      color: var(--t1); line-height: 1; margin-bottom: 5px;
+    }
+    .stat-n em { color: var(--cyan); font-style: normal; }
+    .stat-l { font-size: 12px; color: var(--t3); font-weight: 500; }
+
+    /* ─── Sections ─── */
+    section { padding: 96px 28px; }
+    .s-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .9px;
+      text-transform: uppercase; color: var(--cyan);
+      margin-bottom: 14px;
+    }
+    h2 {
+      font-size: clamp(28px, 3.8vw, 44px);
+      font-weight: 800; line-height: 1.12;
+      letter-spacing: -1.2px; color: var(--t1); margin-bottom: 14px;
+    }
+    .s-sub {
+      font-size: 15px; color: var(--t2); line-height: 1.75;
+      max-width: 500px; margin-bottom: 52px; font-weight: 400;
+    }
+    .center { text-align: center; }
+    .center .s-sub { margin-left: auto; margin-right: auto; }
+
+    /* ─── Problem ─── */
+    .prob-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      border: 1px solid var(--b1);
+      border-radius: var(--r2); overflow: hidden;
+    }
+    .prob-card {
+      padding: 36px 32px; background: var(--bg1);
+      position: relative; overflow: hidden;
+    }
+    .prob-card + .prob-card { border-left: 1px solid var(--b1); }
+    .prob-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      opacity: 0; transition: opacity .3s;
+    }
+    .prob-card:hover::before { opacity: 1; }
+    .prob-card:hover { background: var(--bg2); }
+    .p-idx {
+      font-size: 11px; font-weight: 700; letter-spacing: .8px;
+      text-transform: uppercase; color: var(--t3); margin-bottom: 20px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .p-idx::after { content: ''; flex: 1; height: 1px; background: var(--b1); }
+    .prob-card h3 { font-size: 15px; font-weight: 700; color: var(--t1); margin-bottom: 10px; }
+    .prob-card p  { font-size: 13px; color: var(--t2); line-height: 1.65; }
+
+    /* ─── How it works ─── */
+    .how-bg {
+      background: var(--bg1);
+      border-top: 1px solid var(--b1); border-bottom: 1px solid var(--b1);
+    }
+    .how-flow {
+      display: grid; grid-template-columns: 1fr 48px 1fr 48px 1fr;
+      align-items: start; max-width: 880px; margin: 0 auto;
+    }
+    .how-step { text-align: center; padding: 0 8px; }
+    .step-n {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: var(--bg3); border: 1px solid rgba(6,182,212,.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 900; color: var(--cyan);
+      margin: 0 auto 18px;
+      box-shadow: 0 0 24px rgba(6,182,212,.12);
+    }
+    .how-step h3 { font-size: 14px; font-weight: 700; color: var(--t1); margin-bottom: 7px; }
+    .how-step p  { font-size: 12px; color: var(--t2); line-height: 1.65; }
+    .how-arrow {
+      display: flex; align-items: flex-start; justify-content: center;
+      padding-top: 18px; color: var(--t3); font-size: 20px;
+    }
+    .tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-top: 12px; }
+    .tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; padding: 2px 7px; border-radius: 4px;
+      background: var(--bg3); border: 1px solid var(--b2);
+      color: var(--t3); font-weight: 500;
+    }
+
+    /* ─── Features ─── */
+    .feat-grid {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      border: 1px solid var(--b1); border-radius: var(--r2); overflow: hidden;
+      max-width: 1000px; margin: 0 auto;
+    }
+    .feat-card {
+      padding: 32px; background: var(--bg1);
+      border-bottom: 1px solid var(--b1);
+      transition: background .2s;
+    }
+    .feat-card:nth-child(n+4) { border-bottom: none; }
+    .feat-card:not(:nth-child(3n)) { border-right: 1px solid var(--b1); }
+    .feat-card:hover { background: var(--bg2); }
+    .feat-icon {
+      width: 36px; height: 36px;
+      background: var(--bg3); border: 1px solid rgba(6,182,212,.15);
+      border-radius: var(--r);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; margin-bottom: 18px;
+    }
+    .feat-card h3 { font-size: 14px; font-weight: 700; color: var(--t1); margin-bottom: 8px; }
+    .feat-card p  { font-size: 13px; color: var(--t2); line-height: 1.65; }
+
+    /* ─── Schema ─── */
+    .schema-bg {
+      background: var(--bg1);
+      border-top: 1px solid var(--b1); border-bottom: 1px solid var(--b1);
+    }
+    .schema-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 72px; align-items: start;
+      max-width: 1000px; margin: 0 auto;
+    }
+    .field-list { display: flex; flex-direction: column; gap: 1px; margin-top: 28px; }
+    .f-row {
+      display: grid; grid-template-columns: 156px 76px 1fr;
+      gap: 12px; align-items: center;
+      padding: 9px 12px; border-radius: var(--r);
+      transition: background .15s; cursor: default;
+    }
+    .f-row:hover { background: var(--bg2); }
+    .f-name { font-family:'JetBrains Mono',monospace; font-size:12px; color:#60a5fa; font-weight:500; }
+    .f-type { font-family:'JetBrains Mono',monospace; font-size:11px; color:#f59e0b; }
+    .f-desc { font-size:11px; color:var(--t3); }
+    .code-box {
+      background: #020810;
+      border: 1px solid var(--b2); border-radius: var(--r2);
+      padding: 28px; overflow-x: auto;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+    }
+    .code-box pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; line-height: 2; color: #8aa6c8;
+    }
+    .ck { color: #60a5fa; }
+    .cs { color: #4ade80; }
+    .cb { color: #c084fc; }
+
+    /* ─── Demo ─── */
+    .demo-bg {
+      border-top: 1px solid var(--b1);
+    }
+    .demo-max { max-width: 980px; margin: 0 auto; }
+    .tabs {
+      display: inline-flex;
+      background: var(--bg1); border: 1px solid var(--b1);
+      border-radius: var(--r2); padding: 4px; margin-bottom: 24px;
+    }
+    .tab-btn {
+      padding: 8px 20px; border-radius: var(--r);
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none;
+      background: transparent; color: var(--t2);
+      transition: all .15s;
+    }
+    .tab-btn.on {
+      background: var(--blue); color: #fff;
+      box-shadow: 0 2px 8px rgba(59,130,246,.3);
+    }
+    .tab-btn:hover:not(.on) { color: var(--t1); background: var(--b0); }
+
+    .demo-card {
+      background: var(--bg1);
+      border: 1px solid var(--b1); border-radius: var(--r2);
+      padding: 28px;
+    }
+    .inp-row {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+    }
+    .inp-row label { font-size: 12px; font-weight: 600; color: var(--t2); min-width: 94px; }
+    .inp-row input {
+      flex: 1; padding: 8px 12px;
+      background: var(--bg2); border: 1px solid var(--b2);
+      border-radius: var(--r);
+      font-size: 12px; font-family: 'JetBrains Mono', monospace;
+      color: var(--t1); transition: border-color .15s;
+    }
+    .inp-row input:focus { outline: none; border-color: var(--cyan); }
+
+    textarea {
+      width: 100%; height: 190px;
+      background: var(--bg2); border: 1px solid var(--b2);
+      border-radius: var(--r); padding: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px; color: var(--t2);
+      line-height: 1.75; resize: vertical;
+      transition: border-color .15s; margin-bottom: 16px;
+    }
+    textarea:focus { outline: none; border-color: var(--cyan); color: var(--t1); }
+
+    .drop-zone {
+      border: 1px dashed var(--b2); border-radius: var(--r2);
+      padding: 48px 20px; text-align: center; cursor: pointer;
+      background: var(--bg2); transition: all .2s; margin-bottom: 16px;
+    }
+    .drop-zone:hover, .drop-zone.over {
+      border-color: var(--cyan); background: rgba(6,182,212,.04);
+    }
+    .drop-icon { font-size: 32px; margin-bottom: 10px; }
+    .drop-t { font-size: 14px; font-weight: 600; color: var(--t1); margin-bottom: 4px; }
+    .drop-s { font-size: 12px; color: var(--t2); }
+    #csv-file-input { display:none; }
+    #csv-fname { font-size:12px; color:var(--cyan); font-weight:600; margin-bottom:12px; }
+
+    .run-btn {
+      background: var(--blue); color: #fff; border: none;
+      border-radius: var(--r); padding: 11px 22px;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 7px;
+      transition: all .15s;
+      box-shadow: 0 0 0 1px rgba(59,130,246,.3), 0 4px 16px rgba(59,130,246,.2);
+    }
+    .run-btn:hover { background: var(--blue2); transform: translateY(-1px); box-shadow: 0 0 0 1px rgba(59,130,246,.5), 0 8px 24px rgba(59,130,246,.3); }
+    .run-btn:disabled { background: #0f2545; color: #1e3d6a; cursor:not-allowed; transform:none; box-shadow:none; }
+
+    /* Output */
+    .out-panel {
+      margin-top: 20px; max-width: 980px; margin-left: auto; margin-right: auto;
+      border: 1px solid var(--b1); border-radius: var(--r2); overflow: hidden;
+    }
+    .out-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 20px; background: var(--bg2);
+      border-bottom: 1px solid var(--b1);
+    }
+    .out-head-l { display: flex; align-items: center; gap: 10px; }
+    .out-title { font-size: 13px; font-weight: 700; color: var(--t1); }
+    .out-meta  { font-size: 11px; color: var(--t3); }
+    .out-head-r { display: flex; gap: 6px; }
+    .tool-btn {
+      padding: 5px 11px; border-radius: var(--r);
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      border: 1px solid var(--b2); background: var(--bg1);
+      color: var(--t2); display: inline-flex; align-items: center; gap: 5px;
+      transition: all .15s;
+    }
+    .tool-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+
+    .tbl-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    thead { background: var(--bg2); }
+    th {
+      padding: 9px 16px; text-align: left;
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .5px; color: var(--t3);
+      border-bottom: 1px solid var(--b1); white-space: nowrap;
+    }
+    td {
+      padding: 12px 16px; border-bottom: 1px solid var(--b0);
+      color: var(--t1); vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(6,182,212,.03); }
+    td strong { font-weight: 600; }
+    .dim { font-size: 10px; color: var(--t3); margin-top: 2px; }
+    .dash { color: var(--b2); }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Event badges */
+    .ev {
+      display: inline-block; padding: 2px 8px;
+      border-radius: 100px; font-size: 10px; font-weight: 700;
+      letter-spacing: .3px; white-space: nowrap;
+    }
+    .ev-ARRIVAL    { background:rgba(16,185,129,.1); color:#34d399; border:1px solid rgba(16,185,129,.18); }
+    .ev-DEPARTURE  { background:rgba(245,158,11,.1); color:#fbbf24; border:1px solid rgba(245,158,11,.18); }
+    .ev-BERTHING   { background:rgba(6,182,212,.1);  color:#22d3ee; border:1px solid rgba(6,182,212,.18); }
+    .ev-GATE_IN    { background:rgba(167,139,250,.1);color:#c4b5fd; border:1px solid rgba(167,139,250,.18); }
+    .ev-GATE_OUT   { background:rgba(244,114,182,.1);color:#f9a8d4; border:1px solid rgba(244,114,182,.18); }
+    .ev-LOADED     { background:rgba(59,130,246,.1); color:#93c5fd; border:1px solid rgba(59,130,246,.18); }
+    .ev-DISCHARGED { background:rgba(239,68,68,.1);  color:#fca5a5; border:1px solid rgba(239,68,68,.18); }
+    .ev-ETA_UPDATE { background:rgba(16,185,129,.08);color:#6ee7b7; border:1px solid rgba(16,185,129,.14); }
+    .ev-ETD_UPDATE { background:rgba(251,146,60,.1); color:#fdba74; border:1px solid rgba(251,146,60,.18); }
+    .ev-AVAILABLE  { background:rgba(16,185,129,.08);color:#34d399; border:1px solid rgba(16,185,129,.14); }
+    .ev-CUSTOMS_RELEASED { background:rgba(99,102,241,.1);color:#a5b4fc;border:1px solid rgba(99,102,241,.18); }
+    .ev-UNKNOWN    { background:var(--bg3); color:var(--t3); border:1px solid var(--b1); }
+
+    .src {
+      display:inline-block; padding:2px 7px; border-radius:4px;
+      font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:600;
+    }
+    .src-EDI_315      { background:rgba(99,102,241,.1); color:#a5b4fc; }
+    .src-CSV_TERMINAL { background:rgba(16,185,129,.1); color:#34d399; }
+
+    .spinner {
+      display:inline-block; width:14px; height:14px;
+      border:2px solid rgba(255,255,255,.15);
+      border-top-color:#fff; border-radius:50%;
+      animation:spin .65s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .err-box {
+      margin-top:14px; padding:13px 16px;
+      background:rgba(239,68,68,.06); border:1px solid rgba(239,68,68,.15);
+      border-radius:var(--r); color:#fca5a5; font-size:13px;
+      display:flex; gap:10px; align-items:flex-start;
+    }
+
+    /* ─── CTA ─── */
+    .cta-bg {
+      background: var(--bg1);
+      border-top: 1px solid var(--b1); border-bottom: 1px solid var(--b1);
+      padding: 96px 28px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .cta-bg::before {
+      content: '';
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 600px; height: 400px; pointer-events: none;
+      background: radial-gradient(ellipse at center, rgba(6,182,212,.07) 0%, transparent 65%);
+    }
+    .cta-inner { position: relative; max-width: 580px; margin: 0 auto; }
+    .cta-inner h2 { margin-bottom: 16px; }
+    .cta-inner p { font-size: 16px; color: var(--t2); margin-bottom: 40px; line-height: 1.7; }
+    .cta-btns { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+
+    /* ─── Footer ─── */
+    footer {
+      background: var(--bg); border-top: 1px solid var(--b1);
+      padding: 56px 28px 32px;
+    }
+    .foot-grid {
+      display: grid; grid-template-columns: 1.6fr 1fr 1fr;
+      gap: 48px; max-width: 900px; margin: 0 auto;
+      padding-bottom: 40px; border-bottom: 1px solid var(--b1);
+    }
+    .foot-logo { font-size: 16px; font-weight: 900; letter-spacing: .4px; margin-bottom: 10px; display: block; }
+    .foot-logo .v { color: var(--cyan); }
+    .foot-brand p { font-size: 13px; color: var(--t3); line-height: 1.65; }
+    .foot-col h4 {
+      font-size: 11px; font-weight: 700; letter-spacing: .6px;
+      text-transform: uppercase; color: var(--t3); margin-bottom: 16px;
+    }
+    .foot-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .foot-col a { font-size: 13px; color: var(--t3); transition: color .15s; }
+    .foot-col a:hover { color: var(--t1); }
+    .foot-bottom {
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+      max-width: 900px; margin: 28px auto 0;
+      font-size: 12px; color: var(--t3);
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 800px) {
+      .nav-links { display: none; }
+      .mob-btn { display: block; }
+      .prob-grid, .feat-grid { grid-template-columns: 1fr; }
+      .prob-card + .prob-card { border-left: none; border-top: 1px solid var(--b1); }
+      .feat-card { border-right: none !important; }
+      .how-flow { grid-template-columns: 1fr; }
+      .how-arrow { display: none; }
+      .schema-grid { grid-template-columns: 1fr; gap: 40px; }
+      .foot-grid { grid-template-columns: 1fr; gap: 28px; }
+      .stats-row { grid-template-columns: repeat(2,1fr); }
+      .stat + .stat { border-left: none; }
+      .stat:nth-child(3), .stat:nth-child(4) { border-top: 1px solid var(--b1); padding-top: 28px; margin-top: 28px; }
+    }
+    @media (max-width: 480px) {
+      h1 { letter-spacing: -1.5px; }
+      .hero { padding: 72px 16px 56px; }
+      .tabs { width: 100%; }
+      .tab-btn { flex: 1; text-align: center; }
+      .out-head { flex-direction: column; align-items: flex-start; gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════ NAV ═══════════════════ -->
+<header>
+  <nav class="wrap" aria-label="Main navigation">
+    <a href="/" class="logo"><span class="logo-v">V</span>ESSIQ</a>
+    <ul class="nav-links">
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#schema">Schema</a></li>
+      <li><a href="#demo">Demo</a></li>
+    </ul>
+    <a href="mailto:hello@vessiq.com?subject=VESSIQ Pilot Request" class="nav-cta">Request a Pilot</a>
+    <button class="mob-btn" aria-label="Menu" onclick="toggleNav()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<section class="hero" aria-labelledby="h1">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="wrap" style="position:relative;">
+    <div class="eyebrow"><span class="dot"></span>Maritime Data Infrastructure</div>
+    <h1 id="h1">Every shipping format,<br><em>one clean schema</em></h1>
+    <p class="hero-sub">Carriers send EDI 315. Terminals export CSVs. Ports use proprietary feeds. VESSIQ normalizes all of it into a single validated JSON event stream — via REST API.</p>
+    <div class="hero-btns">
+      <a href="#demo" class="btn-primary">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+        Try the Live Demo
+      </a>
+      <a href="mailto:hello@vessiq.com?subject=VESSIQ Pilot Request" class="btn-ghost">Request a Pilot</a>
+    </div>
+    <div class="trust">
+      <div class="trust-item">
+        <div class="chk"><svg width="8" height="8" viewBox="0 0 12 12" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2 6 5 9 10 3"/></svg></div>
+        EDI X12 315
+      </div>
+      <div class="trust-item">
+        <div class="chk"><svg width="8" height="8" viewBox="0 0 12 12" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2 6 5 9 10 3"/></svg></div>
+        Terminal CSV / TOS exports
+      </div>
+      <div class="trust-item">
+        <div class="chk"><svg width="8" height="8" viewBox="0 0 12 12" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2 6 5 9 10 3"/></svg></div>
+        Pydantic-validated schema
+      </div>
+      <div class="trust-item">
+        <div class="chk"><svg width="8" height="8" viewBox="0 0 12 12" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2 6 5 9 10 3"/></svg></div>
+        REST API · JSON output
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ STATS ═══════════════════ -->
+<div class="stats" role="region" aria-label="Key metrics">
+  <div class="stats-row">
+    <div class="stat"><div class="stat-n">12<em>+</em></div><div class="stat-l">Event types normalized</div></div>
+    <div class="stat"><div class="stat-n"><em>&lt;</em>50ms</div><div class="stat-l">Normalization latency</div></div>
+    <div class="stat"><div class="stat-n">100<em>%</em></div><div class="stat-l">Raw data preserved</div></div>
+    <div class="stat"><div class="stat-n">2<em>→1</em></div><div class="stat-l">Formats in, one schema out</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PROBLEM ═══════════════════ -->
+<section id="problem" aria-labelledby="h-prob">
+  <div class="wrap">
+    <div class="s-label">The Problem</div>
+    <h2 id="h-prob">Maritime data is fragmented.<br>Your ops team shouldn't fix it.</h2>
+    <p class="s-sub">Every carrier, terminal, and port uses a different format and field naming convention. Reconciling it manually costs hours daily — and creates SLA risk.</p>
+    <div class="prob-grid">
+      <div class="prob-card">
+        <div class="p-idx">01</div>
+        <h3>Format fragmentation</h3>
+        <p>EDI X12, EDIFACT, CSV, XML, PDF — every source has its own structure. No two carriers share the same field names or event codes.</p>
+      </div>
+      <div class="prob-card">
+        <div class="p-idx">02</div>
+        <h3>Manual reconciliation</h3>
+        <p>Ops teams spend hours per day stitching together vessel events from carrier portals, TOS exports, and email advisories before they can act.</p>
+      </div>
+      <div class="prob-card">
+        <div class="p-idx">03</div>
+        <h3>Downstream system failures</h3>
+        <p>TMS and visibility platforms require clean, consistent data. Bad input cascades into incorrect ETAs, missed updates, and demurrage exposure.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ HOW IT WORKS ═══════════════════ -->
+<section class="how-bg" id="how" aria-labelledby="h-how">
+  <div class="wrap">
+    <div class="s-label center">How It Works</div>
+    <h2 class="center" id="h-how">Three steps to clean data</h2>
+    <p class="s-sub center">VESSIQ sits between your raw sources and your systems. No custom integration code required.</p>
+    <div class="how-flow">
+      <div class="how-step">
+        <div class="step-n">1</div>
+        <h3>Send raw data</h3>
+        <p>POST your EDI message or upload a terminal CSV to the ingest endpoint.</p>
+        <div class="tags"><span class="tag">EDI 315</span><span class="tag">CSV</span><span class="tag">+ more</span></div>
+      </div>
+      <div class="how-arrow">→</div>
+      <div class="how-step">
+        <div class="step-n">2</div>
+        <h3>VESSIQ normalizes</h3>
+        <p>Config-driven engine parses every field, resolves event types, and validates against the schema.</p>
+        <div class="tags"><span class="tag">parsed</span><span class="tag">mapped</span><span class="tag">validated</span></div>
+      </div>
+      <div class="how-arrow">→</div>
+      <div class="how-step">
+        <div class="step-n">3</div>
+        <h3>Receive clean JSON</h3>
+        <p>Get a normalized <code class="tag">VesselEvent</code> array — ready for your TMS or data warehouse.</p>
+        <div class="tags"><span class="tag">JSON</span><span class="tag">CSV</span><span class="tag">REST</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ FEATURES ═══════════════════ -->
+<section id="features" aria-labelledby="h-feat">
+  <div class="wrap">
+    <div class="s-label">Capabilities</div>
+    <h2 id="h-feat">Built for production maritime workflows</h2>
+    <p class="s-sub">Everything a logistics operator needs to stop wrestling with raw data.</p>
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-icon">⚡</div>
+        <h3>EDI 315 Translation</h3>
+        <p>Full X12 315 parser — multi-transaction envelopes, ISA/GS/ST segments, B4 event codes, R4 port locations, and DTM timestamps across all major carrier formats.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📊</div>
+        <h3>Terminal CSV Normalization</h3>
+        <p>Ingests TOS exports from Navis N4, SPARCS, and custom systems. YAML-driven column mapping means new terminals take minutes, not sprints.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔍</div>
+        <h3>Unified VesselEvent Schema</h3>
+        <p>Every event maps to the same object: vessel, voyage, container, event type, port, timestamps, and references — regardless of source format.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔎</div>
+        <h3>Filterable Event API</h3>
+        <p>Query by vessel, voyage, port LOCODE, container, event type, or source. Paginated, fast, and ready to power dashboards or downstream feeds.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🛡️</div>
+        <h3>Strict Schema Validation</h3>
+        <p>Every event validated by Pydantic v2. Malformed records are rejected with clean error detail — never silently dropped or corrupted downstream.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔌</div>
+        <h3>Config-Driven Extensibility</h3>
+        <p>Add a new carrier or terminal by editing a YAML mapping file. No Python required. New data sources ship in hours, not engineering sprints.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ SCHEMA ═══════════════════ -->
+<section class="schema-bg" id="schema" aria-labelledby="h-schema">
+  <div class="wrap">
+    <div class="schema-grid">
+      <div>
+        <div class="s-label">Output Schema</div>
+        <h2 id="h-schema">One schema.<br>Every source.</h2>
+        <p class="s-sub" style="margin-bottom:0;">The <code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#60a5fa;">VesselEvent</code> is what VESSIQ always returns — consistently typed across every ingest path.</p>
+        <div class="field-list" role="list">
+          <div class="f-row" role="listitem"><span class="f-name">event_type</span><span class="f-type">EventType</span><span class="f-desc">ARRIVAL, DEPARTURE…</span></div>
+          <div class="f-row" role="listitem"><span class="f-name">vessel_name</span><span class="f-type">str</span><span class="f-desc">Normalized vessel name</span></div>
+          <div class="f-row" role="listitem"><span class="f-name">vessel_imo</span><span class="f-type">str</span><span class="f-desc">IMO vessel identifier</span></div>
+          <div class="f-row" role="listitem"><span class="f-name">voyage_number</span><span class="f-type">str</span><span class="f-desc">Carrier voyage reference</span></div>
+          <div class="f-row" role="listitem"><span class="f-name">port_locode</span><span class="f-type">str</span><span class="f-desc">UN/LOCODE e.g. USLAX</span></div>
+          <div class="f-row" role="listitem"><span class="f-name">event_timestamp</span><span class="f-type">datetime</span><span class="f-desc">ISO 8601 UTC</span></div>
+          <div class="f-row" role="listitem"><span class="f-name">container_number</span><span class="f-type">str</span><span class="f-desc">ISO 6346 container ID</span></div>
+          <div class="f-row" role="listitem"><span class="f-name">raw_data</span><span class="f-type">dict</span><span class="f-desc">Original fields preserved</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="code-box" role="img" aria-label="Example VesselEvent JSON output">
+          <pre><span class="ck">{</span>
+  <span class="ck">"event_id"</span>:          <span class="cs">"a3f9c1d2-..."</span>,
+  <span class="ck">"source_format"</span>:     <span class="cb">"EDI_315"</span>,
+  <span class="ck">"source_name"</span>:       <span class="cs">"MAERSK_CARRIER"</span>,
+  <span class="ck">"event_type"</span>:        <span class="cb">"ARRIVAL"</span>,
+  <span class="ck">"vessel_name"</span>:       <span class="cs">"MAERSK TOKYO"</span>,
+  <span class="ck">"vessel_imo"</span>:        <span class="cs">"9321456"</span>,
+  <span class="ck">"voyage_number"</span>:     <span class="cs">"123W"</span>,
+  <span class="ck">"port_locode"</span>:       <span class="cs">"USLAX"</span>,
+  <span class="ck">"port_name"</span>:         <span class="cs">"LOS ANGELES"</span>,
+  <span class="ck">"event_timestamp"</span>:   <span class="cs">"2023-06-15T14:30:00Z"</span>,
+  <span class="ck">"estimated_arrival"</span>: <span class="cs">"2023-06-16T08:00:00Z"</span>,
+  <span class="ck">"container_number"</span>:  <span class="cs">"MSKU1234567"</span>,
+  <span class="ck">"booking_number"</span>:    <span class="cs">"BKG987654321"</span>,
+  <span class="ck">"bill_of_lading"</span>:    <span class="cs">"PASHA2023BOL001"</span>,
+  <span class="ck">"ingested_at"</span>:       <span class="cs">"2026-03-20T09:12:44Z"</span>
+<span class="ck">}</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ DEMO ═══════════════════ -->
+<section class="demo-bg" id="demo" aria-labelledby="h-demo">
+  <div class="wrap">
+    <div class="demo-max">
+      <div class="s-label center">Live Demo</div>
+      <h2 class="center" id="h-demo">See normalization in real time</h2>
+      <p class="s-sub center">Paste a raw EDI 315 message or upload a terminal CSV — VESSIQ normalizes it live and returns structured vessel events.</p>
+
+      <div style="display:flex;justify-content:center;">
+        <div class="tabs" role="tablist">
+          <button class="tab-btn on" role="tab" aria-selected="true" aria-controls="panel-edi" id="tab-edi" onclick="switchTab('edi')">EDI 315 Message</button>
+          <button class="tab-btn"   role="tab" aria-selected="false" aria-controls="panel-csv" id="tab-csv" onclick="switchTab('csv')">Terminal CSV Export</button>
+        </div>
+      </div>
+
+      <!-- EDI -->
+      <div class="demo-card" id="panel-edi" role="tabpanel" aria-labelledby="tab-edi">
+        <div class="inp-row">
+          <label for="edi-source">Source Name</label>
+          <input type="text" id="edi-source" value="MAERSK_CARRIER" placeholder="e.g. MAERSK_CARRIER" autocomplete="off" />
+        </div>
+        <label for="edi-input" class="sr-only">Raw EDI 315 message</label>
+        <textarea id="edi-input" spellcheck="false">ISA*00*          *00*          *ZZ*MAERSK         *ZZ*PASHA          *230615*1430*^*00401*000000001*0*P*:~
+GS*QO*MAERSK*PASHA*20230615*1430*1*X*004010~
+ST*315*0001~
+B4**VE*20230615*1430*PT**MSKU*1234567**45G1~
+N9*BM*PASHA2023BOL001~
+N9*BK*BKG987654321~
+Q2*MAERSK TOKYO**20230601*20230615*20230616*W*123W*9321456~
+SG*L~
+R4*D*UN*USLAX*LOS ANGELES**US~
+DTM*140*20230615*1430~
+DTM*139*20230616*0800~
+SE*11*0001~
+ST*315*0002~
+B4**UV*20230615*1600*PT**MSKU*7654321**45G1~
+N9*BM*PASHA2023BOL002~
+N9*BK*BKG111222333~
+Q2*MAERSK TOKYO**20230601*20230615*20230616*W*123W*9321456~
+SG*L~
+R4*D*UN*USLAX*LOS ANGELES**US~
+DTM*140*20230615*1600~
+SE*9*0002~
+ST*315*0003~
+B4**AV*20230616*0900*PT**TCKU*9876543**22G1~
+N9*BM*PASHA2023BOL003~
+N9*BK*BKG444555666~
+Q2*MAERSK TOKYO**20230601*20230615*20230616*W*123W*9321456~
+SG*L~
+R4*D*UN*USLAX*LOS ANGELES**US~
+DTM*140*20230616*0900~
+SE*9*0003~
+GE*3*1~
+IEA*1*000000001~</textarea>
+        <button class="run-btn" id="run-edi" onclick="runEDI()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          <span>Normalize EDI Data</span>
+        </button>
+      </div>
+
+      <!-- CSV -->
+      <div class="demo-card" id="panel-csv" role="tabpanel" aria-labelledby="tab-csv" style="display:none;">
+        <div class="inp-row">
+          <label for="csv-source">Terminal Name</label>
+          <input type="text" id="csv-source" value="PASHA_HONOLULU" placeholder="e.g. PASHA_HONOLULU" autocomplete="off" />
+        </div>
+        <div class="drop-zone" id="drop-zone"
+             onclick="document.getElementById('csv-file-input').click()"
+             ondragover="onDragOver(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)"
+             role="button" tabindex="0"
+             aria-label="Upload CSV file"
+             onkeydown="if(event.key==='Enter'||event.key===' ')document.getElementById('csv-file-input').click()">
+          <div class="drop-icon">📂</div>
+          <div class="drop-t">Click to upload or drag &amp; drop</div>
+          <div class="drop-s">CSV exports from Navis N4, SPARCS, or any terminal TOS</div>
+        </div>
+        <input type="file" id="csv-file-input" accept=".csv" onchange="onFileSelect(event)" />
+        <div id="csv-fname"></div>
+        <button class="run-btn" id="run-csv" onclick="runCSV()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          <span>Normalize CSV Data</span>
+        </button>
+      </div>
+
+      <div id="err-area"></div>
+
+      <div class="out-panel" id="out-panel" style="display:none;" aria-live="polite">
+        <div class="out-head">
+          <div class="out-head-l">
+            <span class="out-title">Normalized Vessel Events</span>
+            <span class="out-meta" id="out-meta"></span>
+          </div>
+          <div class="out-head-r">
+            <button class="tool-btn" onclick="dlCSV()">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              CSV
+            </button>
+            <button class="tool-btn" id="copy-btn" onclick="cpJSON()">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              JSON
+            </button>
+          </div>
+        </div>
+        <div class="tbl-scroll">
+          <table aria-label="Normalized vessel events">
+            <thead>
+              <tr>
+                <th>Event</th><th>Vessel</th><th>Voyage</th>
+                <th>Container</th><th>Port / Terminal</th>
+                <th>Event Time</th><th>ETA</th>
+                <th>References</th><th>Src</th>
+              </tr>
+            </thead>
+            <tbody id="tbl-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ CTA ═══════════════════ -->
+<div class="cta-bg" role="region" aria-labelledby="h-cta">
+  <div class="cta-inner">
+    <div class="s-label center">Get Started</div>
+    <h2 id="h-cta">Ready to standardize your maritime data?</h2>
+    <p>Join logistics operators using VESSIQ to eliminate manual data reconciliation and build reliable shipment visibility.</p>
+    <div class="cta-btns">
+      <a href="mailto:hello@vessiq.com?subject=VESSIQ Pilot Request" class="btn-primary">Request a Pilot</a>
+      <a href="/docs" target="_blank" rel="noopener" class="btn-ghost">API Docs →</a>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <span class="foot-logo"><span class="v">V</span>ESSIQ</span>
+        <p>Maritime data normalization and EDI translation infrastructure. One API. Every format. Clean data.</p>
+      </div>
+      <nav class="foot-col" aria-label="Product">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#how">How It Works</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#schema">Schema Reference</a></li>
+          <li><a href="#demo">Live Demo</a></li>
+          <li><a href="/docs" target="_blank" rel="noopener">API Docs</a></li>
+        </ul>
+      </nav>
+      <nav class="foot-col" aria-label="Company">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="mailto:hello@vessiq.com">Contact</a></li>
+          <li><a href="mailto:hello@vessiq.com?subject=VESSIQ Pilot Request">Request a Pilot</a></li>
+          <li><a href="mailto:hello@vessiq.com?subject=VESSIQ Partnership">Partnerships</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 VESSIQ — Maritime Data Infrastructure</span>
+      <span>hello@vessiq.com</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const API = '';
+  let lastEvents = [], selectedFile = null;
+
+  function switchTab(t) {
+    document.querySelectorAll('.tab-btn').forEach((b,i) => {
+      const a = (t==='edi'&&i===0)||(t==='csv'&&i===1);
+      b.classList.toggle('on', a);
+      b.setAttribute('aria-selected', a);
+    });
+    document.getElementById('panel-edi').style.display = t==='edi'?'block':'none';
+    document.getElementById('panel-csv').style.display = t==='csv'?'block':'none';
+    clearOut();
+  }
+  function clearOut() {
+    document.getElementById('out-panel').style.display = 'none';
+    document.getElementById('err-area').innerHTML = '';
+  }
+
+  function setBusy(id) {
+    const b = document.getElementById(id); b.disabled = true;
+    b.innerHTML = '<span class="spinner"></span><span>Normalizing…</span>';
+  }
+  function setReady(id, label) {
+    const b = document.getElementById(id); b.disabled = false;
+    b.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><span>${label}</span>`;
+  }
+
+  function showErr(msg) {
+    document.getElementById('err-area').innerHTML = `
+      <div class="err-box" role="alert">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>${esc(msg)}</span>
+      </div>`;
+  }
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  async function runEDI() {
+    const raw = document.getElementById('edi-input').value.trim();
+    const src = document.getElementById('edi-source').value.trim()||'EDI_SOURCE';
+    if (!raw) { showErr('Paste an EDI 315 message first.'); return; }
+    clearOut(); setBusy('run-edi');
+    try {
+      const fd = new FormData();
+      fd.append('raw_edi', raw); fd.append('source_name', src);
+      const r = await fetch(`${API}/ingest/edi315`, {method:'POST',body:fd});
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.detail||`HTTP ${r.status}`);
+      await load(j.event_ids, j);
+    } catch(e) { showErr(e.message); }
+    finally { setReady('run-edi','Normalize EDI Data'); }
+  }
+
+  async function runCSV() {
+    if (!selectedFile) { showErr('Select a CSV file first.'); return; }
+    const src = document.getElementById('csv-source').value.trim()||'CSV_TERMINAL';
+    clearOut(); setBusy('run-csv');
+    try {
+      const fd = new FormData();
+      fd.append('file', selectedFile); fd.append('source_name', src);
+      const r = await fetch(`${API}/ingest/csv-terminal`, {method:'POST',body:fd});
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.detail||`HTTP ${r.status}`);
+      await load(j.event_ids, j);
+    } catch(e) { showErr(e.message); }
+    finally { setReady('run-csv','Normalize CSV Data'); }
+  }
+
+  async function load(ids, meta) {
+    const r = await fetch(`${API}/events?limit=500`);
+    const d = await r.json();
+    const set = new Set(ids);
+    lastEvents = (d.events||[]).filter(e => set.has(e.event_id));
+    if (!lastEvents.length) { showErr('No events produced — check input format.'); return; }
+    render(lastEvents, meta);
+  }
+
+  function render(evs, meta) {
+    const tbody = document.getElementById('tbl-body');
+    tbody.innerHTML = '';
+    evs.forEach(e => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><span class="ev ev-${e.event_type}">${e.event_type.replace(/_/g,' ')}</span></td>
+        <td><strong>${esc(e.vessel_name||'—')}</strong>${e.vessel_imo?`<div class="dim">IMO ${esc(e.vessel_imo)}</div>`:''}</td>
+        <td><span class="mono" style="font-size:11px;">${esc(e.voyage_number||'—')}</span></td>
+        <td><span class="mono" style="font-size:11px;">${esc(e.container_number||'—')}</span></td>
+        <td><div>${esc(e.port_locode||e.port_name||'—')}</div>${e.terminal_name?`<div class="dim">${esc(e.terminal_name)}</div>`:''}</td>
+        <td>${fdt(e.event_timestamp)}</td>
+        <td>${fdt(e.estimated_arrival)}</td>
+        <td>
+          ${e.booking_number?`<div class="mono" style="font-size:10px;color:#3d5572;">BKG ${esc(e.booking_number)}</div>`:''}
+          ${e.bill_of_lading?`<div class="mono" style="font-size:10px;color:#3d5572;">BOL ${esc(e.bill_of_lading)}</div>`:''}
+          ${!e.booking_number&&!e.bill_of_lading?'<span class="dash">—</span>':''}
+        </td>
+        <td><span class="src src-${e.source_format}">${e.source_format==='EDI_315'?'EDI 315':'CSV'}</span></td>`;
+      tbody.appendChild(tr);
+    });
+    const rej = meta?.rejected||0;
+    document.getElementById('out-meta').textContent =
+      `${evs.length} event${evs.length!==1?'s':''} normalized`+(rej>0?` · ${rej} rejected`:'');
+    document.getElementById('out-panel').style.display = 'block';
+    document.getElementById('out-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+
+  function fdt(iso) {
+    if (!iso) return '<span class="dash">—</span>';
+    const d = new Date(iso);
+    return `<span style="font-size:11px;white-space:nowrap;">${d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}<div class="dim">${d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</div></span>`;
+  }
+
+  function dlCSV() {
+    if (!lastEvents.length) return;
+    const cols = ['event_type','vessel_name','vessel_imo','voyage_number','container_number',
+                  'port_locode','port_name','terminal_name','event_timestamp',
+                  'estimated_arrival','estimated_departure','booking_number','bill_of_lading',
+                  'source_format','source_name','event_id'];
+    const rows = [cols.join(','), ...lastEvents.map(e=>cols.map(c=>`"${(e[c]??'').toString().replace(/"/g,'""')}"`).join(','))];
+    Object.assign(document.createElement('a'),{
+      href:URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'})),
+      download:`vessiq_${new Date().toISOString().slice(0,10)}.csv`
+    }).click();
+  }
+  function cpJSON() {
+    if (!lastEvents.length) return;
+    navigator.clipboard.writeText(JSON.stringify(lastEvents,null,2)).then(()=>{
+      const b = document.getElementById('copy-btn');
+      const h = b.innerHTML;
+      b.innerHTML = h.replace('JSON','✓');
+      setTimeout(()=>{ b.innerHTML = h; }, 2000);
+    });
+  }
+
+  function onFileSelect(e) {
+    selectedFile = e.target.files[0];
+    if (selectedFile) {
+      document.getElementById('csv-fname').textContent = `📎 ${selectedFile.name}`;
+      const z = document.getElementById('drop-zone');
+      z.classList.add('over'); setTimeout(()=>z.classList.remove('over'), 600);
+    }
+  }
+  function onDragOver(e)  { e.preventDefault(); document.getElementById('drop-zone').classList.add('over'); }
+  function onDragLeave()  { document.getElementById('drop-zone').classList.remove('over'); }
+  function onDrop(e) {
+    e.preventDefault(); onDragLeave();
+    const f = e.dataTransfer.files[0];
+    if (f?.name.endsWith('.csv')) {
+      selectedFile = f;
+      document.getElementById('csv-fname').textContent = `📎 ${f.name}`;
+    }
+  }
+
+  function toggleNav() {
+    const ul = document.querySelector('.nav-links');
+    const open = ul.dataset.open==='1';
+    if (open) {
+      ul.removeAttribute('style'); ul.dataset.open='0';
+    } else {
+      Object.assign(ul.style,{display:'flex',flexDirection:'column',position:'absolute',
+        top:'62px',left:'0',right:'0',background:'#040d18',
+        padding:'16px 28px 24px',borderBottom:'1px solid rgba(255,255,255,.07)',
+        gap:'16px',zIndex:'199'});
+      ul.dataset.open='1';
+    }
+  }
+</script>
+</body>
+</html>
