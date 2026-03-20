@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VESSIQ — Operations Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:      #020c17;
+      --bg1:     #051422;
+      --bg2:     #071929;
+      --bg3:     #0b2035;
+      --surface: #091b2a;
+
+      --b0: rgba(255,255,255,.03);
+      --b1: rgba(255,255,255,.07);
+      --b2: rgba(255,255,255,.12);
+      --b3: rgba(255,255,255,.18);
+
+      --t1: #e8f4ff;
+      --t2: #6b8eaa;
+      --t3: #2d4a66;
+
+      --cyan:   #22d3ee;
+      --cyan2:  #0ea5e9;
+      --blue:   #3b82f6;
+      --blue2:  #2563eb;
+      --green:  #22c55e;
+      --yellow: #eab308;
+      --red:    #ef4444;
+      --orange: #f97316;
+
+      --r:  7px;
+      --r2: 12px;
+      --r3: 20px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--t1);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(34,211,238,.016) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34,211,238,.016) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 10%, transparent 100%);
+    }
+
+    /* ── Nav ── */
+    header {
+      position: sticky; top: 0; z-index: 200;
+      border-bottom: 1px solid var(--b1);
+      background: rgba(2,12,23,.9);
+      backdrop-filter: blur(24px);
+    }
+    nav {
+      display: flex; align-items: center;
+      justify-content: space-between; height: 60px;
+      max-width: 1440px; margin: 0 auto; padding: 0 28px;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 16px; font-weight: 900; letter-spacing: .5px;
+    }
+    .logo-icon {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, rgba(34,211,238,.15), rgba(59,130,246,.1));
+      border: 1px solid rgba(34,211,238,.2);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-v { color: var(--cyan); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .client-selector {
+      background: var(--bg2); border: 1px solid var(--b2);
+      color: var(--t1); font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 600; padding: 7px 32px 7px 12px;
+      border-radius: var(--r); cursor: pointer;
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b8eaa' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      transition: border-color .15s;
+    }
+    .client-selector:focus { outline: none; border-color: var(--cyan); }
+    .nav-link { font-size: 13px; font-weight: 500; color: var(--t2); transition: color .15s; }
+    .nav-link:hover { color: var(--t1); }
+    .nav-status {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--green); font-weight: 500;
+    }
+    .nav-status::before {
+      content: ''; width: 7px; height: 7px;
+      background: var(--green); border-radius: 50%;
+      box-shadow: 0 0 8px var(--green);
+    }
+
+    /* ── Layout ── */
+    .dashboard {
+      position: relative; z-index: 1;
+      max-width: 1440px; margin: 0 auto; padding: 0 28px 60px;
+    }
+
+    /* ── Node Tabs ── */
+    .tab-bar {
+      display: flex; margin: 24px 0 0;
+      border-bottom: 1px solid var(--b1);
+      gap: 0;
+    }
+    .tab-btn {
+      background: none; border: none; color: var(--t3);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 600;
+      padding: 10px 20px; cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all .15s;
+    }
+    .tab-btn:hover { color: var(--t2); }
+    .tab-btn.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+
+    /* ── Sub Tabs ── */
+    .sub-tabs {
+      display: flex; gap: 4px; margin: 20px 0 24px;
+      padding: 4px; background: var(--bg1);
+      border: 1px solid var(--b1); border-radius: var(--r2);
+      width: fit-content;
+    }
+    .sub-tab {
+      background: none; border: none; color: var(--t2);
+      font-family: 'Inter', sans-serif;
+      font-size: 12px; font-weight: 600;
+      padding: 7px 18px; cursor: pointer;
+      border-radius: var(--r);
+      transition: all .15s;
+    }
+    .sub-tab:hover { color: var(--t1); }
+    .sub-tab.active {
+      background: var(--blue); color: #fff;
+      box-shadow: 0 2px 10px rgba(59,130,246,.3);
+    }
+
+    /* ── Cards Grid ── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px; margin-bottom: 20px;
+    }
+    .card {
+      background: var(--bg1);
+      border: 1px solid var(--b1);
+      border-radius: var(--r2);
+      padding: 20px 22px;
+      transition: border-color .2s;
+    }
+    .card:hover { border-color: var(--b2); }
+    .card-label {
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .7px;
+      color: var(--t3); margin-bottom: 10px;
+    }
+    .card-value {
+      font-size: 30px; font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--t1); line-height: 1.1;
+    }
+    .card-sub {
+      font-size: 11px; color: var(--t2); margin-top: 5px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .card-sub .up   { color: var(--green); }
+    .card-sub .down { color: var(--red); }
+
+    /* ── Panels ── */
+    .section-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 16px; margin-bottom: 16px;
+    }
+    .section-full { margin-bottom: 16px; }
+    .panel {
+      background: var(--bg1);
+      border: 1px solid var(--b1);
+      border-radius: var(--r2);
+      padding: 24px;
+      overflow: hidden;
+    }
+    .panel-title {
+      font-size: 13px; font-weight: 700;
+      color: var(--t1); margin-bottom: 18px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .panel-icon {
+      width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 6px; flex-shrink: 0;
+    }
+    .panel-icon.cyan  { background: rgba(34,211,238,.1);  color: var(--cyan); }
+    .panel-icon.red   { background: rgba(239,68,68,.1);   color: var(--red); }
+    .panel-icon.green { background: rgba(34,197,94,.1);   color: var(--green); }
+    .panel-icon.blue  { background: rgba(59,130,246,.1);  color: var(--blue); }
+
+    /* ── Timeline ── */
+    .timeline { position: relative; padding-left: 28px; }
+    .timeline::before {
+      content: '';
+      position: absolute; left: 9px; top: 6px; bottom: 6px; width: 2px;
+      background: linear-gradient(180deg, var(--cyan), var(--blue), var(--cyan));
+      opacity: .25;
+    }
+    .tl-item { position: relative; padding: 0 0 18px; }
+    .tl-item:last-child { padding-bottom: 0; }
+    .tl-dot {
+      position: absolute; left: -23px; top: 4px;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--bg1); border: 2px solid var(--t3);
+      z-index: 1; transition: border-color .2s;
+    }
+    .tl-item.error    .tl-dot { border-color: var(--red); }
+    .tl-item.complete .tl-dot { background: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 8px rgba(34,211,238,.5); }
+    .tl-item.active   .tl-dot { background: var(--blue); border-color: var(--blue); box-shadow: 0 0 10px rgba(59,130,246,.5); }
+    .tl-header { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+    .tl-title  { font-size: 13px; font-weight: 600; color: var(--t1); }
+    .tl-badge  {
+      font-size: 10px; font-weight: 700;
+      padding: 2px 7px; border-radius: 100px;
+      text-transform: uppercase; letter-spacing: .4px;
+    }
+    .badge-rail      { background: rgba(249,115,22,.1); color: var(--orange); border: 1px solid rgba(249,115,22,.18); }
+    .badge-maritime  { background: rgba(34,211,238,.1); color: var(--cyan);   border: 1px solid rgba(34,211,238,.18); }
+    .badge-trucking  { background: rgba(139,92,246,.1); color: #8b5cf6;       border: 1px solid rgba(139,92,246,.18); }
+    .tl-meta   { font-size: 11px; color: var(--t3); font-family: 'JetBrains Mono', monospace; }
+    .tl-source { font-size: 11px; color: var(--t2); }
+
+    /* ── Tables ── */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+      font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .7px;
+      color: var(--t3); text-align: left;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--b1);
+    }
+    .data-table td {
+      font-size: 12px; color: var(--t2);
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--b0);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: var(--b0); }
+
+    /* ── Severity badges ── */
+    .severity {
+      font-size: 10px; font-weight: 700;
+      padding: 3px 8px; border-radius: 100px;
+      text-transform: uppercase; letter-spacing: .3px;
+      display: inline-block;
+    }
+    .severity-error   { background: rgba(239,68,68,.1);  color: var(--red);    border: 1px solid rgba(239,68,68,.18); }
+    .severity-warning { background: rgba(234,179,8,.1);  color: var(--yellow); border: 1px solid rgba(234,179,8,.18); }
+    .severity-info    { background: rgba(59,130,246,.1); color: var(--blue);   border: 1px solid rgba(59,130,246,.18); }
+
+    /* ── Quality bars ── */
+    .quality-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 12px;
+    }
+    .quality-row:last-child { margin-bottom: 0; }
+    .quality-label {
+      font-size: 13px; font-weight: 500;
+      color: var(--t2); width: 130px; flex-shrink: 0;
+    }
+    .quality-bar-track {
+      flex: 1; height: 20px;
+      background: var(--bg2);
+      border-radius: 5px; overflow: hidden; position: relative;
+    }
+    .quality-bar-fill {
+      height: 100%; border-radius: 5px;
+      transition: width .7s cubic-bezier(.4,0,.2,1);
+      position: relative;
+    }
+    .quality-bar-fill::after {
+      content: attr(data-value);
+      position: absolute; right: 8px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px; font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      color: rgba(255,255,255,.9);
+    }
+    .qb-high { background: linear-gradient(90deg, rgba(34,197,94,.5), rgba(34,197,94,.75)); }
+    .qb-mid  { background: linear-gradient(90deg, rgba(234,179,8,.45), rgba(234,179,8,.7)); }
+    .qb-low  { background: linear-gradient(90deg, rgba(239,68,68,.45), rgba(239,68,68,.7)); }
+
+    /* ── Route tag ── */
+    .route-tag {
+      font-size: 11px; font-weight: 600;
+      padding: 3px 8px; border-radius: 4px;
+      background: rgba(34,211,238,.07);
+      color: var(--cyan);
+      border: 1px solid rgba(34,211,238,.14);
+      display: inline-block;
+    }
+
+    /* ── Event type tags ── */
+    .event-type-tag {
+      font-size: 10px; font-weight: 700;
+      padding: 2px 7px; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: .3px;
+      display: inline-block;
+    }
+    .et-arrival   { background: rgba(34,197,94,.12);   color: var(--green); }
+    .et-departure { background: rgba(59,130,246,.12);  color: var(--blue); }
+    .et-loaded    { background: rgba(34,211,238,.12);  color: var(--cyan); }
+    .et-discharged{ background: rgba(139,92,246,.12);  color: #8b5cf6; }
+    .et-gate-in   { background: rgba(249,115,22,.12);  color: var(--orange); }
+    .et-gate-out  { background: rgba(234,179,8,.12);   color: var(--yellow); }
+    .et-eta-update{ background: rgba(59,130,246,.08);  color: var(--blue); }
+    .et-customs   { background: rgba(34,197,94,.08);   color: var(--green); }
+    .et-berthing  { background: rgba(34,211,238,.08);  color: var(--cyan); }
+
+    /* ── Feed filters ── */
+    .feed-filters { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+    .feed-filter {
+      background: var(--bg2); border: 1px solid var(--b1);
+      color: var(--t2); font-family: 'Inter', sans-serif;
+      font-size: 11px; font-weight: 600;
+      padding: 5px 12px; border-radius: 100px;
+      cursor: pointer; transition: all .15s;
+    }
+    .feed-filter:hover { border-color: var(--b2); color: var(--t1); }
+    .feed-filter.active {
+      background: rgba(34,211,238,.08); border-color: rgba(34,211,238,.25);
+      color: var(--cyan);
+    }
+
+    /* ── Field completeness ── */
+    .completeness-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 8px; margin-top: 16px;
+    }
+    .comp-item {
+      background: var(--bg2);
+      border: 1px solid var(--b0);
+      border-radius: var(--r);
+      padding: 10px; text-align: center;
+    }
+    .comp-field {
+      font-size: 9px; color: var(--t3);
+      font-weight: 600; text-transform: uppercase;
+      letter-spacing: .5px; margin-bottom: 4px;
+    }
+    .comp-val { font-size: 15px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+    .comp-high { color: var(--green); }
+    .comp-mid  { color: var(--yellow); }
+    .comp-low  { color: var(--red); }
+
+    /* ── Scrollable wrapper ── */
+    .table-scroll { overflow-x: auto; }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .section-grid { grid-template-columns: 1fr; }
+      .cards-grid   { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .cards-grid { grid-template-columns: 1fr; }
+      nav { height: auto; flex-wrap: wrap; padding: 12px 16px; gap: 10px; }
+      .dashboard { padding: 0 14px 40px; }
+      .quality-label { width: 80px; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <a href="/" class="logo">
+      <div class="logo-icon" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 17l9 4 9-4M3 12l9 4 9-4M12 2l9 4-9 4-9-4 9-4z"/>
+        </svg>
+      </div>
+      <span><span class="logo-v">V</span>ESSIQ</span>
+    </a>
+    <div class="nav-right">
+      <select class="client-selector" id="clientSelector">
+        <option selected>Pasha Group</option>
+        <option>Matson Navigation</option>
+        <option>Crowley Maritime</option>
+        <option>TOTE Maritime</option>
+      </select>
+      <a href="/docs" class="nav-link">API Docs</a>
+      <a href="/" class="nav-link">Home</a>
+      <span class="nav-status">System Online</span>
+    </div>
+  </nav>
+</header>
+
+<main class="dashboard">
+
+  <!-- Node Tabs -->
+  <div class="tab-bar" id="nodeTabs">
+    <button class="tab-btn active" data-node="international">International</button>
+    <button class="tab-btn" data-node="domestic">Domestic</button>
+  </div>
+
+  <!-- Sub Tabs -->
+  <div class="sub-tabs" id="subTabs">
+    <button class="sub-tab active" data-mode="maritime">Maritime</button>
+    <button class="sub-tab" data-mode="rail">Rail</button>
+  </div>
+
+  <!-- Overview Cards -->
+  <section class="cards-grid" id="overviewCards"></section>
+
+  <!-- Timeline + Errors -->
+  <section class="section-grid">
+    <div class="panel">
+      <div class="panel-title">
+        <div class="panel-icon cyan">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        Shipment Timeline &mdash; BOL PSHA-2026-04817
+      </div>
+      <div class="timeline" id="timeline"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">
+        <div class="panel-icon red">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        Error Detection
+      </div>
+      <div class="table-scroll">
+        <table class="data-table" id="errorTable">
+          <thead>
+            <tr>
+              <th>Severity</th>
+              <th>Description</th>
+              <th>Source</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quality + Routes -->
+  <section class="section-grid">
+    <div class="panel">
+      <div class="panel-title">
+        <div class="panel-icon green">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        Source Quality Scores
+      </div>
+      <div id="qualityBars"></div>
+      <div class="completeness-grid" id="completeness"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">
+        <div class="panel-icon blue">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </div>
+        Route Analytics
+      </div>
+      <div class="table-scroll">
+        <table class="data-table" id="routeTable">
+          <thead>
+            <tr>
+              <th>Route</th>
+              <th>Volume</th>
+              <th>Avg Transit</th>
+              <th>Avg Dwell</th>
+              <th>ETA Acc.</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Live Feed -->
+  <section class="section-full">
+    <div class="panel">
+      <div class="panel-title">
+        <div class="panel-icon cyan">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.63 19.79 19.79 0 01.07 2a2 2 0 012-2.18h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.91 5.91a16 16 0 006.18 6.18l.71-.71a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+        </div>
+        Live Event Feed
+      </div>
+      <div class="feed-filters" id="feedFilters">
+        <button class="feed-filter active" data-filter="all">All</button>
+        <button class="feed-filter" data-filter="maritime">Maritime</button>
+        <button class="feed-filter" data-filter="rail">Rail</button>
+        <button class="feed-filter" data-filter="arrival">Arrival</button>
+        <button class="feed-filter" data-filter="departure">Departure</button>
+        <button class="feed-filter" data-filter="loaded">Loaded</button>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table" id="feedTable">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Event</th>
+              <th>Container</th>
+              <th>Vessel / Train</th>
+              <th>Port / Station</th>
+              <th>Source</th>
+              <th>Node</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ─── Mock Data ─── //
+
+const overviewData = {
+  international: {
+    maritime: {
+      totalToday: 147, totalWeek: 1024,
+      activeShipments: 38, errorRate: '1.2%', errorDelta: -0.3,
+      latency: '24ms', latencyDelta: -2,
+      qualityScore: '94.1%', qualityDelta: 1.2,
+      activeRoutes: 6
+    },
+    rail: {
+      totalToday: 312, totalWeek: 2187,
+      activeShipments: 84, errorRate: '3.8%', errorDelta: 0.5,
+      latency: '31ms', latencyDelta: 1,
+      qualityScore: '87.3%', qualityDelta: -0.8,
+      activeRoutes: 12
+    }
+  },
+  domestic: {
+    maritime: {
+      totalToday: 63, totalWeek: 441,
+      activeShipments: 14, errorRate: '0.8%', errorDelta: -0.1,
+      latency: '19ms', latencyDelta: -1,
+      qualityScore: '96.4%', qualityDelta: 0.4,
+      activeRoutes: 3
+    },
+    rail: {
+      totalToday: 89, totalWeek: 623,
+      activeShipments: 22, errorRate: '2.1%', errorDelta: -0.2,
+      latency: '27ms', latencyDelta: 0,
+      qualityScore: '91.7%', qualityDelta: 0.6,
+      activeRoutes: 5
+    }
+  }
+};
+
+const timelineEvents = [
+  { title: 'Container picked up', time: '2026-03-12 06:30 EST', source: 'JB Hunt TMS', badge: 'trucking', status: 'complete', location: 'Baltimore, MD' },
+  { title: 'Gate in — USBAL rail yard', time: '2026-03-12 09:15 EST', source: 'BNSF EDI 417', badge: 'rail', status: 'complete', location: 'Baltimore, MD (USBAL)' },
+  { title: 'Loaded on train BNSF-7742', time: '2026-03-12 14:00 EST', source: 'BNSF EDI 417', badge: 'rail', status: 'complete', location: 'Baltimore, MD' },
+  { title: 'Departed Baltimore yard', time: '2026-03-12 18:30 EST', source: 'BNSF EDI 417', badge: 'rail', status: 'complete', location: 'Baltimore, MD' },
+  { title: 'In transit — passed Harrisburg', time: '2026-03-13 02:45 EST', source: 'BNSF EDI 417', badge: 'rail', status: 'complete', location: 'Harrisburg, PA' },
+  { title: 'In transit — passed Pittsburgh', time: '2026-03-13 11:20 EST', source: 'BNSF EDI 417', badge: 'rail', status: 'complete', location: 'Pittsburgh, PA' },
+  { title: 'In transit — passed Chicago', time: '2026-03-14 04:10 CST', source: 'BNSF EDI 417', badge: 'rail', status: 'complete', location: 'Chicago, IL (USCHI)' },
+  { title: 'In transit — passed Kansas City', time: '2026-03-14 18:55 CST', source: 'BNSF EDI 417', badge: 'rail', status: 'complete', location: 'Kansas City, MO' },
+  { title: 'In transit — passed Albuquerque', time: '2026-03-15 14:30 MST', source: 'BNSF EDI 417', badge: 'rail', status: 'complete', location: 'Albuquerque, NM' },
+  { title: 'Arrived LA rail yard (ICTF)', time: '2026-03-16 05:00 PST', source: 'BNSF EDI 417', badge: 'rail', status: 'complete', location: 'Los Angeles, CA (USLAX)' },
+  { title: 'Transferred to port — dray pickup', time: '2026-03-16 11:30 PST', source: 'Pasha Logistics TMS', badge: 'trucking', status: 'complete', location: 'Los Angeles, CA' },
+  { title: 'Gate in — Pasha Terminal Pier 400', time: '2026-03-16 14:00 PST', source: 'Pasha Terminal TOS', badge: 'maritime', status: 'complete', location: 'Los Angeles, CA (USLAX)' },
+  { title: 'Loaded on MV Jean Anne', time: '2026-03-17 08:45 PST', source: 'Pasha EDI 315', badge: 'maritime', status: 'complete', location: 'Los Angeles, CA (USLAX)' },
+  { title: 'Vessel departed Los Angeles', time: '2026-03-17 16:00 PST', source: 'Pasha EDI 315', badge: 'maritime', status: 'complete', location: 'Los Angeles, CA (USLAX)' },
+  { title: 'Vessel in transit — Pacific', time: '2026-03-19 12:00 HST', source: 'AIS / Vessel Tracker', badge: 'maritime', status: 'active', location: 'Pacific Ocean' },
+  { title: 'ETA Honolulu', time: '2026-03-21 06:00 HST (est)', source: 'Pasha EDI 315', badge: 'maritime', status: '', location: 'Honolulu, HI (USHON)' },
+];
+
+const errors = [
+  { severity: 'error', desc: "BNSF sent unmapped status code 'ZZ' on PCIU4028371", source: 'BNSF EDI 417', time: '2026-03-20 09:14 EST' },
+  { severity: 'warning', desc: 'Missing container number on CSX event ID cx-90281', source: 'CSX EDI 417', time: '2026-03-20 08:47 EST' },
+  { severity: 'error', desc: "Duplicate timestamp from UP — two events at identical 14:30:00Z", source: 'UP EDI 417', time: '2026-03-20 07:30 CST' },
+  { severity: 'warning', desc: "Invalid LOCODE 'XXBAL' received — expected USBAL", source: 'BNSF EDI 417', time: '2026-03-19 22:15 EST' },
+  { severity: 'info', desc: 'Schema version mismatch: expected v2.1, got v2.0 — auto-migrated', source: 'CSX EDI 417', time: '2026-03-19 18:40 EST' },
+  { severity: 'warning', desc: 'Voyage number V2603W not found in master data — created provisional', source: 'Maersk EDI 315', time: '2026-03-19 16:22 PST' },
+  { severity: 'error', desc: "Container MSKU8847291 weight exceeds max (32,400 kg) — flagged", source: 'Pasha Terminal', time: '2026-03-19 14:10 PST' },
+];
+
+const qualitySources = {
+  international: {
+    maritime: [
+      { name: 'Maersk', score: 94 },
+      { name: 'Pasha Terminal', score: 91 },
+      { name: 'Pasha Hawaii', score: 97 },
+    ],
+    rail: [
+      { name: 'BNSF', score: 96 },
+      { name: 'Union Pacific', score: 78 },
+      { name: 'CSX', score: 82 },
+      { name: 'Norfolk Southern', score: 88 },
+    ]
+  },
+  domestic: {
+    maritime: [
+      { name: 'Pasha Hawaii', score: 97 },
+      { name: 'Pasha Terminal', score: 93 },
+    ],
+    rail: [
+      { name: 'BNSF', score: 95 },
+      { name: 'Union Pacific', score: 80 },
+    ]
+  }
+};
+
+const fieldCompleteness = [
+  { field: 'Vessel Name', pct: 99 },
+  { field: 'IMO', pct: 94 },
+  { field: 'Container #', pct: 91 },
+  { field: 'Port LOCODE', pct: 97 },
+  { field: 'Timestamp', pct: 100 },
+  { field: 'BOL', pct: 86 },
+  { field: 'Booking #', pct: 78 },
+  { field: 'Terminal', pct: 88 },
+];
+
+const routes = {
+  international: {
+    maritime: [
+      { route: 'USLAX \u2192 USHON', volume: 142, transit: '4.2d', dwell: '6.8h', eta: '94.1%' },
+      { route: 'USOAK \u2192 USHON', volume: 67, transit: '4.8d', dwell: '5.2h', eta: '91.8%' },
+      { route: 'USHON \u2192 USLAX', volume: 118, transit: '4.0d', dwell: '7.1h', eta: '93.4%' },
+    ],
+    rail: [
+      { route: 'USBAL \u2192 USLAX', volume: 284, transit: '4.1d', dwell: '8.4h', eta: '89.2%' },
+      { route: 'USCHI \u2192 USLAX', volume: 196, transit: '2.3d', dwell: '5.1h', eta: '92.7%' },
+      { route: 'USBAL \u2192 USCHI', volume: 151, transit: '1.8d', dwell: '4.6h', eta: '91.0%' },
+      { route: 'USNYC \u2192 USLAX', volume: 112, transit: '4.6d', dwell: '9.2h', eta: '86.3%' },
+    ]
+  },
+  domestic: {
+    maritime: [
+      { route: 'USLAX \u2192 USHON', volume: 89, transit: '4.1d', dwell: '5.4h', eta: '95.6%' },
+      { route: 'USOAK \u2192 USHON', volume: 34, transit: '4.6d', dwell: '4.8h', eta: '93.2%' },
+    ],
+    rail: [
+      { route: 'USLAX \u2192 USLGB', volume: 78, transit: '0.4d', dwell: '2.1h', eta: '97.8%' },
+      { route: 'USOAK \u2192 USSCK', volume: 45, transit: '0.6d', dwell: '3.0h', eta: '95.1%' },
+    ]
+  }
+};
+
+const feedEvents = [
+  { ts: '2026-03-20 09:42:18', event: 'ARRIVAL', container: 'PCIU4028371', vessel: 'MV Jean Anne', port: 'USHON', source: 'Pasha EDI 315', node: 'maritime' },
+  { ts: '2026-03-20 09:38:04', event: 'LOADED', container: 'MSKU8847291', vessel: 'MV Marjorie C', port: 'USLAX', source: 'Pasha Terminal', node: 'maritime' },
+  { ts: '2026-03-20 09:35:51', event: 'DEPARTURE', container: 'OOCU7712840', vessel: 'Train BNSF-8814', port: 'USBAL', source: 'BNSF EDI 417', node: 'rail' },
+  { ts: '2026-03-20 09:31:22', event: 'GATE_IN', container: 'PCIU3319847', vessel: '-', port: 'USLAX', source: 'Pasha Terminal', node: 'maritime' },
+  { ts: '2026-03-20 09:28:09', event: 'ETA_UPDATE', container: 'MSKU6623104', vessel: 'MV Jean Anne', port: 'USHON', source: 'Pasha EDI 315', node: 'maritime' },
+  { ts: '2026-03-20 09:24:33', event: 'DISCHARGED', container: 'PCIU2810445', vessel: 'MV Marjorie C', port: 'USHON', source: 'Pasha Terminal', node: 'maritime' },
+  { ts: '2026-03-20 09:21:17', event: 'DEPARTURE', container: 'OOCU5540921', vessel: 'Train UP-4421', port: 'USCHI', source: 'UP EDI 417', node: 'rail' },
+  { ts: '2026-03-20 09:18:44', event: 'CUSTOMS_RELEASED', container: 'PCIU4028371', vessel: 'MV Jean Anne', port: 'USHON', source: 'CBP ABI', node: 'maritime' },
+  { ts: '2026-03-20 09:15:02', event: 'ARRIVAL', container: 'MSKU3304817', vessel: 'Train BNSF-7742', port: 'USLAX', source: 'BNSF EDI 417', node: 'rail' },
+  { ts: '2026-03-20 09:12:38', event: 'LOADED', container: 'PCIU6691024', vessel: 'MV Jean Anne', port: 'USLAX', source: 'Pasha EDI 315', node: 'maritime' },
+  { ts: '2026-03-20 09:09:11', event: 'GATE_OUT', container: 'OOCU4418203', vessel: '-', port: 'USHON', source: 'Pasha Terminal', node: 'maritime' },
+  { ts: '2026-03-20 09:05:55', event: 'BERTHING', container: '-', vessel: 'MV Marjorie C', port: 'USHON', source: 'Pasha EDI 315', node: 'maritime' },
+  { ts: '2026-03-20 09:02:30', event: 'ARRIVAL', container: 'PCIU7730182', vessel: 'Train CSX-2201', port: 'USBAL', source: 'CSX EDI 417', node: 'rail' },
+  { ts: '2026-03-20 08:58:14', event: 'LOADED', container: 'MSKU9921047', vessel: 'Train BNSF-8814', port: 'USBAL', source: 'BNSF EDI 417', node: 'rail' },
+  { ts: '2026-03-20 08:54:02', event: 'DEPARTURE', container: 'PCIU5517382', vessel: 'MV Jean Anne', port: 'USLAX', source: 'Pasha EDI 315', node: 'maritime' },
+  { ts: '2026-03-20 08:49:47', event: 'ETA_UPDATE', container: 'OOCU3310294', vessel: 'MV Marjorie C', port: 'USHON', source: 'Pasha EDI 315', node: 'maritime' },
+];
+
+// ─── Render Functions ─── //
+
+let currentNode = 'international';
+let currentMode = 'maritime';
+let currentFeedFilter = 'all';
+
+function renderCards() {
+  const d = overviewData[currentNode][currentMode];
+  const container = document.getElementById('overviewCards');
+  container.innerHTML = `
+    <div class="card">
+      <div class="card-label">Total Events Today</div>
+      <div class="card-value">${d.totalToday.toLocaleString()}</div>
+      <div class="card-sub">${d.totalWeek.toLocaleString()} this week</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Active Shipments</div>
+      <div class="card-value">${d.activeShipments}</div>
+      <div class="card-sub">Across all routes</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Error Rate</div>
+      <div class="card-value">${d.errorRate}</div>
+      <div class="card-sub"><span class="${d.errorDelta <= 0 ? 'up' : 'down'}">${d.errorDelta > 0 ? '+' : ''}${d.errorDelta}%</span> vs last week</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Avg Normalization Latency</div>
+      <div class="card-value">${d.latency}</div>
+      <div class="card-sub"><span class="${d.latencyDelta <= 0 ? 'up' : 'down'}">${d.latencyDelta > 0 ? '+' : ''}${d.latencyDelta}ms</span> vs last week</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Source Quality Score</div>
+      <div class="card-value">${d.qualityScore}</div>
+      <div class="card-sub"><span class="${d.qualityDelta >= 0 ? 'up' : 'down'}">${d.qualityDelta > 0 ? '+' : ''}${d.qualityDelta}%</span> vs last week</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Active Routes</div>
+      <div class="card-value">${d.activeRoutes}</div>
+      <div class="card-sub">${currentNode} ${currentMode}</div>
+    </div>
+  `;
+}
+
+function renderTimeline() {
+  const container = document.getElementById('timeline');
+  container.innerHTML = timelineEvents.map(e => `
+    <div class="tl-item ${e.status}">
+      <div class="tl-dot"></div>
+      <div class="tl-header">
+        <span class="tl-title">${e.title}</span>
+        <span class="tl-badge badge-${e.badge}">${e.badge}</span>
+      </div>
+      <div class="tl-meta">${e.time} &mdash; ${e.location}</div>
+      <div class="tl-source">Source: ${e.source}</div>
+    </div>
+  `).join('');
+}
+
+function renderErrors() {
+  const tbody = document.querySelector('#errorTable tbody');
+  tbody.innerHTML = errors.map(e => `
+    <tr>
+      <td><span class="severity severity-${e.severity}">${e.severity}</span></td>
+      <td style="font-family:'Inter',sans-serif;max-width:300px;">${e.desc}</td>
+      <td>${e.source}</td>
+      <td>${e.time}</td>
+    </tr>
+  `).join('');
+}
+
+function renderQuality() {
+  const sources = qualitySources[currentNode][currentMode];
+  const container = document.getElementById('qualityBars');
+  container.innerHTML = sources.map(s => {
+    const cls = s.score >= 90 ? 'qb-high' : s.score >= 80 ? 'qb-mid' : 'qb-low';
+    return `
+      <div class="quality-row">
+        <span class="quality-label">${s.name}</span>
+        <div class="quality-bar-track">
+          <div class="quality-bar-fill ${cls}" style="width:${s.score}%" data-value="${s.score}%"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const compContainer = document.getElementById('completeness');
+  compContainer.innerHTML = fieldCompleteness.map(f => {
+    const cls = f.pct >= 95 ? 'comp-high' : f.pct >= 85 ? 'comp-mid' : 'comp-low';
+    return `
+      <div class="comp-item">
+        <div class="comp-field">${f.field}</div>
+        <div class="comp-val ${cls}">${f.pct}%</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderRoutes() {
+  const data = routes[currentNode][currentMode];
+  const tbody = document.querySelector('#routeTable tbody');
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td><span class="route-tag">${r.route}</span></td>
+      <td>${r.volume}</td>
+      <td>${r.transit}</td>
+      <td>${r.dwell}</td>
+      <td>${r.eta}</td>
+    </tr>
+  `).join('');
+}
+
+function getEventTypeClass(type) {
+  const map = {
+    'ARRIVAL': 'et-arrival', 'DEPARTURE': 'et-departure',
+    'LOADED': 'et-loaded', 'DISCHARGED': 'et-discharged',
+    'GATE_IN': 'et-gate-in', 'GATE_OUT': 'et-gate-out',
+    'ETA_UPDATE': 'et-eta-update', 'CUSTOMS_RELEASED': 'et-customs',
+    'BERTHING': 'et-berthing'
+  };
+  return map[type] || '';
+}
+
+function renderFeed() {
+  const tbody = document.querySelector('#feedTable tbody');
+  let filtered = feedEvents;
+  if (currentFeedFilter === 'maritime') filtered = feedEvents.filter(e => e.node === 'maritime');
+  else if (currentFeedFilter === 'rail') filtered = feedEvents.filter(e => e.node === 'rail');
+  else if (currentFeedFilter !== 'all') filtered = feedEvents.filter(e => e.event.toLowerCase().includes(currentFeedFilter));
+
+  tbody.innerHTML = filtered.map(e => `
+    <tr>
+      <td>${e.ts}</td>
+      <td><span class="event-type-tag ${getEventTypeClass(e.event)}">${e.event.replace('_', ' ')}</span></td>
+      <td>${e.container}</td>
+      <td style="font-family:'Inter',sans-serif;font-size:12px;">${e.vessel}</td>
+      <td>${e.port}</td>
+      <td style="font-family:'Inter',sans-serif;font-size:11px;">${e.source}</td>
+      <td><span class="tl-badge badge-${e.node}">${e.node}</span></td>
+    </tr>
+  `).join('');
+}
+
+function renderAll() {
+  renderCards();
+  renderTimeline();
+  renderErrors();
+  renderQuality();
+  renderRoutes();
+  renderFeed();
+}
+
+// ─── Tab Handlers ─── //
+
+document.querySelectorAll('#nodeTabs .tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#nodeTabs .tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentNode = btn.dataset.node;
+    renderAll();
+  });
+});
+
+document.querySelectorAll('#subTabs .sub-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#subTabs .sub-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentMode = btn.dataset.mode;
+    renderAll();
+  });
+});
+
+document.querySelectorAll('#feedFilters .feed-filter').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#feedFilters .feed-filter').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFeedFilter = btn.dataset.filter;
+    renderFeed();
+  });
+});
+
+// ─── Initial Render ─── //
+renderAll();
+</script>
+</body>
+</html>
