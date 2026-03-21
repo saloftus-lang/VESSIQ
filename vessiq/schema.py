@@ -33,6 +33,8 @@ class EventType(str, Enum):
 
 class SourceFormat(str, Enum):
     EDI_315 = "EDI_315"
+    EDI_214 = "EDI_214"
+    EDI_322 = "EDI_322"
     CSV_TERMINAL = "CSV_TERMINAL"
 
 

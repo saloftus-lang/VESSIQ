@@ -30,6 +30,8 @@ from fastapi.staticfiles import StaticFiles
 from vessiq.normalizer import engine
 from vessiq.parsers import csv_terminal as csv_parser
 from vessiq.parsers import edi315 as edi_parser
+from vessiq.parsers import edi214 as edi214_parser
+from vessiq.parsers import edi322 as edi322_parser
 from vessiq.schema import EventListResponse, EventType, IngestResponse, SourceFormat, VesselEvent
 
 logging.basicConfig(level=logging.INFO)
@@ -59,6 +61,10 @@ app.mount("/static", StaticFiles(directory=_FRONTEND), name="static")
 @app.get("/", include_in_schema=False)
 def landing():
     return FileResponse(_FRONTEND / "index.html")
+
+@app.get("/dashboard", include_in_schema=False)
+def dashboard():
+    return FileResponse(_FRONTEND / "dashboard.html")
 
 # ---------------------------------------------------------------------------
 # In-memory event store (replace with PostgreSQL/Redis in production)
@@ -114,6 +120,94 @@ async def ingest_edi315(
     _store_events(normalized)
 
     logger.info("EDI 315 ingest: %d accepted, %d errors from %s", len(normalized), len(errors), source_name)
+
+    return IngestResponse(
+        accepted=len(normalized),
+        rejected=len(errors),
+        event_ids=[e.event_id for e in normalized],
+        errors=errors,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Ingest — EDI 214
+# ---------------------------------------------------------------------------
+
+@app.post(
+    "/ingest/edi214",
+    response_model=IngestResponse,
+    tags=["Ingest"],
+    summary="Ingest raw EDI X12 214 message",
+    description=(
+        "Accepts a raw EDI 214 (Transportation Carrier Shipment Status Message) "
+        "text body (may contain multiple ST/SE transaction sets). "
+        "Parses, normalizes, and stores each shipment status event. "
+        "Returns the IDs of accepted events."
+    ),
+)
+async def ingest_edi214(
+    raw_edi: str = Form(..., description="Raw EDI 214 text content"),
+    source_name: str = Form(default="EDI_214_SOURCE", description="Identifier for the sending carrier/system"),
+):
+    if not raw_edi.strip():
+        raise HTTPException(status_code=400, detail="EDI content is empty")
+
+    try:
+        raw_events = edi214_parser.parse(raw_edi)
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"EDI parse error: {e}")
+
+    if not raw_events:
+        raise HTTPException(status_code=422, detail="No valid EDI 214 transactions found in input")
+
+    normalized, errors = engine.normalize_edi214(raw_events, source_name=source_name)
+    _store_events(normalized)
+
+    logger.info("EDI 214 ingest: %d accepted, %d errors from %s", len(normalized), len(errors), source_name)
+
+    return IngestResponse(
+        accepted=len(normalized),
+        rejected=len(errors),
+        event_ids=[e.event_id for e in normalized],
+        errors=errors,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Ingest — EDI 322
+# ---------------------------------------------------------------------------
+
+@app.post(
+    "/ingest/edi322",
+    response_model=IngestResponse,
+    tags=["Ingest"],
+    summary="Ingest raw EDI X12 322 message",
+    description=(
+        "Accepts a raw EDI 322 (Terminal Operations / Intermodal Container Status) "
+        "text body (may contain multiple ST/SE transaction sets). "
+        "Parses, normalizes, and stores each container status event. "
+        "Returns the IDs of accepted events."
+    ),
+)
+async def ingest_edi322(
+    raw_edi: str = Form(..., description="Raw EDI 322 text content"),
+    source_name: str = Form(default="EDI_322_SOURCE", description="Identifier for the sending railroad/yard system"),
+):
+    if not raw_edi.strip():
+        raise HTTPException(status_code=400, detail="EDI content is empty")
+
+    try:
+        raw_events = edi322_parser.parse(raw_edi)
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"EDI parse error: {e}")
+
+    if not raw_events:
+        raise HTTPException(status_code=422, detail="No valid EDI 322 transactions found in input")
+
+    normalized, errors = engine.normalize_edi322(raw_events, source_name=source_name)
+    _store_events(normalized)
+
+    logger.info("EDI 322 ingest: %d accepted, %d errors from %s", len(normalized), len(errors), source_name)
 
     return IngestResponse(
         accepted=len(normalized),

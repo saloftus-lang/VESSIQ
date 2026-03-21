@@ -1,0 +1,87 @@
+# VESSIQ — EDI 322 Normalization Mapping
+# ----------------------------------------
+# Maps raw parsed EDI 322 fields to the VESSIQ unified VesselEvent schema.
+#
+# EDI 322 = Terminal Operations and Intermodal Container Status
+# Used by railroads (BNSF, UP, CSX, NS) and container yards to report
+# container movements, availability, and intermodal status.
+#
+# Structure:
+#   field_map:      raw_field_name → canonical VesselEvent field name
+#   status_codes:   EDI Q5 status code → EventType enum value
+#   date_formats:   List of date formats to try when parsing status_date
+#
+# To support a new railroad variant, add/override entries here — no Python needed.
+
+field_map:
+  vessel_name:      vessel_name
+  vessel_imo:       vessel_imo
+  voyage_number:    voyage_number
+  container_number: container_number
+  booking_number:   booking_number
+  bill_of_lading:   bill_of_lading
+  port_locode:      port_locode
+  port_name:        port_name
+  terminal_code:    terminal_code
+  terminal_name:    terminal_name
+
+# EDI 322 Q5 Status Codes → VESSIQ EventType
+# Reference: X12 004010 322 Transaction Set
+status_codes:
+  # Container availability
+  AE: AVAILABLE           # Available Empty
+  AF: AVAILABLE           # Available Full / Available for Pickup
+  AV: AVAILABLE           # Available for Delivery
+
+  # Loading / Rail
+  AL: LOADED              # At Loading / Loaded
+  LR: LOADED              # Loaded on Rail
+  RL: LOADED              # Released to Railroad (loaded)
+  LV: LOADED              # Loaded on Vessel
+
+  # Unloading / Discharge
+  UA: DISCHARGED          # Unloaded from Rail / Arrived
+  UV: DISCHARGED          # Unloaded from Vessel
+  UR: DISCHARGED          # Unloaded from Rail
+
+  # Arrival / Departure
+  OA: ARRIVAL             # Arrived at Destination
+  AR: ARRIVAL             # Arrived at Ramp
+  IT: ARRIVAL             # In Transit Arrival
+  RR: ARRIVAL             # Rail Arrived
+
+  DE: DEPARTURE           # Departed
+  DT: DEPARTURE           # Departed Terminal
+  TR: DEPARTURE           # In Transit / Departed Rail
+
+  # Gate events
+  GI: GATE_IN             # Gate In
+  GO: GATE_OUT            # Gate Out
+  RD: GATE_IN             # Received at Dock / Gate-In
+  OG: GATE_OUT            # Out-Gate
+
+  # Customs
+  CD: CUSTOMS_RELEASED    # Customs Released
+  CR: CUSTOMS_RELEASED    # Customs Released (alternate)
+  CP: CUSTOMS_RELEASED    # Customs Permit
+
+  # ETA/ETD updates
+  EI: ETA_UPDATE          # ETA Update
+  ED: ETD_UPDATE          # ETD Update
+
+  # Intermodal specific
+  NS: UNKNOWN             # Notification Sent
+  SD: UNKNOWN             # Spotted for Delivery
+  RC: UNKNOWN             # Reconsigned
+
+# Date formats to attempt when parsing raw date strings from EDI
+date_formats:
+  - "%Y%m%d"      # CCYYMMDD (preferred X12 format)
+  - "%y%m%d"      # YYMMDD (legacy)
+  - "%Y-%m-%d"    # ISO fallback
+
+# Time formats for parsing raw time strings
+time_formats:
+  - "%H%M"        # HHMM
+  - "%H:%M"       # HH:MM
+  - "%H%M%S"      # HHMMSS

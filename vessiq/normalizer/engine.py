@@ -63,6 +63,58 @@ def normalize_edi315(
     return events, errors
 
 
+def normalize_edi214(
+    raw_events: list[dict[str, Any]],
+    source_name: str = "EDI_214_SOURCE",
+) -> tuple[list[VesselEvent], list[str]]:
+    """
+    Normalize a list of raw EDI 214 parsed dicts into VesselEvent objects.
+
+    Returns:
+        (events, errors) — successfully normalized events + list of error strings
+    """
+    config = _load_mapping("edi214")
+    events: list[VesselEvent] = []
+    errors: list[str] = []
+
+    for i, raw in enumerate(raw_events):
+        try:
+            event = _normalize_edi214_record(raw, config, source_name)
+            events.append(event)
+        except Exception as e:
+            msg = f"EDI 214 record {i}: {e}"
+            logger.warning(msg)
+            errors.append(msg)
+
+    return events, errors
+
+
+def normalize_edi322(
+    raw_events: list[dict[str, Any]],
+    source_name: str = "EDI_322_SOURCE",
+) -> tuple[list[VesselEvent], list[str]]:
+    """
+    Normalize a list of raw EDI 322 parsed dicts into VesselEvent objects.
+
+    Returns:
+        (events, errors) — successfully normalized events + list of error strings
+    """
+    config = _load_mapping("edi322")
+    events: list[VesselEvent] = []
+    errors: list[str] = []
+
+    for i, raw in enumerate(raw_events):
+        try:
+            event = _normalize_edi322_record(raw, config, source_name)
+            events.append(event)
+        except Exception as e:
+            msg = f"EDI 322 record {i}: {e}"
+            logger.warning(msg)
+            errors.append(msg)
+
+    return events, errors
+
+
 def normalize_csv_terminal(
     raw_rows: list[dict[str, Any]],
     source_name: str = "CSV_TERMINAL",
@@ -139,6 +191,104 @@ def _normalize_edi315_record(
         estimated_departure=etd,
         port_locode=_clean(raw.get("port_locode")),
         port_name=_clean(raw.get("port_name")),
+        container_number=_clean(raw.get("container_number")),
+        booking_number=_clean(raw.get("booking_number")),
+        bill_of_lading=_clean(raw.get("bill_of_lading")),
+        raw_data=raw,
+    )
+
+
+# ---------------------------------------------------------------------------
+# EDI 214 record normalizer
+# ---------------------------------------------------------------------------
+
+def _normalize_edi214_record(
+    raw: dict[str, Any], config: dict, source_name: str
+) -> VesselEvent:
+    status_codes: dict = config.get("status_codes", {})
+    date_formats: list = config.get("date_formats", ["%Y%m%d", "%y%m%d"])
+    time_formats: list = config.get("time_formats", ["%H%M"])
+
+    # Map AT7 status code → EventType
+    status_code = (raw.get("status_code") or "").upper()
+    event_type = _map_event_type(status_code, status_codes)
+
+    # Parse event timestamp from AT7 date + time
+    event_ts = _parse_datetime(
+        raw.get("status_date"),
+        raw.get("status_time"),
+        date_formats,
+        time_formats,
+    )
+
+    # EDI 214 is land-side; use carrier SCAC as source_name if available
+    effective_source = _clean(raw.get("carrier_scac")) or source_name
+
+    return VesselEvent(
+        source_format=SourceFormat.EDI_214,
+        source_name=effective_source,
+        voyage_number=_clean(raw.get("voyage_number")),
+        event_type=event_type,
+        event_timestamp=event_ts,
+        port_name=_clean(raw.get("port_name")),
+        container_number=_clean(raw.get("container_number")),
+        booking_number=_clean(raw.get("booking_number")),
+        bill_of_lading=_clean(raw.get("bill_of_lading")),
+        raw_data=raw,
+    )
+
+
+# ---------------------------------------------------------------------------
+# EDI 322 record normalizer
+# ---------------------------------------------------------------------------
+
+def _normalize_edi322_record(
+    raw: dict[str, Any], config: dict, source_name: str
+) -> VesselEvent:
+    status_codes: dict = config.get("status_codes", {})
+    date_formats: list = config.get("date_formats", ["%Y%m%d", "%y%m%d"])
+    time_formats: list = config.get("time_formats", ["%H%M"])
+
+    # Map status code → EventType
+    status_code = (raw.get("status_code") or "").upper()
+    event_type = _map_event_type(status_code, status_codes)
+
+    # Parse event timestamp from Q5 date + time
+    event_ts = _parse_datetime(
+        raw.get("status_date"),
+        raw.get("status_time"),
+        date_formats,
+        time_formats,
+    )
+
+    # Parse ETA/ETD
+    eta = _parse_datetime(
+        raw.get("eta_date"),
+        raw.get("eta_time"),
+        date_formats,
+        time_formats,
+    )
+    etd = _parse_datetime(
+        raw.get("etd_date"),
+        raw.get("etd_time"),
+        date_formats,
+        time_formats,
+    )
+
+    return VesselEvent(
+        source_format=SourceFormat.EDI_322,
+        source_name=source_name,
+        vessel_name=_clean(raw.get("vessel_name")),
+        vessel_imo=_clean(raw.get("vessel_imo")),
+        voyage_number=_clean(raw.get("voyage_number")),
+        event_type=event_type,
+        event_timestamp=event_ts,
+        estimated_arrival=eta,
+        estimated_departure=etd,
+        port_locode=_clean(raw.get("port_locode")),
+        port_name=_clean(raw.get("port_name")),
+        terminal_code=_clean(raw.get("terminal_code")),
+        terminal_name=_clean(raw.get("terminal_name")),
         container_number=_clean(raw.get("container_number")),
         booking_number=_clean(raw.get("booking_number")),
         bill_of_lading=_clean(raw.get("bill_of_lading")),

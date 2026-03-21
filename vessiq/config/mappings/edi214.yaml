@@ -1,0 +1,83 @@
+# VESSIQ — EDI 214 Normalization Mapping
+# ----------------------------------------
+# Maps raw parsed EDI 214 fields to the VESSIQ unified VesselEvent schema.
+#
+# EDI 214 is the Transportation Carrier Shipment Status Message, used by
+# motor carriers and intermodal providers for shipment tracking updates.
+#
+# Structure:
+#   field_map:      raw_field_name → canonical VesselEvent field name
+#   status_codes:   AT7 shipment status code → EventType enum value
+#   date_formats:   List of date formats to try when parsing status_date
+#
+# To support a new carrier variant, add/override entries here — no Python needed.
+
+field_map:
+  container_number: container_number
+  booking_number:   booking_number
+  bill_of_lading:   bill_of_lading
+  port_name:        port_name
+  carrier_scac:     source_name
+
+# EDI 214 AT7 Shipment Status Codes → VESSIQ EventType
+# Reference: X12 004010 214 Transaction Set
+status_codes:
+  # Arrival events
+  X1: ARRIVAL           # Arrived at
+  AA: ARRIVAL           # Arrived at Pickup Location
+  CP: ARRIVAL           # Completed Loading at Pickup Location
+  X4: ARRIVAL           # Arrived at Terminal Location
+
+  # Departure events
+  X3: DEPARTURE         # Departed
+  AF: DEPARTURE         # Carrier Departed Pickup Location
+  CD: DEPARTURE         # Carrier Departed Delivery Location
+  RL: DEPARTURE         # Rail Departure
+  X2: DEPARTURE         # Departed Terminal Location
+
+  # En route / in transit
+  X6: GATE_IN           # En Route to Delivery (mapped to GATE_IN as intermodal handoff)
+  IT: GATE_IN           # In Transit
+  AR: GATE_IN           # Rail Arrival at Destination Intermodal Ramp
+
+  # Delivery events
+  D1: GATE_OUT          # Completed Delivery
+  AJ: GATE_OUT          # Delivered to Consignee
+  X5: GATE_OUT          # Arrived at Delivery Location
+  J1: GATE_OUT          # Delivered to Connecting Line
+
+  # Estimated events
+  AG: ETA_UPDATE        # Estimated Delivery
+  P1: ETD_UPDATE        # Estimated Departure (Departed with Shipment)
+  NS: ETA_UPDATE        # New Estimated Delivery Date
+
+  # Customs / holds
+  OA: CUSTOMS_RELEASED  # Customs Released
+  CT: CUSTOMS_RELEASED  # Customs Entry Filed
+
+  # Loading / unloading at intermodal facilities
+  AL: LOADED            # Loaded on Equipment (rail/trailer)
+  I1: LOADED            # In-Gate (received at intermodal ramp)
+  UV: DISCHARGED        # Unloaded from Equipment
+  OI: DISCHARGED        # Out-Gate from Intermodal Ramp
+
+  # Availability
+  AV: AVAILABLE         # Available for Delivery
+  RD: AVAILABLE         # Ready for Pickup
+
+  # Other / fallback
+  SD: UNKNOWN           # Shipment Delayed
+  SC: UNKNOWN           # Shipment Cancelled
+  A9: UNKNOWN           # Shipment Pickup Date/Time Changed
+
+# Date formats to attempt when parsing raw date strings from EDI 214
+date_formats:
+  - "%Y%m%d"      # CCYYMMDD (preferred X12 format)
+  - "%y%m%d"      # YYMMDD (legacy)
+  - "%Y-%m-%d"    # ISO fallback
+
+# Time formats for parsing raw time strings
+time_formats:
+  - "%H%M"        # HHMM
+  - "%H:%M"       # HH:MM
+  - "%H%M%S"      # HHMMSS
