@@ -22,12 +22,14 @@ created: 2026-03-24
 | Preset | not applicable |
 | Component library | none — hand-rolled HTML/CSS patterns |
 | Icon library | Unicode symbols + inline SVG (no icon CDN) |
-| Font (primary) | Inter variable font via Google Fonts CDN (`wght@300..700`, single file ~17 KB) |
-| Font (monospace) | JetBrains Mono via Google Fonts CDN (`wght@400;500`) — for container numbers, SCAC codes, dollar amounts in table cells |
-| Font fallback | `-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif` (renders immediately before CDN loads) |
+| Font (primary) | Inter — must be self-hosted or inlined (see DS-05 note below) |
+| Font (monospace) | JetBrains Mono — must be self-hosted or inlined (see DS-05 note below) |
+| Font fallback | `-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif` (renders immediately before font loads) |
 | Charts | ApexCharts 3.54.1 via jsDelivr CDN — pinned exact version, never `@latest` |
 | Animation | GSAP 3.12.5 core via jsDelivr CDN — UMD bundle (not ESM), works over `file://` if needed |
 | Rendering target | Desktop only — 1280×800 minimum, 1440×900 optimized |
+
+**DS-05 Font Loading Note:** REQUIREMENTS.md DS-05 requires offline-safe rendering. Google Fonts CDN violates this. Inter and JetBrains Mono must be bundled locally (downloaded and placed in `/fonts/`, referenced via `@font-face` with `font-display: swap`). This satisfies both DS-05 and eliminates the CDN round-trip. The CDN `<link>` tags in the CDN Stack section are retained as fallback documentation only — the executor must replace them with self-hosted `@font-face` declarations.
 
 Source: REQUIREMENTS.md DS-05, DS-06, DS-07; RESEARCH.md stack.md sections 2, 4, 5
 
@@ -49,7 +51,7 @@ Declared values (multiples of 4 only):
 
 Exceptions:
 - KPI tile touch areas: minimum 44px height (accessibility, even though desktop-only)
-- Table row height: 52px (ensures legibility of two-line data rows at 13px body)
+- Table row height: 52px (ensures legibility of two-line data rows at 14px body)
 - Expandable row content: 16px padding top/bottom inside the expanded area
 - Header height: 68px fixed
 
@@ -61,20 +63,20 @@ Source: demo/index.html measured patterns; REQUIREMENTS.md REL-02
 
 | Role | Font | Size | Weight | Line Height | Usage |
 |------|------|------|--------|-------------|-------|
-| Display | Inter | 36px | 800 | 1.2 | KPI tile numbers (animated), hero headline |
-| Heading | Inter | 24px | 700 | 1.2 | Section titles (`h2`), panel headers |
-| Sub-heading | Inter | 18px | 700 | 1.3 | Card titles (`h3`), chart panel titles |
-| Body | Inter | 14px | 400 | 1.6 | Table cell text, descriptions, filter labels |
-| Label | Inter | 13px | 600 | 1.5 | Table header columns, nav links, button text |
-| Caption | Inter | 11px | 600 | 1.4 | Badges, KPI tile labels (uppercase + letter-spacing 0.5px), chart axis labels |
+| Display | Inter | 36px | 700 | 1.2 | KPI tile numbers (animated), hero headline |
+| Heading | Inter | 24px | 700 | 1.2 | Section titles (`h2`), panel headers, logo wordmark (letter-spacing 1px) |
+| Body | Inter | 14px | 400 | 1.6 | Table cell text, descriptions, filter labels, button text, nav links |
+| Caption | Inter | 11px | 700 | 1.4 | Badges, KPI tile labels (uppercase + letter-spacing 0.5px), chart axis labels, table header columns (uppercase + letter-spacing 0.5px) |
 | Monospace | JetBrains Mono | 12px | 400 | 1.6 | Container numbers, SCAC codes, invoice IDs, currency amounts in table cells |
-| Monospace emphasis | JetBrains Mono | 12px | 500 | 1.6 | Highlighted dollar amounts, overcharge delta values |
+| Monospace emphasis | JetBrains Mono | 12px | 700 | 1.6 | Highlighted dollar amounts, overcharge delta values |
 
 Additional typography rules:
 - KPI tile labels: uppercase, letter-spacing 0.5px (pattern from existing demo)
-- Table header columns: uppercase, letter-spacing 0.5px, color `--gray-500`
-- Logo wordmark: 22px, weight 700, letter-spacing 1px
+- Table header columns: uppercase, letter-spacing 0.5px, color `--gray-500` — use Caption role (11px weight 700)
+- Logo wordmark: 24px, weight 700, letter-spacing 1px — uses Heading size slot
+- Label differentiation (replaces former separate Label role): use Body (14px) + weight 700 + uppercase where a label must be distinguished from body text
 - All currency values in the invoice table: JetBrains Mono, never Inter
+- KPI tile numbers use size (36px) and color for emphasis — weight 700 is sufficient, 800 is removed
 - No more than 2 font families on the page at any time
 
 Source: demo/index.html CSS analysis; RESEARCH.md stack.md section 5
@@ -198,20 +200,21 @@ These are the UI components needed for Phase 1. Each maps to one or more require
 - Height: 68px fixed, `position: sticky; top: 0; z-index: 200`
 - Background: `#0B1F3A` (solid, no glass — header is above the gradient)
 - Contents (left to right): Logo mark + wordmark + sub-label | Nav links (Overview, Disputes, ROI) | "Book a Demo" CTA button
-- CTA button: `#0EA5E9` bg, white text, 8px 24px padding, 8px border-radius, 600 weight, 14px size
-- Source badge: pill with text "Live Demo · Q1 2025", `rgba(14,165,233,0.15)` bg, `rgba(14,165,233,0.3)` border, `#0EA5E9` text, 12px, weight 600
+- CTA button: `#0EA5E9` bg, white text, 8px 24px padding, 8px border-radius, weight 700, 14px size
+- Source badge: pill with text "Live Demo · Q1 2025", `rgba(14,165,233,0.15)` bg, `rgba(14,165,233,0.3)` border, `#0EA5E9` text, 12px, weight 700
 - Requirement: INV-01
 
 ### 2. KPI Tile Row
 - Layout: 4-column grid, `gap: 24px`, full width of content area
 - Each tile: glassmorphism card, 24px padding, min-height 120px
-- Tile structure: label (11px uppercase caption) → number (36px display, 800 weight) → delta badge (optional)
+- Tile structure: label (11px uppercase caption) → number (36px display, weight 700) → delta badge (optional)
 - Numbers animate on page load with GSAP `countTo` — duration 1.2s, ease `power2.out`, triggered by `DOMContentLoaded`
 - Tile 1 "Total Invoices Audited": number color `--white`, value 847
 - Tile 2 "Total Overcharges Found": number color `--red`, value 288 (count of flagged invoices)
 - Tile 3 "Recovery Amount": number color `--accent`, value $187,500 formatted as `$187,500`
 - Tile 4 "Dispute Win Rate": number color `--accent`, value 68% (142 won / (142+67) = 67.8%)
 - All KPI values derived by summing DATA array — never hardcoded independently
+- **Primary visual anchor:** KPI tile row — animated counter numbers on load draw the viewer's eye first and establish the value proposition before any other element is read.
 - Requirement: INV-02, INV-03, INV-10
 
 ### 3. Filter Bar
@@ -233,14 +236,15 @@ These are the UI components needed for Phase 1. Each maps to one or more require
 - Columns (in order): Source badge | Invoice ID | Carrier | Port pair | Date | Billed | Contract | Overcharge | Status badge | Expand chevron
 - Invoice ID and container numbers: JetBrains Mono 12px
 - All dollar amounts: JetBrains Mono 12px
-- Overcharge column: `--red` color, JetBrains Mono, weight 500
+- Overcharge column: `--red` color, JetBrains Mono, weight 700
 - Click target for expand: entire row (event delegation on `<tbody>`)
 - Chevron icon: rotates 180° on expand (CSS `transform: rotate(180deg)`, `transition: 0.2s`)
+- Chevron aria-label: toggled by JS on click — `aria-label="Expand invoice details"` when collapsed, `aria-label="Collapse invoice details"` when expanded
 - Source format badges: "Ocean" = `rgba(26,86,160,0.25)` bg, `#93C5FD` text; "Rail" = `rgba(16,185,129,0.2)` bg, `#6EE7B7` text
 - Requirement: INV-04, INV-06, INV-09
 
 ### 5. Dispute Status Badges
-- Pill shape: `border-radius: 12px; padding: 4px 10px; font-size: 11px; font-weight: 600`
+- Pill shape: `border-radius: 12px; padding: 4px 10px; font-size: 11px; font-weight: 700`
 - "Pending": `rgba(245,158,11,0.2)` bg, `#FDE68A` text
 - "Filed": `rgba(14,165,233,0.2)` bg, `#7DD3FC` text
 - "Won": `rgba(16,185,129,0.2)` bg, `#6EE7B7` text
@@ -260,7 +264,7 @@ These are the UI components needed for Phase 1. Each maps to one or more require
 
 ### 7. Charts Row
 - Layout: 2-column grid, `gap: 24px`
-- Each chart panel: glassmorphism card, 24px padding, chart title 18px weight 700 white, 8px margin-bottom
+- Each chart panel: glassmorphism card, 24px padding, chart title 24px weight 700 white, 8px margin-bottom
 
 **Chart A — Overcharge by Carrier (Horizontal Bar):**
 - ApexCharts horizontal bar, dark theme, transparent background
@@ -383,6 +387,8 @@ These are the UI components needed for Phase 1. Each maps to one or more require
 | Charge type: D&D | `D&D Violation` |
 | Charge type: duplicate | `Duplicate Billing` |
 | Charge type: unauthorized | `Unauthorized Surcharge` |
+| Chevron (collapsed) | `aria-label="Expand invoice details"` |
+| Chevron (expanded) | `aria-label="Collapse invoice details"` |
 
 No destructive actions in Phase 1. Dashboard is read-only except for filters, expand/collapse, and ROI calculator input.
 
@@ -412,6 +418,7 @@ state = {
 - Use event delegation: single `addEventListener('click', handler)` on `<tbody>`, read `event.target.closest('tr[data-invoice-id]')`
 - Expanded content injected as next sibling `<tr>` with class `row-detail`
 - Animation: `max-height: 0` → `max-height: 400px` CSS transition, `overflow: hidden`, duration 0.25s ease
+- On expand: set chevron `aria-label="Collapse invoice details"`; on collapse: set chevron `aria-label="Expand invoice details"`
 
 ### GSAP Counter Animation
 
@@ -466,10 +473,13 @@ Source: REQUIREMENTS.md REL-05; RESEARCH.md pitfalls.md; features.md data sectio
 ## CDN Stack (pinned versions)
 
 ```html
-<!-- Typography — variable font, one file covers weights 300–700 -->
+<!-- Typography — self-hosted preferred (DS-05 offline-safe requirement).
+     If self-hosting, download Inter and JetBrains Mono, place in /fonts/,
+     and declare @font-face with font-display: swap.
+     CDN tags below are reference only — replace with @font-face in production. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
 <!-- Charts — pinned exact version, never @latest -->
 <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.1/dist/apexcharts.min.js"></script>
@@ -478,7 +488,23 @@ Source: REQUIREMENTS.md REL-05; RESEARCH.md pitfalls.md; features.md data sectio
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 ```
 
-Total CDN weight (gzipped): ~178 KB (Inter ~17 KB + JetBrains Mono ~8 KB + ApexCharts ~131 KB + GSAP ~30 KB)
+**Self-hosted @font-face pattern (preferred for DS-05 compliance):**
+```css
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter-variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/jetbrains-mono-variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+```
+
+Total CDN weight (gzipped, if CDN path used): ~178 KB (Inter ~17 KB + JetBrains Mono ~8 KB + ApexCharts ~131 KB + GSAP ~30 KB)
 
 Source: REQUIREMENTS.md DS-05, DS-06, DS-07, REL-01; RESEARCH.md stack.md section 7
 
