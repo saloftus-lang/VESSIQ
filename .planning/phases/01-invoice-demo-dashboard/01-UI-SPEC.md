@@ -66,13 +66,13 @@ Source: demo/index.html measured patterns; REQUIREMENTS.md REL-02
 | Display | Inter | 36px | 700 | 1.2 | KPI tile numbers (animated), hero headline |
 | Heading | Inter | 24px | 700 | 1.2 | Section titles (`h2`), panel headers, logo wordmark (letter-spacing 1px) |
 | Body | Inter | 14px | 400 | 1.6 | Table cell text, descriptions, filter labels, button text, nav links |
-| Caption | Inter | 11px | 700 | 1.4 | Badges, KPI tile labels (uppercase + letter-spacing 0.5px), chart axis labels, table header columns (uppercase + letter-spacing 0.5px) |
+| Caption | Inter | 12px | 700 | 1.4 | Badges, KPI tile labels (uppercase + letter-spacing 0.5px), chart axis labels, table header columns (uppercase + letter-spacing 0.5px) |
 | Monospace | JetBrains Mono | 12px | 400 | 1.6 | Container numbers, SCAC codes, invoice IDs, currency amounts in table cells |
 | Monospace emphasis | JetBrains Mono | 12px | 700 | 1.6 | Highlighted dollar amounts, overcharge delta values |
 
 Additional typography rules:
 - KPI tile labels: uppercase, letter-spacing 0.5px (pattern from existing demo)
-- Table header columns: uppercase, letter-spacing 0.5px, color `--gray-500` — use Caption role (11px weight 700)
+- Table header columns: uppercase, letter-spacing 0.5px, color `--gray-500` — use Caption role (12px weight 700)
 - Logo wordmark: 24px, weight 700, letter-spacing 1px — uses Heading size slot
 - Label differentiation (replaces former separate Label role): use Body (14px) + weight 700 + uppercase where a label must be distinguished from body text
 - All currency values in the invoice table: JetBrains Mono, never Inter
@@ -207,7 +207,7 @@ These are the UI components needed for Phase 1. Each maps to one or more require
 ### 2. KPI Tile Row
 - Layout: 4-column grid, `gap: 24px`, full width of content area
 - Each tile: glassmorphism card, 24px padding, min-height 120px
-- Tile structure: label (11px uppercase caption) → number (36px display, weight 700) → delta badge (optional)
+- Tile structure: label (12px uppercase caption) → number (36px display, weight 700) → delta badge (optional)
 - Numbers animate on page load with GSAP `countTo` — duration 1.2s, ease `power2.out`, triggered by `DOMContentLoaded`
 - Tile 1 "Total Invoices Audited": number color `--white`, value 847
 - Tile 2 "Total Overcharges Found": number color `--red`, value 288 (count of flagged invoices)
@@ -230,7 +230,7 @@ These are the UI components needed for Phase 1. Each maps to one or more require
 ### 4. Invoice Table
 - Container: `border-radius: 16px; overflow: hidden; background: #132B4E;` (solid — not glass, performance)
 - Table: `width: 100%; border-collapse: collapse`
-- Header row: `background: rgba(0,0,0,0.2)`, 11px uppercase, letter-spacing 0.5px, `--gray-300` color, 52px height
+- Header row: `background: rgba(0,0,0,0.2)`, 12px uppercase, letter-spacing 0.5px, `--gray-300` color, 52px height
 - Data row: 52px height, `border-bottom: 1px solid rgba(255,255,255,0.06)`, hover: `background: rgba(255,255,255,0.04)`
 - Expanded row: collapsible area beneath parent row, `background: rgba(0,0,0,0.15)`, 16px padding
 - Columns (in order): Source badge | Invoice ID | Carrier | Port pair | Date | Billed | Contract | Overcharge | Status badge | Expand chevron
@@ -244,7 +244,7 @@ These are the UI components needed for Phase 1. Each maps to one or more require
 - Requirement: INV-04, INV-06, INV-09
 
 ### 5. Dispute Status Badges
-- Pill shape: `border-radius: 12px; padding: 4px 10px; font-size: 11px; font-weight: 700`
+- Pill shape: `border-radius: 12px; padding: 4px 10px; font-size: 12px; font-weight: 700`
 - "Pending": `rgba(245,158,11,0.2)` bg, `#FDE68A` text
 - "Filed": `rgba(14,165,233,0.2)` bg, `#7DD3FC` text
 - "Won": `rgba(16,185,129,0.2)` bg, `#6EE7B7` text
