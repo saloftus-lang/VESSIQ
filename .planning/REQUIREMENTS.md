@@ -76,38 +76,38 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DS-01 | Phase 1 | Pending |
-| DS-02 | Phase 1 | Pending |
-| DS-03 | Phase 1 | Pending |
-| DS-04 | Phase 1 | Pending |
-| DS-05 | Phase 1 | Pending |
-| DS-06 | Phase 1 | Pending |
-| DS-07 | Phase 1 | Pending |
-| INV-01 | Phase 1 | Pending |
-| INV-02 | Phase 1 | Pending |
-| INV-03 | Phase 1 | Pending |
-| INV-04 | Phase 1 | Pending |
-| INV-05 | Phase 1 | Pending |
-| INV-06 | Phase 1 | Pending |
-| INV-07 | Phase 1 | Pending |
-| INV-08 | Phase 1 | Pending |
-| INV-09 | Phase 1 | Pending |
-| INV-10 | Phase 1 | Pending |
-| INV-11 | Phase 1 | Pending |
-| INV-12 | Phase 1 | Pending |
-| INV-13 | Phase 1 | Pending |
-| REL-01 | Phase 1 | Pending |
-| REL-02 | Phase 1 | Pending |
-| REL-03 | Phase 1 | Pending |
-| REL-04 | Phase 1 | Pending |
-| REL-05 | Phase 1 | Pending |
-| FND-01 | Phase 2 | Pending |
-| FND-02 | Phase 2 | Pending |
-| FND-03 | Phase 2 | Pending |
-| FND-04 | Phase 2 | Pending |
-| FND-05 | Phase 2 | Pending |
-| FND-06 | Phase 2 | Pending |
-| FND-07 | Phase 2 | Pending |
+| DS-01 | Phase 1: Invoice Demo Dashboard | Pending |
+| DS-02 | Phase 1: Invoice Demo Dashboard | Pending |
+| DS-03 | Phase 1: Invoice Demo Dashboard | Pending |
+| DS-04 | Phase 1: Invoice Demo Dashboard | Pending |
+| DS-05 | Phase 1: Invoice Demo Dashboard | Pending |
+| DS-06 | Phase 1: Invoice Demo Dashboard | Pending |
+| DS-07 | Phase 1: Invoice Demo Dashboard | Pending |
+| INV-01 | Phase 1: Invoice Demo Dashboard | Pending |
+| INV-02 | Phase 1: Invoice Demo Dashboard | Pending |
+| INV-03 | Phase 1: Invoice Demo Dashboard | Pending |
+| INV-04 | Phase 1: Invoice Demo Dashboard | Pending |
+| INV-05 | Phase 1: Invoice Demo Dashboard | Pending |
+| INV-06 | Phase 1: Invoice Demo Dashboard | Pending |
+| INV-07 | Phase 1: Invoice Demo Dashboard | Pending |
+| INV-08 | Phase 1: Invoice Demo Dashboard | Pending |
+| INV-09 | Phase 1: Invoice Demo Dashboard | Pending |
+| INV-10 | Phase 1: Invoice Demo Dashboard | Pending |
+| INV-11 | Phase 1: Invoice Demo Dashboard | Pending |
+| INV-12 | Phase 1: Invoice Demo Dashboard | Pending |
+| INV-13 | Phase 1: Invoice Demo Dashboard | Pending |
+| REL-01 | Phase 1: Invoice Demo Dashboard | Pending |
+| REL-02 | Phase 1: Invoice Demo Dashboard | Pending |
+| REL-03 | Phase 1: Invoice Demo Dashboard | Pending |
+| REL-04 | Phase 1: Invoice Demo Dashboard | Pending |
+| REL-05 | Phase 1: Invoice Demo Dashboard | Pending |
+| FND-01 | Phase 2: Founder Ops Dashboard | Pending |
+| FND-02 | Phase 2: Founder Ops Dashboard | Pending |
+| FND-03 | Phase 2: Founder Ops Dashboard | Pending |
+| FND-04 | Phase 2: Founder Ops Dashboard | Pending |
+| FND-05 | Phase 2: Founder Ops Dashboard | Pending |
+| FND-06 | Phase 2: Founder Ops Dashboard | Pending |
+| FND-07 | Phase 2: Founder Ops Dashboard | Pending |
 
 **Coverage:**
 - v1 requirements: 32 total
@@ -116,4 +116,4 @@
 
 ---
 *Requirements defined: 2026-03-24*
-*Last updated: 2026-03-24 after initial definition*
+*Last updated: 2026-03-24 after roadmap creation*
