@@ -1,0 +1,6 @@
+{
+  "eval_id": 2,
+  "eval_name": "freight-spend-dashboard",
+  "prompt": "Create a dashboard showing a shipper's freight spend broken down by carrier, with a table of recent invoices and flags for any that had billing errors. Use fake but realistic data.",
+  "assertions": []
+}

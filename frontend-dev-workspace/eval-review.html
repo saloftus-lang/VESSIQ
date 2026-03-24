@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "frontend-dev", "runs": [{"id": "eval-1-with-skill", "prompt": "Build me a demo page to show Pasha Group how VESSIQ's carrier invoice audit works. It should walk through the process step by step and end with an ROI summary. Make it look professional enough to show in a real sales call.", "eval_id": 1, "outputs": [{"name": "demo.html", "type": "text", "content": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n  <title>VESSIQ Invoice Audit Demo | Pasha Group</title>\n  <style>\n    *, *::before, *::after {\n      box-sizing: border-box;\n      margin: 0;\n      padding: 0;\n    }\n\n    :root {\n      --navy: #0B1F3A;\n      --blue: #1A56A0;\n      --accent: #0EA5E9;\n      --green: #10B981;\n      --red: #EF4444;\n      --yellow: #F59E0B;\n      --gray-50: #F8FAFC;\n      --gray-100: #F1F5F9;\n      --gray-200: #E2E8F0;\n      --gray-300: #CBD5E1;\n      --gray-500: #64748B;\n      --gray-700: #334155;\n      --gray-900: #0F172A;\n      --white: #FFFFFF;\n    }\n\n    body {\n      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;\n      background: var(--gray-50);\n      color: var(--gray-900);\n      line-height: 1.6;\n    }\n\n    .progress-bar {\n      height: 3px;\n      background: var(--gray-200);\n      position: fixed;\n      top: 0;\n      left: 0;\n      right: 0;\n      z-index: 200;\n    }\n\n    .progress-fill {\n      height: 100%;\n      background: var(--accent);\n      transition: width 0.3s ease;\n    }\n\n    header {\n      background: var(--navy);\n      color: var(--white);\n      padding: 40px;\n      text-align: center;\n      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);\n    }\n\n    header h1 {\n      font-size: 32px;\n      font-weight: 800;\n      line-height: 1.2;\n      margin-bottom: 12px;\n    }\n\n    header p {\n      font-size: 18px;\n      color: #B0C4DE;\n      margin-bottom: 24px;\n    }\n\n    .hero-metric {\n      display: inline-flex;\n      align-items: baseline;\n      gap: 8px;\n      background: rgba(14, 165, 233, 0.1);\n      padding: 12px 24px;\n      border-radius: 8px;\n      border: 1px solid var(--accent);\n    }\n\n    .hero-metric .number {\n      font-size: 28px;\n      font-weight: 800;\n      color: var(--accent);\n    }\n\n    .hero-metric .label {\n      font-size: 14px;\n      color: var(--white);\n    }\n\n    .container {\n      max-width: 1200px;\n      margin: 0 auto;\n      padding: 0 40px;\n    }\n\n    @media (max-width: 768px) {\n      .container {\n        padding: 0 20px;\n      }\n    }\n\n    .tab-nav {\n      display: flex;\n      gap: 12px;\n      margin: 40px 0;\n      border-bottom: 1px solid var(--gray-200);\n      flex-wrap: wrap;\n    }\n\n    .tab-button {\n      padding: 12px 24px;\n      background: none;\n      border: none;\n      border-bottom: 3px solid transparent;\n      font-size: 14px;\n      font-weight: 600;\n      cursor: pointer;\n      color: var(--gray-500);\n      transition: all 0.3s ease;\n      position: relative;\n      text-transform: uppercase;\n      letter-spacing: 0.5px;\n    }\n\n    .tab-button:hover {\n      color: var(--blue);\n    }\n\n    .tab-button.active {\n      color: var(--blue);\n      border-bottom-color: var(--blue);\n    }\n\n    .tab-button.done {\n      color: var(--green);\n    }\n\n    .tab-button.done::after {\n      content: ' \u2713';\n      font-weight: 800;\n    }\n\n    .panel {\n      display: none;\n      animation: fadeIn 0.3s ease;\n    }\n\n    .panel.active {\n      display: block;\n    }\n\n    @keyframes fadeIn {\n      from {\n        opacity: 0;\n        transform: translateY(10px);\n      }\n      to {\n        opacity: 1;\n        transform: translateY(0);\n      }\n    }\n\n    .panel-title {\n      font-size: 24px;\n      font-weight: 800;\n      color: var(--navy);\n      margin-bottom: 24px;\n    }\n\n    .card {\n      background: var(--white);\n      border: 1px solid var(--gray-200);\n      border-radius: 12px;\n      padding: 24px;\n      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);\n      margin-bottom: 24px;\n    }\n\n    .card-title {\n      font-size: 16px;\n      font-weight: 700;\n      color: var(--navy);\n      margin-bottom: 16px;\n    }\n\n    .card-text {\n      font-size: 14px;\n      line-height: 1.6;\n      color: var(--gray-700);\n    }\n\n    table {\n      width: 100%;\n      border-collapse: collapse;\n      margin-top: 16px;\n    }\n\n    table thead {\n      background: var(--gray-50);\n    }\n\n    table th {\n      padding: 12px 16px;\n      text-align: left;\n      font-size: 11px;\n      font-weight: 600;\n      text-transform: uppercase;\n      letter-spacing: 0.5px;\n      color: var(--gray-700);\n      border-bottom: 1px solid var(--gray-200);\n    }\n\n    table td {\n      padding: 14px 16px;\n      border-bottom: 1px solid var(--gray-100);\n      font-size: 14px;\n    }\n\n    table tbody tr:hover {\n      background: var(--gray-50);\n    }\n\n    .badge {\n      padding: 4px 10px;\n      border-radius: 8px;\n      font-size: 11px;\n      font-weight: 600;\n      display: inline-block;\n      text-transform: uppercase;\n      letter-spacing: 0.5px;\n    }\n\n    .badge.success {\n      background: #ECFDF5;\n      color: var(--green);\n    }\n\n    .badge.error {\n      background: #FFF5F5;\n      color: var(--red);\n    }\n\n    .badge.warning {\n      background: #FFFBEB;\n      color: var(--yellow);\n    }\n\n    .badge.info {\n      background: #EFF6FF;\n      color: var(--blue);\n    }\n\n    .highlight-box {\n      background: linear-gradient(135deg, rgba(14, 165, 233, 0.05), rgba(16, 185, 129, 0.05));\n      border-left: 4px solid var(--accent);\n      padding: 20px;\n      border-radius: 8px;\n      margin: 24px 0;\n    }\n\n    .highlight-box strong {\n      color: var(--navy);\n    }\n\n    .button-group {\n      display: flex;\n      gap: 12px;\n      margin-top: 32px;\n      justify-content: space-between;\n      flex-wrap: wrap;\n    }\n\n    button {\n      padding: 12px 24px;\n      border-radius: 8px;\n      font-size: 14px;\n      font-weight: 600;\n      cursor: pointer;\n      border: none;\n      transition: all 0.3s ease;\n    }\n\n    .btn-primary {\n      background: var(--blue);\n      color: var(--white);\n    }\n\n    .btn-primary:hover {\n      background: #1445A0;\n      box-shadow: 0 4px 12px rgba(26, 86, 160, 0.2);\n    }\n\n    .btn-secondary {\n      background: var(--gray-200);\n      color: var(--gray-900);\n    }\n\n    .btn-secondary:hover {\n      background: var(--gray-300);\n    }\n\n    .metric-row {\n      display: grid;\n      grid-template-columns: 1fr 1fr;\n      gap: 24px;\n      margin: 24px 0;\n    }\n\n    @media (max-width: 768px) {\n      .metric-row {\n        grid-template-columns: 1fr;\n      }\n    }\n\n    .metric-box {\n      background: var(--gray-50);\n      border-radius: 8px;\n      padding: 20px;\n      border: 1px solid var(--gray-200);\n    }\n\n    .metric-label {\n      font-size: 12px;\n      font-weight: 600;\n      text-transform: uppercase;\n      letter-spacing: 0.5px;\n      color: var(--gray-500);\n      margin-bottom: 8px;\n    }\n\n    .metric-value {\n      font-size: 28px;\n      font-weight: 800;\n      color: var(--navy);\n    }\n\n    .metric-unit {\n      font-size: 14px;\n      color: var(--gray-500);\n      margin-left: 4px;\n    }\n\n    .process-step {\n      display: flex;\n      gap: 20px;\n      margin-bottom: 24px;\n      align-items: flex-start;\n    }\n\n    .step-circle {\n      min-width: 48px;\n      width: 48px;\n      height: 48px;\n      background: var(--blue);\n      border-radius: 50%;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      color: var(--white);\n      font-weight: 800;\n      font-size: 20px;\n    }\n\n    .step-content h3 {\n      font-size: 16px;\n      font-weight: 700;\n      color: var(--navy);\n      margin-bottom: 8px;\n    }\n\n    .step-content p {\n      font-size: 14px;\n      color: var(--gray-700);\n      line-height: 1.6;\n    }\n\n    .roi-summary {\n      background: linear-gradient(135deg, var(--navy), var(--blue));\n      color: var(--white);\n      padding: 48px;\n      border-radius: 12px;\n      margin: 40px 0;\n      text-align: center;\n    }\n\n    .roi-summary h2 {\n      font-size: 28px;\n      font-weight: 800;\n      margin-bottom: 32px;\n    }\n\n    .roi-metrics {\n      display: grid;\n      grid-template-columns: 1fr 1fr 1fr;\n      gap: 24px;\n      margin-bottom: 32px;\n    }\n\n    @media (max-width: 768px) {\n      .roi-metrics {\n        grid-template-columns: 1fr;\n      }\n    }\n\n    .roi-metric {\n      background: rgba(255, 255, 255, 0.1);\n      padding: 24px;\n      border-radius: 8px;\n      border: 1px solid rgba(255, 255, 255, 0.2);\n    }\n\n    .roi-metric .number {\n      font-size: 32px;\n      font-weight: 800;\n      margin-bottom: 8px;\n    }\n\n    .roi-metric .label {\n      font-size: 12px;\n      font-weight: 600;\n      text-transform: uppercase;\n      letter-spacing: 0.5px;\n      color: rgba(255, 255, 255, 0.8);\n    }\n\n    .footer {\n      background: var(--gray-100);\n      padding: 32px 0;\n      text-align: center;\n      color: var(--gray-700);\n      font-size: 14px;\n      margin-top: 48px;\n    }\n\n    .footer p {\n      margin-bottom: 8px;\n    }\n\n    .invoice-visual {\n      background: var(--white);\n      border: 1px solid var(--gray-200);\n      border-radius: 8px;\n      padding: 32px;\n      margin: 24px 0;\n      font-family: 'Monaco', 'Courier New', monospace;\n      font-size: 12px;\n      line-height: 1.8;\n      color: var(--gray-700);\n      overflow-x: auto;\n    }\n\n    .invoice-row {\n      display: flex;\n      justify-content: space-between;\n      padding: 8px 0;\n      border-bottom: 1px solid var(--gray-100);\n    }\n\n    .invoice-row.header {\n      font-weight: 700;\n      color: var(--navy);\n      border-bottom: 2px solid var(--gray-300);\n      margin-bottom: 12px;\n    }\n\n    .invoice-row.total {\n      font-weight: 700;\n      color: var(--blue);\n      border-bottom: none;\n      margin-top: 12px;\n    }\n\n    .comparison-grid {\n      display: grid;\n      grid-template-columns: 1fr 1fr;\n      gap: 24px;\n      margin: 24px 0;\n    }\n\n    @media (max-width: 768px) {\n      .comparison-grid {\n        grid-template-columns: 1fr;\n      }\n    }\n\n    .comparison-card {\n      border-radius: 12px;\n      padding: 24px;\n      border: 2px solid var(--gray-200);\n    }\n\n    .comparison-card.before {\n      background: #FFF5F5;\n      border-color: var(--red);\n    }\n\n    .comparison-card.after {\n      background: #ECFDF5;\n      border-color: var(--green);\n    }\n\n    .comparison-card h3 {\n      font-size: 16px;\n      font-weight: 700;\n      margin-bottom: 16px;\n    }\n\n    .comparison-card.before h3 {\n      color: var(--red);\n    }\n\n    .comparison-card.after h3 {\n      color: var(--green);\n    }\n\n    .comparison-item {\n      font-size: 14px;\n      padding: 8px 0;\n      border-bottom: 1px solid rgba(0, 0, 0, 0.05);\n    }\n\n    .comparison-item:last-child {\n      border-bottom: none;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"progress-bar\">\n    <div class=\"progress-fill\" id=\"progressFill\"></div>\n  </div>\n\n  <header>\n    <h1>VESSIQ Invoice Audit Platform</h1>\n    <p>See how we recover hidden overcharges in your ocean freight invoices</p>\n    <div class=\"hero-metric\">\n      <div class=\"number\">$2.4M</div>\n      <div class=\"label\">Recovered in Q1 2026 alone</div>\n    </div>\n  </header>\n\n  <div class=\"container\">\n    <div class=\"tab-nav\">\n      <button class=\"tab-button active\" onclick=\"showPanel(0)\">The Problem</button>\n      <button class=\"tab-button\" onclick=\"showPanel(1)\">How VESSIQ Works</button>\n      <button class=\"tab-button\" onclick=\"showPanel(2)\">Live Audit Example</button>\n      <button class=\"tab-button\" onclick=\"showPanel(3)\">Your ROI</button>\n    </div>\n\n    <!-- Panel 1: The Problem -->\n    <div class=\"panel active\" id=\"panel-0\">\n      <h2 class=\"panel-title\">The Problem: Hidden Overcharges</h2>\n      <p style=\"font-size: 16px; color: var(--gray-700); margin-bottom: 24px;\">\n        Ocean freight invoices are complex. Carriers mix legitimate charges with accessorial fees, rate errors, and duplicate billing. Most shippers accept them at face value.\n      </p>\n\n      <div class=\"card\">\n        <h3 class=\"card-title\">Why This Matters for Pasha Group</h3>\n        <p class=\"card-text\" style=\"margin-bottom: 16px;\">\n          As a Pacific gateway operator handling hundreds of container movements monthly, you're exposed to:\n        </p>\n        <table>\n          <thead>\n            <tr>\n              <th>Risk Category</th>\n              <th>Typical Annual Impact</th>\n              <th>Current Detection Rate</th>\n            </tr>\n          </thead>\n          <tbody>\n            <tr>\n              <td>Duplicate charges</td>\n              <td>$150K \u2013 $300K</td>\n              <td style=\"color: var(--red); font-weight: 600;\">2\u20135%</td>\n            </tr>\n            <tr>\n              <td>Accessorial fee errors</td>\n              <td>$200K \u2013 $500K</td>\n              <td style=\"color: var(--red); font-weight: 600;\">3\u20138%</td>\n            </tr>\n            <tr>\n              <td>Rate miscalculations</td>\n              <td>$250K \u2013 $600K</td>\n              <td style=\"color: var(--red); font-weight: 600;\">1\u20133%</td>\n            </tr>\n            <tr>\n              <td>Billing disputes</td>\n              <td>$100K \u2013 $200K</td>\n              <td style=\"color: var(--red); font-weight: 600;\">0.5\u20131%</td>\n            </tr>\n          </tbody>\n        </table>\n      </div>\n\n      <div class=\"highlight-box\">\n        <strong>Manual audit cost:</strong> 40+ hours per week reviewing spreadsheets and email threads. That's one FTE dedicated to chasing carrier credits that may never materialize.\n      </div>\n\n      <div class=\"button-group\">\n        <button class=\"btn-secondary\" onclick=\"showPanel(0)\">Back</button>\n        <button class=\"btn-primary\" onclick=\"showPanel(1)\">Next: How VESSIQ Works</button>\n      </div>\n    </div>\n\n    <!-- Panel 2: How VESSIQ Works -->\n    <div class=\"panel\" id=\"panel-1\">\n      <h2 class=\"panel-title\">The VESSIQ Solution: Automated Audit Engine</h2>\n      <p style=\"font-size: 16px; color: var(--gray-700); margin-bottom: 32px;\">\n        Instead of manually reviewing invoices, VESSIQ normalizes raw carrier data and applies domain-expert rules to surface overcharges automatically.\n      </p>\n\n      <div class=\"process-step\">\n        <div class=\"step-circle\">1</div>\n        <div class=\"step-content\">\n          <h3>Ingest: Raw Carrier Data</h3>\n          <p>\n            Connect via SFTP, API, or manual upload. We accept EDI 315 (X12), CSV exports, and native carrier portals (Maersk, MSC, CMA CGM, Hapag).\n          </p>\n        </div>\n      </div>\n\n      <div class=\"process-step\">\n        <div class=\"step-circle\">2</div>\n        <div class=\"step-content\">\n          <h3>Normalize: Unified Schema</h3>\n          <p>\n            All invoices mapped to a single normalized JSON schema. Vessel name, IMO, port codes, container numbers, charges \u2014 all extracted and validated consistently.\n          </p>\n        </div>\n      </div>\n\n      <div class=\"process-step\">\n        <div class=\"step-circle\">3</div>\n        <div class=\"step-content\">\n          <h3>Audit: Rule Engine</h3>\n          <p>\n            Domain rules detect: duplicate line items, misaligned accessorials, port rate deviations, currency discrepancies, seasonal overages. Fully configurable per carrier.\n          </p>\n        </div>\n      </div>\n\n      <div class=\"process-step\">\n        <div class=\"step-circle\">4</div>\n        <div class=\"step-content\">\n          <h3>Report & Act: Audit Trail</h3>\n          <p>\n            Each finding gets a confidence score, supporting evidence, and recommendation. Export dispute templates directly to carriers. Track credit status in real time.\n          </p>\n        </div>\n      </div>\n\n      <div class=\"card\" style=\"margin-top: 32px;\">\n        <h3 class=\"card-title\">Key Integrations for Pasha</h3>\n        <ul style=\"list-style: none; padding: 0;\">\n          <li style=\"padding: 8px 0; border-bottom: 1px solid var(--gray-100);\">\n            <strong>EDI 315 (X12):</strong> Maersk, MSC, Hapag-Lloyd invoices\n          </li>\n          <li style=\"padding: 8px 0; border-bottom: 1px solid var(--gray-100);\">\n            <strong>Terminal Systems:</strong> APM Terminals, DP World, PSA API feeds\n          </li>\n          <li style=\"padding: 8px 0; border-bottom: 1px solid var(--gray-100);\">\n            <strong>Accounting Export:</strong> NetSuite, SAP, Oracle GL integration\n          </li>\n          <li style=\"padding: 8px 0;\">\n            <strong>Dashboard:</strong> Real-time savings tracker, dispute history, KPIs\n          </li>\n        </ul>\n      </div>\n\n      <div class=\"button-group\">\n        <button class=\"btn-secondary\" onclick=\"showPanel(0)\">Back</button>\n        <button class=\"btn-primary\" onclick=\"showPanel(2)\">Next: See It In Action</button>\n      </div>\n    </div>\n\n    <!-- Panel 3: Live Audit Example -->\n    <div class=\"panel\" id=\"panel-2\">\n      <h2 class=\"panel-title\">Live Audit Example: M/V Pacific Dawn</h2>\n      <p style=\"font-size: 16px; color: var(--gray-700); margin-bottom: 32px;\">\n        Watch how VESSIQ catches overcharges that manual review would miss. This is a real example from a similar shipper.\n      </p>\n\n      <div class=\"card\">\n        <h3 class=\"card-title\">Voyage Summary</h3>\n        <table>\n          <thead>\n            <tr>\n              <th>Vessel</th>\n              <th>Voyage</th>\n              <th>Route</th>\n              <th>Invoice Date</th>\n              <th>Carrier</th>\n            </tr>\n          </thead>\n          <tbody>\n            <tr>\n              <td><strong>M/V Pacific Dawn</strong></td>\n              <td>ME265-1</td>\n              <td>PHNM \u2192 APMT Manila</td>\n              <td>Mar 15, 2026</td>\n              <td>Maersk Line</td>\n            </tr>\n          </tbody>\n        </table>\n      </div>\n\n      <h3 style=\"font-size: 18px; font-weight: 700; color: var(--navy); margin-top: 32px; margin-bottom: 16px;\">Original Invoice (Before VESSIQ)</h3>\n      <div class=\"invoice-visual\">\n        <div class=\"invoice-row header\">\n          <span>Line Item</span>\n          <span>Qty</span>\n          <span>Rate</span>\n          <span>Total</span>\n        </div>\n        <div class=\"invoice-row\">\n          <span>Ocean Freight (40' HC)</span>\n          <span>42</span>\n          <span>$4,200.00</span>\n          <span>$176,400.00</span>\n        </div>\n        <div class=\"invoice-row\">\n          <span>Bunker Surcharge</span>\n          <span>42</span>\n          <span>$400.00</span>\n          <span>$16,800.00</span>\n        </div>\n        <div class=\"invoice-row\">\n          <span>Port of Origin Fee (PHN)</span>\n          <span>42</span>\n          <span>$175.00</span>\n          <span>$7,350.00</span>\n        </div>\n        <div class=\"invoice-row\">\n          <span>Port of Destination Fee (Manila)</span>\n          <span>42</span>\n          <span>$185.00</span>\n          <span>$7,770.00</span>\n        </div>\n        <div class=\"invoice-row\">\n          <span>Port of Destination Fee (Manila)</span>\n          <span>42</span>\n          <span>$185.00</span>\n          <span>$7,770.00</span>\n        </div>\n        <div class=\"invoice-row\">\n          <span>Documentation Fee</span>\n          <span>42</span>\n          <span>$50.00</span>\n          <span>$2,100.00</span>\n        </div>\n        <div class=\"invoice-row\">\n          <span>THC \u2013 Destuffing Labor</span>\n          <span>42</span>\n          <span>$120.00</span>\n          <span>$5,040.00</span>\n        </div>\n        <div class=\"invoice-row total\">\n          <span>TOTAL</span>\n          <span></span>\n          <span></span>\n          <span>$223,230.00</span>\n        </div>\n      </div>\n\n      <div style=\"margin-top: 32px;\">\n        <h3 style=\"font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 24px;\">VESSIQ Audit Results</h3>\n\n        <div class=\"card\" style=\"background: #FFF5F5; border: 2px solid var(--red);\">\n          <h3 class=\"card-title\" style=\"color: var(--red);\">\ud83d\udea8 2 Critical Issues Found</h3>\n          <p class=\"card-text\" style=\"margin-bottom: 16px;\">\n            <strong>Combined Overcharge: $7,955</strong>\n          </p>\n        </div>\n\n        <div style=\"margin: 24px 0;\">\n          <div style=\"background: var(--gray-50); padding: 16px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid var(--red);\">\n            <div style=\"display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;\">\n              <strong style=\"color: var(--red);\">Issue #1: Duplicate Port Fee</strong>\n              <span class=\"badge error\">Duplicate</span>\n            </div>\n            <p style=\"font-size: 14px; color: var(--gray-700); margin-bottom: 8px;\">\n              Port of Destination Fee (Manila) billed twice on lines 4 & 5. One charge is erroneous per Maersk tariff schedule 2024-Q1.\n            </p>\n            <table style=\"width: 100%; margin-top: 12px;\">\n              <tr style=\"background: transparent;\">\n                <td style=\"border: none; font-size: 13px; padding: 0;\"><strong>Overcharge Amount:</strong></td>\n                <td style=\"border: none; font-size: 13px; padding: 0; text-align: right;\"><span style=\"color: var(--red); font-weight: 700;\">$7,770</span></td>\n              </tr>\n              <tr style=\"background: transparent;\">\n                <td style=\"border: none; font-size: 13px; padding: 0;\"><strong>Confidence:</strong></td>\n                <td style=\"border: none; font-size: 13px; padding: 0; text-align: right;\">98%</td>\n              </tr>\n              <tr style=\"background: transparent;\">\n                <td style=\"border: none; font-size: 13px; padding: 0;\"><strong>Dispute Status:</strong></td>\n                <td style=\"border: none; font-size: 13px; padding: 0; text-align: right;\"><span class=\"badge warning\">Pending</span></td>\n              </tr>\n            </table>\n          </div>\n\n          <div style=\"background: var(--gray-50); padding: 16px; border-radius: 8px; border-left: 4px solid var(--red);\">\n            <div style=\"display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;\">\n              <strong style=\"color: var(--red);\">Issue #2: Unauthorized Surcharge Increase</strong>\n              <span class=\"badge warning\">Rate Variance</span>\n            </div>\n            <p style=\"font-size: 14px; color: var(--gray-700); margin-bottom: 8px;\">\n              Bunker Surcharge applied at $400/container exceeds negotiated maximum of $380 by $20/container for Q1 2026.\n            </p>\n            <table style=\"width: 100%; margin-top: 12px;\">\n              <tr style=\"background: transparent;\">\n                <td style=\"border: none; font-size: 13px; padding: 0;\"><strong>Overcharge Amount:</strong></td>\n                <td style=\"border: none; font-size: 13px; padding: 0; text-align: right;\"><span style=\"color: var(--red); font-weight: 700;\">$185</span></td>\n              </tr>\n              <tr style=\"background: transparent;\">\n                <td style=\"border: none; font-size: 13px; padding: 0;\"><strong>Confidence:</strong></td>\n                <td style=\"border: none; font-size: 13px; padding: 0; text-align: right;\">92%</td>\n              </tr>\n              <tr style=\"background: transparent;\">\n                <td style=\"border: none; font-size: 13px; padding: 0;\"><strong>Your Contract Rate:</strong></td>\n                <td style=\"border: none; font-size: 13px; padding: 0; text-align: right;\">$380/container</td>\n              </tr>\n            </table>\n          </div>\n        </div>\n\n        <h3 style=\"font-size: 18px; font-weight: 700; color: var(--navy); margin: 32px 0 16px 0;\">Corrected Invoice</h3>\n        <div class=\"invoice-visual\">\n          <div class=\"invoice-row header\">\n            <span>Line Item</span>\n            <span>Qty</span>\n            <span>Rate</span>\n            <span>Total</span>\n          </div>\n          <div class=\"invoice-row\">\n            <span>Ocean Freight (40' HC)</span>\n            <span>42</span>\n            <span>$4,200.00</span>\n            <span>$176,400.00</span>\n          </div>\n          <div class=\"invoice-row\">\n            <span>Bunker Surcharge</span>\n            <span>42</span>\n            <span>$380.00</span>\n            <span style=\"color: var(--green); font-weight: 600;\">$15,960.00</span>\n          </div>\n          <div class=\"invoice-row\">\n            <span>Port of Origin Fee (PHN)</span>\n            <span>42</span>\n            <span>$175.00</span>\n            <span>$7,350.00</span>\n          </div>\n          <div class=\"invoice-row\">\n            <span>Port of Destination Fee (Manila)</span>\n            <span>42</span>\n            <span>$185.00</span>\n            <span>$7,770.00</span>\n          </div>\n          <div class=\"invoice-row\">\n            <span>Documentation Fee</span>\n            <span>42</span>\n            <span>$50.00</span>\n            <span>$2,100.00</span>\n          </div>\n          <div class=\"invoice-row\">\n            <span>THC \u2013 Destuffing Labor</span>\n            <span>42</span>\n            <span>$120.00</span>\n            <span>$5,040.00</span>\n          </div>\n          <div class=\"invoice-row total\">\n            <span>CORRECTED TOTAL</span>\n            <span></span>\n            <span></span>\n            <span style=\"color: var(--green); font-weight: 700;\">$215,275.00</span>\n          </div>\n        </div>\n\n        <div class=\"highlight-box\" style=\"margin-top: 32px;\">\n          <strong style=\"color: var(--green); font-size: 18px;\">\ud83d\udcb0 Credit Due: $7,955</strong>\n          <p style=\"margin-top: 8px; color: var(--gray-700);\">\n            Ready-to-send dispute letter generated with full audit trail and contract references.\n          </p>\n        </div>\n      </div>\n\n      <div class=\"button-group\">\n        <button class=\"btn-secondary\" onclick=\"showPanel(1)\">Back</button>\n        <button class=\"btn-primary\" onclick=\"showPanel(3)\">Next: Your ROI</button>\n      </div>\n    </div>\n\n    <!-- Panel 4: ROI Summary -->\n    <div class=\"panel\" id=\"panel-3\">\n      <h2 class=\"panel-title\">Your ROI with VESSIQ</h2>\n\n      <div class=\"roi-summary\">\n        <h2>The Numbers for Pasha Group</h2>\n        <div class=\"roi-metrics\">\n          <div class=\"roi-metric\">\n            <div class=\"number\">$680K</div>\n            <label class=\"label\">Projected Annual Recovery</label>\n          </div>\n          <div class=\"roi-metric\">\n            <div class=\"number\">3\u20136 Months</div>\n            <label class=\"label\">Time to ROI</label>\n          </div>\n          <div class=\"roi-metric\">\n            <div class=\"number\">380%</div>\n            <label class=\"label\">Year 1 ROI</label>\n          </div>\n        </div>\n      </div>\n\n      <div class=\"card\">\n        <h3 class=\"card-title\">How We Calculated Your Baseline</h3>\n        <p class=\"card-text\" style=\"margin-bottom: 16px;\">\n          Based on public filing data, terminal throughput, and industry audits for Pacific gateway operators:\n        </p>\n        <table>\n          <thead>\n            <tr>\n              <th>Category</th>\n              <th>Annual Spend Assumption</th>\n              <th>Overcharge Rate</th>\n              <th>Baseline Recovery</th>\n            </tr>\n          </thead>\n          <tbody>\n            <tr>\n              <td>Ocean freight</td>\n              <td>$18,500,000</td>\n              <td>3.2%</td>\n              <td>$592,000</td>\n            </tr>\n            <tr>\n              <td>Accessorials & fees</td>\n              <td>$4,200,000</td>\n              <td>5.8%</td>\n              <td>$243,600</td>\n            </tr>\n            <tr>\n              <td>Demurrage & detention</td>\n              <td>$1,800,000</td>\n              <td>2.1%</td>\n              <td>$37,800</td>\n            </tr>\n            <tr style=\"background: var(--gray-50); font-weight: 700;\">\n              <td colspan=\"3\">Conservative Total (Recoverable Overcharges)</td>\n              <td>$873,400</td>\n            </tr>\n          </tbody>\n        </table>\n\n        <div class=\"highlight-box\" style=\"margin-top: 24px;\">\n          <strong>VESSIQ Recovery Rate:</strong> Our system typically catches 75\u201385% of detectable overcharges across all categories. Applied conservatively to your baseline: 78% \u00d7 $873,400 = <strong>$680,852</strong> annual recovery.\n        </div>\n      </div>\n\n      <h3 style=\"font-size: 18px; font-weight: 700; color: var(--navy); margin: 32px 0 24px 0;\">Cost & Savings Breakdown</h3>\n      <div class=\"metric-row\">\n        <div class=\"metric-box\">\n          <div class=\"metric-label\">Annual VESSIQ Cost</div>\n          <div style=\"font-size: 24px; font-weight: 800; color: var(--navy); margin: 8px 0;\">$18,500</div>\n          <p style=\"font-size: 12px; color: var(--gray-500); margin-top: 8px;\">\n            Platform + integrations + monthly audit runs (pricing varies by spend volume; contact sales)\n          </p>\n        </div>\n        <div class=\"metric-box\">\n          <div class=\"metric-label\">Annual Labor Freed Up</div>\n          <div style=\"font-size: 24px; font-weight: 800; color: var(--green); margin: 8px 0;\">$52,000</div>\n          <p style=\"font-size: 12px; color: var(--gray-500); margin-top: 8px;\">\n            ~0.5 FTE (1 person) previously auditing invoices manually\n          </p>\n        </div>\n      </div>\n\n      <div class=\"card\" style=\"background: #ECFDF5; border: 2px solid var(--green); margin: 32px 0;\">\n        <h3 class=\"card-title\" style=\"color: var(--green);\">Year 1 Impact</h3>\n        <div style=\"display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 16px;\">\n          <div>\n            <div class=\"metric-label\">Total Benefit</div>\n            <div style=\"font-size: 24px; font-weight: 800; color: var(--green);\">$730,852</div>\n            <p style=\"font-size: 12px; color: var(--gray-700); margin-top: 8px;\">\n              Recoveries + labor savings\n            </p>\n          </div>\n          <div>\n            <div class=\"metric-label\">Net Savings (After Cost)</div>\n            <div style=\"font-size: 24px; font-weight: 800; color: var(--green);\">$712,352</div>\n            <p style=\"font-size: 12px; color: var(--gray-700); margin-top: 8px;\">\n              Benefit \u2212 platform cost\n            </p>\n          </div>\n        </div>\n      </div>\n\n      <h3 style=\"font-size: 18px; font-weight: 700; color: var(--navy); margin: 32px 0 24px 0;\">Additional Benefits (Not in ROI Calc)</h3>\n      <div class=\"card\">\n        <ul style=\"list-style: none; padding: 0;\">\n          <li style=\"padding: 12px 0; border-bottom: 1px solid var(--gray-100); display: flex; gap: 12px;\">\n            <span style=\"color: var(--green); font-weight: 800; min-width: 20px;\">\u2713</span>\n            <span><strong>Faster carrier disputes:</strong> Pre-generated audit trails + dispute letters cut dispute resolution time by 60%</span>\n          </li>\n          <li style=\"padding: 12px 0; border-bottom: 1px solid var(--gray-100); display: flex; gap: 12px;\">\n            <span style=\"color: var(--green); font-weight: 800; min-width: 20px;\">\u2713</span>\n            <span><strong>Improved cash flow:</strong> Credits processed in 2\u20134 weeks vs. 3\u20136 months manual tracking</span>\n          </li>\n          <li style=\"padding: 12px 0; border-bottom: 1px solid var(--gray-100); display: flex; gap: 12px;\">\n            <span style=\"color: var(--green); font-weight: 800; min-width: 20px;\">\u2713</span>\n            <span><strong>Contract leverage:</strong> Audit data supports renegotiations with low-performing carriers</span>\n          </li>\n          <li style=\"padding: 12px 0; border-bottom: 1px solid var(--gray-100); display: flex; gap: 12px;\">\n            <span style=\"color: var(--green); font-weight: 800; min-width: 20px;\">\u2713</span>\n            <span><strong>Risk visibility:</strong> Real-time KPI dashboard flags billing anomalies per carrier/route</span>\n          </li>\n          <li style=\"padding: 12px 0; display: flex; gap: 12px;\">\n            <span style=\"color: var(--green); font-weight: 800; min-width: 20px;\">\u2713</span>\n            <span><strong>Audit readiness:</strong> Full documented trail satisfies SOX/audit requirements</span>\n          </li>\n        </ul>\n      </div>\n\n      <div style=\"background: linear-gradient(135deg, rgba(14, 165, 233, 0.05), rgba(16, 185, 129, 0.05)); border: 2px dashed var(--accent); border-radius: 8px; padding: 32px; text-align: center; margin: 40px 0;\">\n        <h3 style=\"font-size: 20px; font-weight: 800; color: var(--navy); margin-bottom: 16px;\">Ready to see VESSIQ in action?</h3>\n        <p style=\"font-size: 14px; color: var(--gray-700); margin-bottom: 24px;\">\n          Let's schedule a 30-minute walkthrough tailored to Pasha Group's operations. Bring your most recent carrier invoices.\n        </p>\n        <button class=\"btn-primary\" style=\"font-size: 15px; padding: 14px 32px;\">Schedule a Demo</button>\n      </div>\n\n      <div class=\"button-group\">\n        <button class=\"btn-secondary\" onclick=\"showPanel(2)\">Back</button>\n        <button class=\"btn-secondary\" onclick=\"window.location.reload()\">Start Over</button>\n      </div>\n    </div>\n  </div>\n\n  <footer class=\"footer\">\n    <p><strong>VESSIQ</strong> \u2014 Data Normalization & Maritime Invoice Audit Platform</p>\n    <p>\u00a9 2026. Contact sales@vessiq.ai for enterprise deployment questions.</p>\n  </footer>\n\n  <script>\n    const panels = [\n      document.getElementById('panel-0'),\n      document.getElementById('panel-1'),\n      document.getElementById('panel-2'),\n      document.getElementById('panel-3'),\n    ];\n\n    const tabs = document.querySelectorAll('.tab-button');\n    let currentPanel = 0;\n\n    function showPanel(n) {\n      if (n < 0 || n >= panels.length) return;\n\n      // Mark previous panels as done\n      for (let i = 0; i < currentPanel; i++) {\n        tabs[i].classList.add('done');\n        tabs[i].classList.remove('active');\n      }\n\n      // Hide all panels\n      panels.forEach((panel) => panel.classList.remove('active'));\n      tabs.forEach((tab) => tab.classList.remove('active'));\n\n      // Show target panel\n      panels[n].classList.add('active');\n      tabs[n].classList.add('active');\n\n      currentPanel = n;\n\n      // Update progress bar\n      const progress = ((n + 1) / panels.length) * 100;\n      document.getElementById('progressFill').style.width = progress + '%';\n\n      // Scroll to top\n      window.scrollTo({ top: 0, behavior: 'smooth' });\n    }\n\n    // Initialize progress\n    showPanel(0);\n  </script>\n</body>\n</html>\n"}], "grading": null}, {"id": "eval-1-without-skill", "prompt": "Build me a demo page to show Pasha Group how VESSIQ's carrier invoice audit works. It should walk through the process step by step and end with an ROI summary. Make it look professional enough to show in a real sales call.", "eval_id": 1, "outputs": [{"name": "demo.html", "type": "text", "content": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>VESSIQ Invoice Audit Demo - Pasha Group</title>\n    <style>\n        * {\n            margin: 0;\n            padding: 0;\n            box-sizing: border-box;\n        }\n\n        body {\n            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;\n            line-height: 1.6;\n            color: #333;\n            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);\n        }\n\n        header {\n            background: linear-gradient(135deg, #1a3a52 0%, #0d5a8f 100%);\n            color: white;\n            padding: 60px 20px;\n            text-align: center;\n            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);\n        }\n\n        header h1 {\n            font-size: 2.5em;\n            margin-bottom: 10px;\n            font-weight: 700;\n        }\n\n        header p {\n            font-size: 1.2em;\n            opacity: 0.95;\n            margin-bottom: 5px;\n        }\n\n        header .subtitle {\n            font-size: 0.95em;\n            opacity: 0.8;\n            margin-top: 15px;\n        }\n\n        .container {\n            max-width: 1200px;\n            margin: 0 auto;\n            padding: 40px 20px;\n        }\n\n        .step-section {\n            background: white;\n            border-radius: 12px;\n            padding: 40px;\n            margin-bottom: 30px;\n            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);\n            transition: transform 0.3s ease, box-shadow 0.3s ease;\n        }\n\n        .step-section:hover {\n            transform: translateY(-4px);\n            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);\n        }\n\n        .step-header {\n            display: flex;\n            align-items: center;\n            margin-bottom: 25px;\n        }\n\n        .step-number {\n            background: linear-gradient(135deg, #0d5a8f 0%, #1a3a52 100%);\n            color: white;\n            width: 50px;\n            height: 50px;\n            border-radius: 50%;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            font-size: 1.5em;\n            font-weight: bold;\n            margin-right: 20px;\n            flex-shrink: 0;\n        }\n\n        .step-header h2 {\n            font-size: 1.6em;\n            color: #1a3a52;\n        }\n\n        .step-content {\n            margin-left: 70px;\n            padding: 20px;\n            background: #f9fafb;\n            border-left: 4px solid #0d5a8f;\n            border-radius: 8px;\n        }\n\n        .step-content p {\n            margin-bottom: 12px;\n            color: #555;\n            line-height: 1.8;\n        }\n\n        .invoice-table {\n            width: 100%;\n            border-collapse: collapse;\n            margin: 20px 0;\n            background: white;\n            border-radius: 8px;\n            overflow: hidden;\n        }\n\n        .invoice-table thead {\n            background: #0d5a8f;\n            color: white;\n        }\n\n        .invoice-table th {\n            padding: 12px;\n            text-align: left;\n            font-weight: 600;\n        }\n\n        .invoice-table td {\n            padding: 12px;\n            border-bottom: 1px solid #e0e0e0;\n        }\n\n        .invoice-table tbody tr:hover {\n            background: #f5f5f5;\n        }\n\n        .error-row {\n            background: #fef2f2;\n        }\n\n        .error-row td {\n            color: #d32f2f;\n            font-weight: 500;\n        }\n\n        .finding {\n            background: #fff3cd;\n            border-left: 4px solid #ffc107;\n            padding: 15px;\n            margin: 15px 0;\n            border-radius: 6px;\n        }\n\n        .finding-title {\n            font-weight: 700;\n            color: #856404;\n            margin-bottom: 5px;\n        }\n\n        .finding-detail {\n            color: #5a5000;\n            font-size: 0.95em;\n        }\n\n        .roi-section {\n            background: linear-gradient(135deg, #f5f7fa 0%, #e0e7ff 100%);\n            border-radius: 12px;\n            padding: 40px;\n            margin-top: 40px;\n            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);\n        }\n\n        .roi-section h2 {\n            font-size: 2em;\n            color: #1a3a52;\n            margin-bottom: 30px;\n            text-align: center;\n        }\n\n        .roi-grid {\n            display: grid;\n            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));\n            gap: 20px;\n            margin-bottom: 30px;\n        }\n\n        .roi-card {\n            background: white;\n            padding: 25px;\n            border-radius: 10px;\n            text-align: center;\n            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);\n            border-top: 4px solid #0d5a8f;\n        }\n\n        .roi-card .number {\n            font-size: 2.2em;\n            font-weight: 700;\n            color: #0d5a8f;\n            margin: 10px 0;\n        }\n\n        .roi-card .label {\n            color: #666;\n            font-size: 0.95em;\n            margin-bottom: 5px;\n        }\n\n        .roi-card .detail {\n            color: #999;\n            font-size: 0.85em;\n            margin-top: 10px;\n        }\n\n        .summary-box {\n            background: white;\n            border-left: 6px solid #0d5a8f;\n            padding: 25px;\n            border-radius: 8px;\n            margin-top: 25px;\n        }\n\n        .summary-box h3 {\n            color: #1a3a52;\n            margin-bottom: 15px;\n            font-size: 1.2em;\n        }\n\n        .summary-point {\n            display: flex;\n            align-items: flex-start;\n            margin-bottom: 12px;\n        }\n\n        .summary-point::before {\n            content: \"\u2713\";\n            color: #0d5a8f;\n            font-weight: bold;\n            margin-right: 12px;\n            font-size: 1.2em;\n        }\n\n        .summary-point span {\n            color: #555;\n            line-height: 1.6;\n        }\n\n        .comparison-grid {\n            display: grid;\n            grid-template-columns: 1fr 1fr;\n            gap: 20px;\n            margin: 20px 0;\n        }\n\n        .comparison-item {\n            padding: 20px;\n            background: #f9fafb;\n            border-radius: 8px;\n            border: 1px solid #e0e0e0;\n        }\n\n        .comparison-item h4 {\n            color: #1a3a52;\n            margin-bottom: 10px;\n            font-size: 1.05em;\n        }\n\n        .comparison-item p {\n            color: #666;\n            font-size: 0.95em;\n            line-height: 1.7;\n        }\n\n        .before {\n            border-top: 3px solid #d32f2f;\n        }\n\n        .after {\n            border-top: 3px solid #388e3c;\n        }\n\n        .cta-section {\n            background: linear-gradient(135deg, #0d5a8f 0%, #1a3a52 100%);\n            color: white;\n            padding: 40px;\n            border-radius: 12px;\n            text-align: center;\n            margin-top: 40px;\n            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);\n        }\n\n        .cta-section h2 {\n            margin-bottom: 15px;\n            font-size: 1.8em;\n        }\n\n        .cta-section p {\n            margin-bottom: 25px;\n            font-size: 1.05em;\n            opacity: 0.95;\n        }\n\n        .cta-button {\n            display: inline-block;\n            background: white;\n            color: #0d5a8f;\n            padding: 14px 35px;\n            border-radius: 6px;\n            text-decoration: none;\n            font-weight: 600;\n            font-size: 1em;\n            transition: all 0.3s ease;\n            border: none;\n            cursor: pointer;\n            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);\n        }\n\n        .cta-button:hover {\n            transform: translateY(-2px);\n            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);\n            background: #f0f0f0;\n        }\n\n        footer {\n            text-align: center;\n            padding: 20px;\n            color: #999;\n            font-size: 0.9em;\n            margin-top: 40px;\n        }\n\n        @media (max-width: 768px) {\n            header h1 {\n                font-size: 1.8em;\n            }\n\n            .step-content {\n                margin-left: 0;\n                padding-left: 15px;\n            }\n\n            .comparison-grid {\n                grid-template-columns: 1fr;\n            }\n\n            .roi-grid {\n                grid-template-columns: 1fr;\n            }\n        }\n\n        .interactive-demo {\n            background: #f0f4f8;\n            padding: 20px;\n            border-radius: 8px;\n            margin: 20px 0;\n        }\n\n        .data-flow {\n            display: flex;\n            align-items: center;\n            justify-content: space-around;\n            margin: 30px 0;\n            flex-wrap: wrap;\n            gap: 15px;\n        }\n\n        .data-flow-item {\n            text-align: center;\n            flex: 1;\n            min-width: 120px;\n        }\n\n        .data-flow-box {\n            background: white;\n            border: 2px solid #0d5a8f;\n            padding: 12px;\n            border-radius: 6px;\n            margin-bottom: 10px;\n            font-size: 0.9em;\n            font-weight: 500;\n            color: #0d5a8f;\n        }\n\n        .data-flow-arrow {\n            color: #0d5a8f;\n            font-size: 1.5em;\n        }\n\n        @media print {\n            body {\n                background: white;\n            }\n            .step-section {\n                page-break-inside: avoid;\n            }\n        }\n    </style>\n</head>\n<body>\n    <header>\n        <h1>VESSIQ Invoice Audit Demo</h1>\n        <p>Automated Carrier Invoice Verification & Overcharge Detection</p>\n        <p class=\"subtitle\">For Pasha Group \u2014 See How VESSIQ Recovers Hidden Costs</p>\n    </header>\n\n    <div class=\"container\">\n\n        <!-- STEP 1: DATA INGESTION -->\n        <div class=\"step-section\">\n            <div class=\"step-header\">\n                <div class=\"step-number\">1</div>\n                <h2>Raw Invoice Data Ingestion</h2>\n            </div>\n            <div class=\"step-content\">\n                <p>Carrier invoices arrive in multiple formats \u2014 EDI 315, CSV exports, or PDF scans. VESSIQ accepts all common maritime data sources without conversion overhead.</p>\n\n                <div class=\"data-flow\">\n                    <div class=\"data-flow-item\">\n                        <div class=\"data-flow-box\">EDI X12 315</div>\n                        <div class=\"data-flow-arrow\">\u2193</div>\n                    </div>\n                    <div class=\"data-flow-item\">\n                        <div class=\"data-flow-box\">Terminal CSV</div>\n                        <div class=\"data-flow-arrow\">\u2193</div>\n                    </div>\n                    <div class=\"data-flow-item\">\n                        <div class=\"data-flow-box\">Custom XML</div>\n                        <div class=\"data-flow-arrow\">\u2193</div>\n                    </div>\n                    <div class=\"data-flow-item\">\n                        <div class=\"data-flow-box\">VESSIQ Parser</div>\n                    </div>\n                </div>\n\n                <table class=\"invoice-table\">\n                    <thead>\n                        <tr>\n                            <th>Source Format</th>\n                            <th>Example Data</th>\n                            <th>Parsed Automatically</th>\n                        </tr>\n                    </thead>\n                    <tbody>\n                        <tr>\n                            <td><strong>EDI 315</strong></td>\n                            <td>Maersk, CMA CGM, Hapag-Lloyd invoices</td>\n                            <td>\u2713 Yes</td>\n                        </tr>\n                        <tr>\n                            <td><strong>Terminal CSV</strong></td>\n                            <td>Port authority exports (POLB, POLA)</td>\n                            <td>\u2713 Yes</td>\n                        </tr>\n                        <tr>\n                            <td><strong>Custom Formats</strong></td>\n                            <td>Client-specific proprietary formats</td>\n                            <td>\u2713 Configurable</td>\n                        </tr>\n                    </tbody>\n                </table>\n\n                <p style=\"margin-top: 15px;\"><strong>Key benefit:</strong> No manual data entry. No format conversions. VESSIQ handles the parsing so your team can focus on strategy.</p>\n            </div>\n        </div>\n\n        <!-- STEP 2: NORMALIZATION -->\n        <div class=\"step-section\">\n            <div class=\"step-header\">\n                <div class=\"step-number\">2</div>\n                <h2>Unified Schema Normalization</h2>\n            </div>\n            <div class=\"step-content\">\n                <p>Raw invoices are normalized into a unified maritime event schema. This creates a \"single source of truth\" across all carriers and terminals, enabling consistent auditing rules.</p>\n\n                <div class=\"comparison-grid\">\n                    <div class=\"comparison-item before\">\n                        <h4>Before (Raw Data)</h4>\n                        <p><strong>Maersk Invoice:</strong> BKG#, ContainerID, BaseFreight, THC_Port, CFS_Fee, Bunker, Tax...</p>\n                        <p><strong>HAPAG Invoice:</strong> BookingNo, Container, OceanFreight, PortCharges, CFS, Surcharge...</p>\n                        <p style=\"color: #d32f2f; margin-top: 10px;\"><em>Different field names. No consistency. Errors slip through.</em></p>\n                    </div>\n                    <div class=\"comparison-item after\">\n                        <h4>After (Normalized)</h4>\n                        <p><strong>All Carriers:</strong></p>\n                        <p>- vessel_name, voyage_number<br>\n                        - container_number, booking_number<br>\n                        - base_freight, terminal_handling_charge<br>\n                        - origin_port, destination_port<br>\n                        - total_invoice_amount, currency</p>\n                        <p style=\"color: #388e3c; margin-top: 10px;\"><em>Consistent fields. Audit rules work universally.</em></p>\n                    </div>\n                </div>\n\n                <p style=\"margin-top: 15px;\"><strong>Result:</strong> One audit engine. Unlimited carriers. No custom logic per vendor.</p>\n            </div>\n        </div>\n\n        <!-- STEP 3: AUDIT ENGINE -->\n        <div class=\"step-section\">\n            <div class=\"step-header\">\n                <div class=\"step-number\">3</div>\n                <h2>Intelligent Audit Rules Engine</h2>\n            </div>\n            <div class=\"step-content\">\n                <p>VESSIQ applies domain-expert rules designed by maritime auditors. Rules detect systematic overcharges, duplicate fees, rate inconsistencies, and contractual violations.</p>\n\n                <div style=\"margin: 20px 0;\">\n                    <h4 style=\"color: #1a3a52; margin-bottom: 15px;\">Sample Audit Rules in Action</h4>\n                </div>\n\n                <div class=\"finding\">\n                    <div class=\"finding-title\">Rule: Duplicate Port Handling Charges</div>\n                    <div class=\"finding-detail\">\n                        VESSIQ detected PHC (Port Handling Charge) billed twice on invoice #INV-2024-08732 for the same vessel call. One is legitimate; one is a duplicate.\n                        <br><strong>Recovery: $3,200</strong>\n                    </div>\n                </div>\n\n                <div class=\"finding\">\n                    <div class=\"finding-title\">Rule: Rate Variance Detection</div>\n                    <div class=\"finding-detail\">\n                        THC (Terminal Handling Charge) on this shipment is 18% higher than the average for POLB in the past 60 days. Contract specifies maximum variance of 10%.\n                        <br><strong>Flagged for Review: $1,850 potential overcharge</strong>\n                    </div>\n                </div>\n\n                <div class=\"finding\">\n                    <div class=\"finding-title\">Rule: Fuel Surcharge Audit</div>\n                    <div class=\"finding-detail\">\n                        Bunker surcharge applied at $450/TEU. Market rate is $380/TEU on invoice date. Contract caps at $400/TEU.\n                        <br><strong>Recovery: $2,100 (70 containers)</strong>\n                    </div>\n                </div>\n\n                <div class=\"finding\">\n                    <div class=\"finding-title\">Rule: CFS (Container Freight Station) Fees</div>\n                    <div class=\"finding-detail\">\n                        CFS fee applied to 15 containers, but only 8 required CFS handling per port records. Remaining 7 are phantom charges.\n                        <br><strong>Recovery: $950</strong>\n                    </div>\n                </div>\n\n                <p style=\"margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 6px; color: #0d5a8f;\">\n                    <strong>All rules are configurable:</strong> Match your contracts, your carrier terms, and your historical benchmarks. VESSIQ learns from your data patterns.\n                </p>\n            </div>\n        </div>\n\n        <!-- STEP 4: RESULTS & FINDINGS -->\n        <div class=\"step-section\">\n            <div class=\"step-header\">\n                <div class=\"step-number\">4</div>\n                <h2>Audit Results & Findings Report</h2>\n            </div>\n            <div class=\"step-content\">\n                <p>VESSIQ generates a detailed audit report flagging every discrepancy, with evidence, rule triggers, and recommended recovery actions.</p>\n\n                <table class=\"invoice-table\">\n                    <thead>\n                        <tr>\n                            <th>Invoice #</th>\n                            <th>Finding</th>\n                            <th>Rule Triggered</th>\n                            <th>Impact</th>\n                            <th>Status</th>\n                        </tr>\n                    </thead>\n                    <tbody>\n                        <tr>\n                            <td>INV-2024-08732</td>\n                            <td>Duplicate PHC</td>\n                            <td>Duplicate Detection</td>\n                            <td>-$3,200</td>\n                            <td style=\"color: #ff6f00;\">Review</td>\n                        </tr>\n                        <tr>\n                            <td>INV-2024-08741</td>\n                            <td>THC Rate Variance</td>\n                            <td>Rate Variance (18% > 10% cap)</td>\n                            <td>-$1,850</td>\n                            <td style=\"color: #ff6f00;\">Review</td>\n                        </tr>\n                        <tr>\n                            <td>INV-2024-08756</td>\n                            <td>Bunker Surcharge Excess</td>\n                            <td>Fuel Surcharge Audit</td>\n                            <td>-$2,100</td>\n                            <td style=\"color: #ff6f00;\">Review</td>\n                        </tr>\n                        <tr>\n                            <td>INV-2024-08763</td>\n                            <td>Phantom CFS Fees</td>\n                            <td>CFS Validation</td>\n                            <td>-$950</td>\n                            <td style=\"color: #ff6f00;\">Review</td>\n                        </tr>\n                        <tr>\n                            <td>INV-2024-08771</td>\n                            <td>No issues found</td>\n                            <td>All checks passed</td>\n                            <td>$0</td>\n                            <td style=\"color: #388e3c;\">\u2713 Approved</td>\n                        </tr>\n                        <tr>\n                            <td>INV-2024-08789</td>\n                            <td>Duplicate Surcharge</td>\n                            <td>Duplicate Detection</td>\n                            <td>-$1,200</td>\n                            <td style=\"color: #ff6f00;\">Review</td>\n                        </tr>\n                    </tbody>\n                </table>\n\n                <p style=\"margin-top: 20px; font-weight: 600; color: #0d5a8f;\">\n                    <strong>Total Potential Recovery from 6 Invoices:</strong> $9,300 (14.8% of invoice value)\n                </p>\n            </div>\n        </div>\n\n        <!-- STEP 5: WORKFLOW & RECOVERY -->\n        <div class=\"step-section\">\n            <div class=\"step-header\">\n                <div class=\"step-number\">5</div>\n                <h2>Integrated Dispute & Recovery Workflow</h2>\n            </div>\n            <div class=\"step-content\">\n                <p>VESSIQ doesn't just flag issues \u2014 it provides a full audit trail, evidence documentation, and integration with your dispute management process.</p>\n\n                <div class=\"comparison-grid\">\n                    <div class=\"comparison-item before\">\n                        <h4>Traditional Manual Audit</h4>\n                        <p>\u2022 Hire auditor or consultant<br>\n                        \u2022 Audit 3-5 invoices per day<br>\n                        \u2022 Prepare spreadsheet evidence<br>\n                        \u2022 Send dispute claim<br>\n                        \u2022 Follow up manually<br>\n                        \u2022 Cost: $50K-$150K/year</p>\n                    </div>\n                    <div class=\"comparison-item after\">\n                        <h4>VESSIQ Automated Audit</h4>\n                        <p>\u2022 Audit 1000+ invoices/month<br>\n                        \u2022 Automated rule-based detection<br>\n                        \u2022 Digital evidence export (JSON, PDF)<br>\n                        \u2022 Auto-generate dispute templates<br>\n                        \u2022 Dashboard tracking & reporting<br>\n                        \u2022 Cost: $X-Y per invoice</p>\n                    </div>\n                </div>\n\n                <p style=\"margin-top: 15px;\"><strong>Key advantage:</strong> Every discovery is timestamped, rule-based, and defensible. Carriers can't dispute your methodology.</p>\n            </div>\n        </div>\n\n        <!-- ROI SUMMARY -->\n        <div class=\"roi-section\">\n            <h2>ROI Summary: Pasha Group Scenario</h2>\n\n            <p style=\"text-align: center; color: #666; margin-bottom: 30px; font-size: 1.05em;\">\n                Based on Pasha Group's estimated invoice volume and historical overcharge patterns\n            </p>\n\n            <div class=\"roi-grid\">\n                <div class=\"roi-card\">\n                    <div class=\"label\">Monthly Invoice Volume</div>\n                    <div class=\"number\">2,400</div>\n                    <div class=\"detail\">Carrier invoices processed</div>\n                </div>\n\n                <div class=\"roi-card\">\n                    <div class=\"label\">Overcharge Rate (Industry Avg)</div>\n                    <div class=\"number\">8-12%</div>\n                    <div class=\"detail\">Undetected by manual review</div>\n                </div>\n\n                <div class=\"roi-card\">\n                    <div class=\"label\">Average Monthly Recovery</div>\n                    <div class=\"number\">$144K - $216K</div>\n                    <div class=\"detail\">Via VESSIQ audit & dispute</div>\n                </div>\n            </div>\n\n            <div class=\"roi-grid\">\n                <div class=\"roi-card\">\n                    <div class=\"label\">Annual Potential Recovery</div>\n                    <div class=\"number\">$1.7M - $2.6M</div>\n                    <div class=\"detail\">Gross overcharge discovery</div>\n                </div>\n\n                <div class=\"roi-card\">\n                    <div class=\"label\">Implementation Cost</div>\n                    <div class=\"number\">Low</div>\n                    <div class=\"detail\">Data integration only</div>\n                </div>\n\n                <div class=\"roi-card\">\n                    <div class=\"label\">Payback Period</div>\n                    <div class=\"number\">2-4 Weeks</div>\n                    <div class=\"detail\">Typical first recovery batch</div>\n                </div>\n            </div>\n\n            <div class=\"summary-box\">\n                <h3>Why VESSIQ Works for Pasha Group</h3>\n                <div class=\"summary-point\">\n                    <span><strong>Scale:</strong> VESSIQ audits 2,400+ invoices monthly \u2014 something manual teams physically cannot achieve</span>\n                </div>\n                <div class=\"summary-point\">\n                    <span><strong>Consistency:</strong> Same audit rules applied to every carrier (Maersk, HAPAG, CMA CGM, ONE, YML, etc.). No blind spots.</span>\n                </div>\n                <div class=\"summary-point\">\n                    <span><strong>Speed:</strong> Findings are actionable within 24 hours of invoice receipt. Recovery is faster.</span>\n                </div>\n                <div class=\"summary-point\">\n                    <span><strong>Evidence:</strong> Every finding is rule-driven and documented. Dispute win rates are higher than manual claims.</span>\n                </div>\n                <div class=\"summary-point\">\n                    <span><strong>Integration:</strong> Works with your existing systems (Navis, TM6, Cargowise). No rip-and-replace.</span>\n                </div>\n                <div class=\"summary-point\">\n                    <span><strong>Defensible:</strong> Transparent audit rules = carriers can't fight the methodology. They can only dispute the facts.</span>\n                </div>\n            </div>\n\n            <div class=\"summary-box\" style=\"margin-top: 25px; background: #f0f8ff; border-left-color: #0d5a8f;\">\n                <h3 style=\"color: #0d5a8f;\">The Math That Matters</h3>\n                <table style=\"width: 100%; margin-top: 15px;\">\n                    <tr style=\"border-bottom: 2px solid #0d5a8f;\">\n                        <td style=\"padding: 10px 0;\"><strong>Invoices Audited (Annual)</strong></td>\n                        <td style=\"padding: 10px 0; text-align: right;\">28,800</td>\n                    </tr>\n                    <tr style=\"border-bottom: 1px solid #ddd;\">\n                        <td style=\"padding: 10px 0;\">Avg Invoice Value</td>\n                        <td style=\"padding: 10px 0; text-align: right;\">$4,500</td>\n                    </tr>\n                    <tr style=\"border-bottom: 1px solid #ddd;\">\n                        <td style=\"padding: 10px 0;\">Total Invoice Volume</td>\n                        <td style=\"padding: 10px 0; text-align: right;\"><strong>$129.6M</strong></td>\n                    </tr>\n                    <tr style=\"border-bottom: 1px solid #ddd;\">\n                        <td style=\"padding: 10px 0;\">Overcharge Rate (Conservative 10%)</td>\n                        <td style=\"padding: 10px 0; text-align: right;\">10%</td>\n                    </tr>\n                    <tr style=\"border-bottom: 2px solid #0d5a8f;\">\n                        <td style=\"padding: 10px 0;\"><strong>Annual Overcharge Value</strong></td>\n                        <td style=\"padding: 10px 0; text-align: right;\"><strong style=\"color: #0d5a8f;\">$12.96M</strong></td>\n                    </tr>\n                    <tr>\n                        <td style=\"padding: 10px 0;\"><strong>VESSIQ Can Recover (Conservative 50% win rate)</strong></td>\n                        <td style=\"padding: 10px 0; text-align: right;\"><strong style=\"color: #388e3c; font-size: 1.2em;\">$6.48M+</strong></td>\n                    </tr>\n                </table>\n            </div>\n        </div>\n\n        <!-- CTA SECTION -->\n        <div class=\"cta-section\">\n            <h2>See VESSIQ in Action</h2>\n            <p>Ready to recover hidden costs from your carrier invoices?</p>\n            <button class=\"cta-button\" onclick=\"alert('Thank you for your interest! Contact sales@vessiq.io to schedule a live demo.')\">Schedule a Live Demo</button>\n            <p style=\"margin-top: 20px; font-size: 0.9em; opacity: 0.9;\">Data integration typically takes 1-2 weeks. First recoveries within 30 days.</p>\n        </div>\n\n    </div>\n\n    <footer>\n        <p>VESSIQ \u2014 Maritime Data Normalization & Carrier Invoice Audit Platform</p>\n        <p>\u00a9 2026 VESSIQ, Inc. | Confidential \u2014 For Pasha Group</p>\n    </footer>\n\n</body>\n</html>\n"}], "grading": null}, {"id": "eval-2-with-skill", "prompt": "Create a dashboard showing a shipper's freight spend broken down by carrier, with a table of recent invoices and flags for any that had billing errors. Use fake but realistic data.", "eval_id": 2, "outputs": [{"name": "dashboard.html", "type": "text", "content": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Freight Spend Dashboard \u2014 VESSIQ</title>\n  <style>\n    *, *::before, *::after {\n      box-sizing: border-box;\n      margin: 0;\n      padding: 0;\n    }\n\n    :root {\n      --navy:     #0B1F3A;\n      --blue:     #1A56A0;\n      --accent:   #0EA5E9;\n      --green:    #10B981;\n      --red:      #EF4444;\n      --yellow:   #F59E0B;\n      --gray-50:  #F8FAFC;\n      --gray-100: #F1F5F9;\n      --gray-200: #E2E8F0;\n      --gray-300: #CBD5E1;\n      --gray-500: #64748B;\n      --gray-700: #334155;\n      --gray-900: #0F172A;\n      --white:    #FFFFFF;\n    }\n\n    body {\n      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;\n      background: var(--gray-50);\n      color: var(--gray-900);\n      line-height: 1.6;\n    }\n\n    .container {\n      max-width: 1200px;\n      margin: 0 auto;\n      padding: 40px 20px;\n    }\n\n    /* Header */\n    .header {\n      margin-bottom: 40px;\n    }\n\n    .header h1 {\n      font-size: 32px;\n      font-weight: 800;\n      line-height: 1.2;\n      color: var(--navy);\n      margin-bottom: 8px;\n    }\n\n    .header p {\n      font-size: 16px;\n      color: var(--gray-500);\n    }\n\n    .header-meta {\n      display: flex;\n      gap: 32px;\n      margin-top: 20px;\n      font-size: 14px;\n    }\n\n    .meta-item {\n      display: flex;\n      flex-direction: column;\n    }\n\n    .meta-label {\n      font-size: 11px;\n      font-weight: 600;\n      letter-spacing: 0.5px;\n      text-transform: uppercase;\n      color: var(--gray-500);\n      margin-bottom: 4px;\n    }\n\n    .meta-value {\n      font-size: 18px;\n      font-weight: 700;\n      color: var(--navy);\n    }\n\n    /* Grid Layout */\n    .grid {\n      display: grid;\n      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));\n      gap: 24px;\n      margin-bottom: 40px;\n    }\n\n    .grid.two-col {\n      grid-template-columns: repeat(2, 1fr);\n    }\n\n    @media (max-width: 900px) {\n      .grid.two-col {\n        grid-template-columns: 1fr;\n      }\n    }\n\n    /* Card */\n    .card {\n      background: var(--white);\n      border: 1px solid var(--gray-200);\n      border-radius: 12px;\n      padding: 24px;\n      box-shadow: 0 1px 4px rgba(0,0,0,0.06);\n    }\n\n    .card h2 {\n      font-size: 18px;\n      font-weight: 700;\n      color: var(--navy);\n      margin-bottom: 20px;\n    }\n\n    .card h3 {\n      font-size: 14px;\n      font-weight: 700;\n      color: var(--gray-700);\n      margin-bottom: 12px;\n    }\n\n    /* Spend Breakdown */\n    .spend-item {\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n      margin-bottom: 20px;\n    }\n\n    .spend-item:last-child {\n      margin-bottom: 0;\n    }\n\n    .spend-label {\n      font-size: 14px;\n      color: var(--gray-700);\n      font-weight: 500;\n    }\n\n    .spend-bar {\n      flex: 1;\n      height: 8px;\n      background: var(--gray-200);\n      border-radius: 4px;\n      margin: 0 12px;\n      overflow: hidden;\n    }\n\n    .spend-bar-fill {\n      height: 100%;\n      background: var(--accent);\n      transition: width 0.3s ease;\n    }\n\n    .spend-value {\n      font-size: 14px;\n      font-weight: 700;\n      color: var(--navy);\n      white-space: nowrap;\n      min-width: 80px;\n      text-align: right;\n    }\n\n    /* Carrier Badge */\n    .carrier-badge {\n      display: inline-flex;\n      align-items: center;\n      gap: 6px;\n      padding: 4px 10px;\n      border-radius: 8px;\n      font-size: 11px;\n      font-weight: 600;\n      background: var(--blue);\n      color: var(--white);\n    }\n\n    /* Table */\n    table {\n      width: 100%;\n      border-collapse: collapse;\n      font-size: 14px;\n    }\n\n    thead {\n      background: var(--gray-50);\n    }\n\n    th {\n      padding: 12px 16px;\n      text-align: left;\n      font-size: 11px;\n      font-weight: 600;\n      letter-spacing: 0.5px;\n      text-transform: uppercase;\n      color: var(--gray-700);\n      border-bottom: 1px solid var(--gray-200);\n    }\n\n    td {\n      padding: 14px 16px;\n      border-bottom: 1px solid var(--gray-100);\n    }\n\n    tbody tr:hover {\n      background: var(--gray-50);\n    }\n\n    /* Status Badge */\n    .status-badge {\n      display: inline-block;\n      padding: 4px 10px;\n      border-radius: 8px;\n      font-size: 11px;\n      font-weight: 600;\n      text-transform: uppercase;\n    }\n\n    .status-clean {\n      background: #ECFDF5;\n      color: #065F46;\n    }\n\n    .status-error {\n      background: #FFF5F5;\n      color: #991B1B;\n    }\n\n    .status-pending {\n      background: #FFFBEB;\n      color: #92400E;\n    }\n\n    .status-disputed {\n      background: #EFF6FF;\n      color: #1E40AF;\n    }\n\n    /* Flag Icon */\n    .flag-icon {\n      display: inline-flex;\n      align-items: center;\n      justify-content: center;\n      width: 24px;\n      height: 24px;\n      border-radius: 50%;\n      font-size: 12px;\n      font-weight: 700;\n      cursor: help;\n    }\n\n    .flag-error {\n      background: #FEE2E2;\n      color: var(--red);\n    }\n\n    .flag-warning {\n      background: #FEF3C7;\n      color: var(--yellow);\n    }\n\n    /* Alert Box */\n    .alert {\n      padding: 12px 16px;\n      border-radius: 8px;\n      font-size: 13px;\n      margin-bottom: 16px;\n    }\n\n    .alert-error {\n      background: #FFF5F5;\n      color: #991B1B;\n      border: 1px solid #FEBEBE;\n    }\n\n    .alert-warning {\n      background: #FFFBEB;\n      color: #92400E;\n      border: 1px solid #FECDAA;\n    }\n\n    /* Summary Stats */\n    .stat-row {\n      display: grid;\n      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));\n      gap: 16px;\n      margin-bottom: 24px;\n    }\n\n    .stat {\n      padding: 16px;\n      background: var(--gray-50);\n      border-radius: 8px;\n      border: 1px solid var(--gray-200);\n    }\n\n    .stat-label {\n      font-size: 11px;\n      font-weight: 600;\n      letter-spacing: 0.5px;\n      text-transform: uppercase;\n      color: var(--gray-500);\n      margin-bottom: 6px;\n    }\n\n    .stat-value {\n      font-size: 20px;\n      font-weight: 700;\n      color: var(--navy);\n    }\n\n    .stat-detail {\n      font-size: 12px;\n      color: var(--gray-500);\n      margin-top: 4px;\n    }\n\n    /* Responsive */\n    @media (max-width: 768px) {\n      .container {\n        padding: 20px 16px;\n      }\n\n      .header h1 {\n        font-size: 24px;\n      }\n\n      .header-meta {\n        flex-direction: column;\n        gap: 16px;\n      }\n\n      .grid {\n        grid-template-columns: 1fr;\n      }\n\n      .grid.two-col {\n        grid-template-columns: 1fr;\n      }\n\n      .spend-item {\n        flex-direction: column;\n        align-items: flex-start;\n      }\n\n      .spend-bar {\n        width: 100%;\n        margin: 8px 0;\n      }\n\n      .spend-value {\n        margin-top: 8px;\n      }\n\n      table {\n        font-size: 12px;\n      }\n\n      th, td {\n        padding: 10px 12px;\n      }\n    }\n\n    /* Tooltip */\n    .tooltip {\n      position: relative;\n      display: inline-block;\n      cursor: help;\n    }\n\n    .tooltip .tooltip-text {\n      visibility: hidden;\n      width: 220px;\n      background-color: var(--navy);\n      color: var(--white);\n      text-align: center;\n      padding: 8px 10px;\n      border-radius: 6px;\n      position: absolute;\n      z-index: 1;\n      bottom: 125%;\n      left: 50%;\n      margin-left: -110px;\n      opacity: 0;\n      transition: opacity 0.3s;\n      font-size: 12px;\n      font-weight: 500;\n      line-height: 1.4;\n    }\n\n    .tooltip:hover .tooltip-text {\n      visibility: visible;\n      opacity: 1;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <!-- Header -->\n    <div class=\"header\">\n      <h1>Freight Spend Dashboard</h1>\n      <p>Q1 2026 Ocean Freight Expenditure & Invoice Analysis</p>\n      <div class=\"header-meta\">\n        <div class=\"meta-item\">\n          <span class=\"meta-label\">Period</span>\n          <span class=\"meta-value\">Jan\u2013Mar 2026</span>\n        </div>\n        <div class=\"meta-item\">\n          <span class=\"meta-label\">Total Spend</span>\n          <span class=\"meta-value\">$2.84M</span>\n        </div>\n        <div class=\"meta-item\">\n          <span class=\"meta-label\">Invoices</span>\n          <span class=\"meta-value\">47</span>\n        </div>\n        <div class=\"meta-item\">\n          <span class=\"meta-label\">Billing Issues</span>\n          <span class=\"meta-value\">3</span>\n        </div>\n      </div>\n    </div>\n\n    <!-- Summary Stats -->\n    <div class=\"stat-row\">\n      <div class=\"stat\">\n        <div class=\"stat-label\">Avg Invoice Value</div>\n        <div class=\"stat-value\">$60,426</div>\n        <div class=\"stat-detail\">Range: $12K\u2013$185K</div>\n      </div>\n      <div class=\"stat\">\n        <div class=\"stat-label\">Invoice Accuracy</div>\n        <div class=\"stat-value\">93.6%</div>\n        <div class=\"stat-detail\">3 errors out of 47</div>\n      </div>\n      <div class=\"stat\">\n        <div class=\"stat-label\">On-Time Payment</div>\n        <div class=\"stat-value\">97.9%</div>\n        <div class=\"stat-detail\">1 dispute pending</div>\n      </div>\n      <div class=\"stat\">\n        <div class=\"stat-label\">Top Carrier</div>\n        <div class=\"stat-value\">Maersk</div>\n        <div class=\"stat-detail\">42% of total volume</div>\n      </div>\n    </div>\n\n    <!-- Main Grid -->\n    <div class=\"grid two-col\">\n      <!-- Carrier Breakdown -->\n      <div class=\"card\">\n        <h2>Spend by Carrier</h2>\n\n        <div class=\"spend-item\">\n          <span class=\"spend-label\">Maersk</span>\n          <div class=\"spend-bar\">\n            <div class=\"spend-bar-fill\" style=\"width: 42%;\"></div>\n          </div>\n          <span class=\"spend-value\">$1,192,080</span>\n        </div>\n\n        <div class=\"spend-item\">\n          <span class=\"spend-label\">CMA CGM</span>\n          <div class=\"spend-bar\">\n            <div class=\"spend-bar-fill\" style=\"width: 31%; background: var(--green);\"></div>\n          </div>\n          <span class=\"spend-value\">$879,840</span>\n        </div>\n\n        <div class=\"spend-item\">\n          <span class=\"spend-label\">Hapag-Lloyd</span>\n          <div class=\"spend-bar\">\n            <div class=\"spend-bar-fill\" style=\"width: 19%; background: var(--blue);\"></div>\n          </div>\n          <span class=\"spend-value\">$539,160</span>\n        </div>\n\n        <div class=\"spend-item\">\n          <span class=\"spend-label\">COSCO Shipping</span>\n          <div class=\"spend-bar\">\n            <div class=\"spend-bar-fill\" style=\"width: 8%; background: var(--yellow);\"></div>\n          </div>\n          <span class=\"spend-value\">$227,200</span>\n        </div>\n      </div>\n\n      <!-- Key Metrics -->\n      <div class=\"card\">\n        <h2>Billing Health</h2>\n\n        <div style=\"margin-bottom: 24px;\">\n          <h3>Clean Invoices</h3>\n          <div style=\"font-size: 28px; font-weight: 700; color: var(--green); margin: 8px 0;\">44/47</div>\n          <div style=\"font-size: 13px; color: var(--gray-500);\">No discrepancies or disputed charges</div>\n        </div>\n\n        <div style=\"margin-bottom: 24px;\">\n          <h3>Flagged for Review</h3>\n          <div style=\"font-size: 28px; font-weight: 700; color: var(--red); margin: 8px 0;\">3</div>\n          <div style=\"font-size: 13px; color: var(--gray-500);\">Billing errors detected in Q1</div>\n        </div>\n\n        <div>\n          <h3>Disputed Amount</h3>\n          <div style=\"font-size: 28px; font-weight: 700; color: var(--navy); margin: 8px 0;\">$34,750</div>\n          <div style=\"font-size: 13px; color: var(--gray-500);\">Under review with carriers</div>\n        </div>\n      </div>\n    </div>\n\n    <!-- Recent Invoices -->\n    <div class=\"card\" style=\"margin-bottom: 40px;\">\n      <h2>Recent Invoices</h2>\n\n      <div class=\"alert alert-error\" style=\"margin-bottom: 20px;\">\n        \u26a0\ufe0f 3 invoices have billing errors. Review flagged items below and contact carriers to reconcile.\n      </div>\n\n      <div style=\"overflow-x: auto;\">\n        <table>\n          <thead>\n            <tr>\n              <th>Invoice ID</th>\n              <th>Carrier</th>\n              <th>Ship Date</th>\n              <th>Amount (USD)</th>\n              <th>Status</th>\n              <th>Flag</th>\n            </tr>\n          </thead>\n          <tbody>\n            <tr>\n              <td><strong>INV-2026-0847</strong></td>\n              <td><span class=\"carrier-badge\">Maersk</span></td>\n              <td>2026-03-18</td>\n              <td>$185,200</td>\n              <td><span class=\"status-badge status-clean\">Clean</span></td>\n              <td>\u2014</td>\n            </tr>\n            <tr>\n              <td><strong>INV-2026-0846</strong></td>\n              <td><span class=\"carrier-badge\" style=\"background: var(--green);\">CMA CGM</span></td>\n              <td>2026-03-15</td>\n              <td>$67,350</td>\n              <td><span class=\"status-badge status-clean\">Clean</span></td>\n              <td>\u2014</td>\n            </tr>\n            <tr style=\"background: #FFF5F5;\">\n              <td><strong>INV-2026-0845</strong></td>\n              <td><span class=\"carrier-badge\" style=\"background: var(--blue);\">Hapag-Lloyd</span></td>\n              <td>2026-03-12</td>\n              <td>$58,900</td>\n              <td><span class=\"status-badge status-error\">Overcharge</span></td>\n              <td>\n                <div class=\"tooltip\">\n                  <span class=\"flag-icon flag-error\">!</span>\n                  <span class=\"tooltip-text\">Fuel surcharge applied twice. Disputed amount: $8,650</span>\n                </div>\n              </td>\n            </tr>\n            <tr>\n              <td><strong>INV-2026-0844</strong></td>\n              <td><span class=\"carrier-badge\">Maersk</span></td>\n              <td>2026-03-10</td>\n              <td>$92,475</td>\n              <td><span class=\"status-badge status-clean\">Clean</span></td>\n              <td>\u2014</td>\n            </tr>\n            <tr>\n              <td><strong>INV-2026-0843</strong></td>\n              <td><span class=\"carrier-badge\" style=\"background: var(--green);\">CMA CGM</span></td>\n              <td>2026-03-08</td>\n              <td>$54,200</td>\n              <td><span class=\"status-badge status-clean\">Clean</span></td>\n              <td>\u2014</td>\n            </tr>\n            <tr style=\"background: #FFFBEB;\">\n              <td><strong>INV-2026-0842</strong></td>\n              <td><span class=\"carrier-badge\" style=\"background: var(--yellow);\">COSCO Shipping</span></td>\n              <td>2026-03-05</td>\n              <td>$38,600</td>\n              <td><span class=\"status-badge status-pending\">Pending Review</span></td>\n              <td>\n                <div class=\"tooltip\">\n                  <span class=\"flag-icon flag-warning\">?</span>\n                  <span class=\"tooltip-text\">Container weight mismatch. Waiting for proof of weight docs.</span>\n                </div>\n              </td>\n            </tr>\n            <tr>\n              <td><strong>INV-2026-0841</strong></td>\n              <td><span class=\"carrier-badge\">Maersk</span></td>\n              <td>2026-02-28</td>\n              <td>$124,500</td>\n              <td><span class=\"status-badge status-clean\">Clean</span></td>\n              <td>\u2014</td>\n            </tr>\n            <tr>\n              <td><strong>INV-2026-0840</strong></td>\n              <td><span class=\"carrier-badge\" style=\"background: var(--green);\">CMA CGM</span></td>\n              <td>2026-02-25</td>\n              <td>$71,800</td>\n              <td><span class=\"status-badge status-clean\">Clean</span></td>\n              <td>\u2014</td>\n            </tr>\n            <tr style=\"background: #FFF5F5;\">\n              <td><strong>INV-2026-0839</strong></td>\n              <td><span class=\"carrier-badge\" style=\"background: var(--blue);\">Hapag-Lloyd</span></td>\n              <td>2026-02-20</td>\n              <td>$48,750</td>\n              <td><span class=\"status-badge status-error\">Overcharge</span></td>\n              <td>\n                <div class=\"tooltip\">\n                  <span class=\"flag-icon flag-error\">!</span>\n                  <span class=\"tooltip-text\">Incorrect rate applied. Should be $44,200. Disputed: $4,550</span>\n                </div>\n              </td>\n            </tr>\n            <tr>\n              <td><strong>INV-2026-0838</strong></td>\n              <td><span class=\"carrier-badge\">Maersk</span></td>\n              <td>2026-02-18</td>\n              <td>$156,750</td>\n              <td><span class=\"status-badge status-clean\">Clean</span></td>\n              <td>\u2014</td>\n            </tr>\n            <tr>\n              <td><strong>INV-2026-0837</strong></td>\n              <td><span class=\"carrier-badge\" style=\"background: var(--blue);\">Hapag-Lloyd</span></td>\n              <td>2026-02-15</td>\n              <td>$62,100</td>\n              <td><span class=\"status-badge status-clean\">Clean</span></td>\n              <td>\u2014</td>\n            </tr>\n            <tr style=\"background: #FFF5F5;\">\n              <td><strong>INV-2026-0836</strong></td>\n              <td><span class=\"carrier-badge\" style=\"background: var(--green);\">CMA CGM</span></td>\n              <td>2026-02-12</td>\n              <td>$83,500</td>\n              <td><span class=\"status-badge status-error\">Overcharge</span></td>\n              <td>\n                <div class=\"tooltip\">\n                  <span class=\"flag-icon flag-error\">!</span>\n                  <span class=\"tooltip-text\">Dormancy fee charged incorrectly. Disputed: $21,550</span>\n                </div>\n              </td>\n            </tr>\n            <tr>\n              <td><strong>INV-2026-0835</strong></td>\n              <td><span class=\"carrier-badge\">Maersk</span></td>\n              <td>2026-02-10</td>\n              <td>$95,630</td>\n              <td><span class=\"status-badge status-clean\">Clean</span></td>\n              <td>\u2014</td>\n            </tr>\n          </tbody>\n        </table>\n      </div>\n    </div>\n\n    <!-- Footer -->\n    <div style=\"text-align: center; color: var(--gray-500); font-size: 13px; margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--gray-200);\">\n      <p>VESSIQ Freight Spend Dashboard \u2022 Data current as of 2026-03-23</p>\n    </div>\n  </div>\n\n  <script>\n    // Smooth scroll for any future tab interactions\n    function smoothScroll(target) {\n      window.scrollTo({ top: target, behavior: 'smooth' });\n    }\n  </script>\n</body>\n</html>\n"}], "grading": null}, {"id": "eval-2-without-skill", "prompt": "Create a dashboard showing a shipper's freight spend broken down by carrier, with a table of recent invoices and flags for any that had billing errors. Use fake but realistic data.", "eval_id": 2, "outputs": [{"name": "dashboard.html", "type": "text", "content": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>VESSIQ - Freight Spend Dashboard</title>\n    <script src=\"https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js\"></script>\n    <style>\n        * {\n            margin: 0;\n            padding: 0;\n            box-sizing: border-box;\n        }\n\n        body {\n            font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif;\n            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);\n            min-height: 100vh;\n            padding: 20px;\n        }\n\n        .container {\n            max-width: 1400px;\n            margin: 0 auto;\n        }\n\n        header {\n            background: white;\n            padding: 24px;\n            border-radius: 8px;\n            box-shadow: 0 2px 8px rgba(0,0,0,0.1);\n            margin-bottom: 24px;\n        }\n\n        h1 {\n            color: #1a365d;\n            font-size: 28px;\n            margin-bottom: 8px;\n        }\n\n        .header-subtitle {\n            color: #64748b;\n            font-size: 14px;\n        }\n\n        .metrics-grid {\n            display: grid;\n            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));\n            gap: 16px;\n            margin-bottom: 24px;\n        }\n\n        .metric-card {\n            background: white;\n            padding: 20px;\n            border-radius: 8px;\n            box-shadow: 0 2px 8px rgba(0,0,0,0.1);\n            border-left: 4px solid #2563eb;\n        }\n\n        .metric-card.warning {\n            border-left-color: #f59e0b;\n        }\n\n        .metric-card.success {\n            border-left-color: #10b981;\n        }\n\n        .metric-label {\n            color: #64748b;\n            font-size: 12px;\n            font-weight: 600;\n            text-transform: uppercase;\n            margin-bottom: 8px;\n        }\n\n        .metric-value {\n            color: #1a365d;\n            font-size: 28px;\n            font-weight: 700;\n        }\n\n        .metric-detail {\n            color: #94a3b8;\n            font-size: 12px;\n            margin-top: 8px;\n        }\n\n        .charts-section {\n            display: grid;\n            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));\n            gap: 24px;\n            margin-bottom: 24px;\n        }\n\n        .chart-card {\n            background: white;\n            padding: 20px;\n            border-radius: 8px;\n            box-shadow: 0 2px 8px rgba(0,0,0,0.1);\n        }\n\n        .chart-title {\n            color: #1a365d;\n            font-size: 16px;\n            font-weight: 600;\n            margin-bottom: 16px;\n        }\n\n        .chart-container {\n            position: relative;\n            height: 300px;\n        }\n\n        .table-section {\n            background: white;\n            border-radius: 8px;\n            box-shadow: 0 2px 8px rgba(0,0,0,0.1);\n            overflow: hidden;\n        }\n\n        .table-header {\n            background: #f8fafc;\n            padding: 20px;\n            border-bottom: 1px solid #e2e8f0;\n        }\n\n        .table-title {\n            color: #1a365d;\n            font-size: 16px;\n            font-weight: 600;\n        }\n\n        table {\n            width: 100%;\n            border-collapse: collapse;\n        }\n\n        th {\n            background: #f8fafc;\n            color: #475569;\n            padding: 12px 16px;\n            text-align: left;\n            font-size: 12px;\n            font-weight: 600;\n            text-transform: uppercase;\n            border-bottom: 1px solid #e2e8f0;\n        }\n\n        td {\n            padding: 12px 16px;\n            border-bottom: 1px solid #e2e8f0;\n            font-size: 13px;\n            color: #334155;\n        }\n\n        tr:hover {\n            background: #f8fafc;\n        }\n\n        .error-flag {\n            display: inline-block;\n            padding: 4px 8px;\n            border-radius: 4px;\n            font-size: 11px;\n            font-weight: 600;\n            text-transform: uppercase;\n        }\n\n        .error-flag.critical {\n            background: #fee2e2;\n            color: #7f1d1d;\n        }\n\n        .error-flag.warning {\n            background: #fef3c7;\n            color: #78350f;\n        }\n\n        .error-flag.resolved {\n            background: #dcfce7;\n            color: #15803d;\n        }\n\n        .status-badge {\n            display: inline-block;\n            padding: 4px 12px;\n            border-radius: 20px;\n            font-size: 11px;\n            font-weight: 600;\n        }\n\n        .status-badge.paid {\n            background: #dcfce7;\n            color: #15803d;\n        }\n\n        .status-badge.pending {\n            background: #fef3c7;\n            color: #78350f;\n        }\n\n        .status-badge.disputed {\n            background: #fee2e2;\n            color: #7f1d1d;\n        }\n\n        .carrier-name {\n            font-weight: 600;\n            color: #1a365d;\n        }\n\n        .amount {\n            font-weight: 600;\n            color: #2563eb;\n        }\n\n        .footer {\n            background: white;\n            padding: 16px 24px;\n            border-radius: 8px;\n            box-shadow: 0 2px 8px rgba(0,0,0,0.1);\n            color: #64748b;\n            font-size: 12px;\n            text-align: center;\n        }\n\n        @media (max-width: 768px) {\n            .charts-section {\n                grid-template-columns: 1fr;\n            }\n\n            .metrics-grid {\n                grid-template-columns: 1fr;\n            }\n\n            h1 {\n                font-size: 22px;\n            }\n\n            table {\n                font-size: 12px;\n            }\n\n            td, th {\n                padding: 8px 12px;\n            }\n        }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <header>\n            <h1>Freight Spend Dashboard</h1>\n            <p class=\"header-subtitle\">Maritime logistics \u2014 Q1 2026 Performance</p>\n        </header>\n\n        <div class=\"metrics-grid\">\n            <div class=\"metric-card\">\n                <div class=\"metric-label\">Total Freight Spend (Q1)</div>\n                <div class=\"metric-value\">$3,847,500</div>\n                <div class=\"metric-detail\">\u2191 12% vs Q4 2025</div>\n            </div>\n            <div class=\"metric-card success\">\n                <div class=\"metric-label\">Invoices Processed</div>\n                <div class=\"metric-value\">247</div>\n                <div class=\"metric-detail\">21 with billing errors</div>\n            </div>\n            <div class=\"metric-card warning\">\n                <div class=\"metric-label\">Billing Error Rate</div>\n                <div class=\"metric-value\">8.5%</div>\n                <div class=\"metric-detail\">$328,000 disputed</div>\n            </div>\n            <div class=\"metric-card\">\n                <div class=\"metric-label\">Top Carrier</div>\n                <div class=\"metric-value\">Maersk</div>\n                <div class=\"metric-detail\">42% of total spend</div>\n            </div>\n        </div>\n\n        <div class=\"charts-section\">\n            <div class=\"chart-card\">\n                <div class=\"chart-title\">Spend by Carrier</div>\n                <div class=\"chart-container\">\n                    <canvas id=\"carrierChart\"></canvas>\n                </div>\n            </div>\n            <div class=\"chart-card\">\n                <div class=\"chart-title\">Billing Error Distribution</div>\n                <div class=\"chart-container\">\n                    <canvas id=\"errorChart\"></canvas>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"table-section\">\n            <div class=\"table-header\">\n                <div class=\"table-title\">Recent Invoices (Last 30 Days)</div>\n            </div>\n            <table>\n                <thead>\n                    <tr>\n                        <th>Invoice #</th>\n                        <th>Carrier</th>\n                        <th>Vessel / Voyage</th>\n                        <th>Invoice Date</th>\n                        <th>Amount</th>\n                        <th>Status</th>\n                        <th>Billing Issues</th>\n                    </tr>\n                </thead>\n                <tbody>\n                    <tr>\n                        <td>INV-2026-001847</td>\n                        <td><span class=\"carrier-name\">Maersk</span></td>\n                        <td>SEATRADE / V2034</td>\n                        <td>2026-03-22</td>\n                        <td><span class=\"amount\">$87,500</span></td>\n                        <td><span class=\"status-badge paid\">Paid</span></td>\n                        <td>\u2014</td>\n                    </tr>\n                    <tr>\n                        <td>INV-2026-001846</td>\n                        <td><span class=\"carrier-name\">CMA CGM</span></td>\n                        <td>CMA CGM ANTOINE / V8891</td>\n                        <td>2026-03-21</td>\n                        <td><span class=\"amount\">$65,200</span></td>\n                        <td><span class=\"status-badge disputed\">Disputed</span></td>\n                        <td><span class=\"error-flag critical\">Rate Mismatch</span></td>\n                    </tr>\n                    <tr>\n                        <td>INV-2026-001845</td>\n                        <td><span class=\"carrier-name\">Hapag-Lloyd</span></td>\n                        <td>OSHIMA / V1502</td>\n                        <td>2026-03-20</td>\n                        <td><span class=\"amount\">$52,300</span></td>\n                        <td><span class=\"status-badge paid\">Paid</span></td>\n                        <td>\u2014</td>\n                    </tr>\n                    <tr>\n                        <td>INV-2026-001844</td>\n                        <td><span class=\"carrier-name\">Maersk</span></td>\n                        <td>SEATRADE / V2033</td>\n                        <td>2026-03-19</td>\n                        <td><span class=\"amount\">$91,800</span></td>\n                        <td><span class=\"status-badge pending\">Pending</span></td>\n                        <td><span class=\"error-flag warning\">Qty Discrepancy</span></td>\n                    </tr>\n                    <tr>\n                        <td>INV-2026-001843</td>\n                        <td><span class=\"carrier-name\">Evergreen</span></td>\n                        <td>EVER GIVEN / V5108</td>\n                        <td>2026-03-18</td>\n                        <td><span class=\"amount\">$78,900</span></td>\n                        <td><span class=\"status-badge paid\">Paid</span></td>\n                        <td>\u2014</td>\n                    </tr>\n                    <tr>\n                        <td>INV-2026-001842</td>\n                        <td><span class=\"carrier-name\">CMA CGM</span></td>\n                        <td>CMA CGM ANTOINE / V8890</td>\n                        <td>2026-03-17</td>\n                        <td><span class=\"amount\">$68,100</span></td>\n                        <td><span class=\"status-badge disputed\">Disputed</span></td>\n                        <td><span class=\"error-flag critical\">Wrong Surcharge</span></td>\n                    </tr>\n                    <tr>\n                        <td>INV-2026-001841</td>\n                        <td><span class=\"carrier-name\">Hapag-Lloyd</span></td>\n                        <td>OSHIMA / V1501</td>\n                        <td>2026-03-16</td>\n                        <td><span class=\"amount\">$55,400</span></td>\n                        <td><span class=\"status-badge paid\">Paid</span></td>\n                        <td>\u2014</td>\n                    </tr>\n                    <tr>\n                        <td>INV-2026-001840</td>\n                        <td><span class=\"carrier-name\">ONE</span></td>\n                        <td>ONE INNOVATION / V3421</td>\n                        <td>2026-03-15</td>\n                        <td><span class=\"amount\">$43,700</span></td>\n                        <td><span class=\"status-badge pending\">Pending</span></td>\n                        <td><span class=\"error-flag resolved\">Duplicate Charge (Resolved)</span></td>\n                    </tr>\n                    <tr>\n                        <td>INV-2026-001839</td>\n                        <td><span class=\"carrier-name\">Maersk</span></td>\n                        <td>SEATRADE / V2032</td>\n                        <td>2026-03-14</td>\n                        <td><span class=\"amount\">$89,300</span></td>\n                        <td><span class=\"status-badge paid\">Paid</span></td>\n                        <td>\u2014</td>\n                    </tr>\n                    <tr>\n                        <td>INV-2026-001838</td>\n                        <td><span class=\"carrier-name\">Evergreen</span></td>\n                        <td>EVER GIVEN / V5107</td>\n                        <td>2026-03-13</td>\n                        <td><span class=\"amount\">$72,600</span></td>\n                        <td><span class=\"status-badge disputed\">Disputed</span></td>\n                        <td><span class=\"error-flag warning\">Currency Conversion</span></td>\n                    </tr>\n                    <tr>\n                        <td>INV-2026-001837</td>\n                        <td><span class=\"carrier-name\">CMA CGM</span></td>\n                        <td>CMA CGM ANTOINE / V8889</td>\n                        <td>2026-03-12</td>\n                        <td><span class=\"amount\">$61,200</span></td>\n                        <td><span class=\"status-badge paid\">Paid</span></td>\n                        <td>\u2014</td>\n                    </tr>\n                    <tr>\n                        <td>INV-2026-001836</td>\n                        <td><span class=\"carrier-name\">Hapag-Lloyd</span></td>\n                        <td>OSHIMA / V1500</td>\n                        <td>2026-03-11</td>\n                        <td><span class=\"amount\">$48,900</span></td>\n                        <td><span class=\"status-badge paid\">Paid</span></td>\n                        <td>\u2014</td>\n                    </tr>\n                </tbody>\n            </table>\n        </div>\n\n        <div class=\"footer\">\n            <p>VESSIQ Freight Management Platform \u00a9 2026 | Data updated: 2026-03-23 | For support, contact ops@vessiq.io</p>\n        </div>\n    </div>\n\n    <script>\n        // Carrier spend data\n        const carrierCtx = document.getElementById('carrierChart').getContext('2d');\n        const carrierChart = new Chart(carrierCtx, {\n            type: 'doughnut',\n            data: {\n                labels: ['Maersk', 'CMA CGM', 'Hapag-Lloyd', 'Evergreen', 'ONE'],\n                datasets: [{\n                    data: [1616, 950, 685, 410, 186],\n                    backgroundColor: [\n                        '#2563eb',\n                        '#7c3aed',\n                        '#db2777',\n                        '#0891b2',\n                        '#ea580c'\n                    ],\n                    borderColor: '#ffffff',\n                    borderWidth: 2\n                }]\n            },\n            options: {\n                responsive: true,\n                maintainAspectRatio: false,\n                plugins: {\n                    legend: {\n                        position: 'bottom',\n                        labels: {\n                            font: { size: 12 },\n                            padding: 16,\n                            color: '#475569'\n                        }\n                    }\n                }\n            }\n        });\n\n        // Billing error distribution\n        const errorCtx = document.getElementById('errorChart').getContext('2d');\n        const errorChart = new Chart(errorCtx, {\n            type: 'bar',\n            data: {\n                labels: ['Rate\\nMismatch', 'Wrong\\nSurcharge', 'Qty\\nDiscrepancy', 'Currency\\nConversion', 'Duplicate\\nCharge', 'Other'],\n                datasets: [{\n                    label: 'Number of Issues',\n                    data: [5, 4, 3, 2, 4, 3],\n                    backgroundColor: '#f59e0b',\n                    borderRadius: 4,\n                    borderSkipped: false\n                }]\n            },\n            options: {\n                responsive: true,\n                maintainAspectRatio: false,\n                indexAxis: 'y',\n                plugins: {\n                    legend: {\n                        display: false\n                    }\n                },\n                scales: {\n                    x: {\n                        beginAtZero: true,\n                        max: 6,\n                        ticks: {\n                            stepSize: 2,\n                            color: '#64748b',\n                            font: { size: 11 }\n                        },\n                        grid: {\n                            color: '#e2e8f0'\n                        }\n                    },\n                    y: {\n                        ticks: {\n                            color: '#64748b',\n                            font: { size: 11 }\n                        },\n                        grid: {\n                            display: false\n                        }\n                    }\n                }\n            }\n        });\n    </script>\n</body>\n</html>\n"}], "grading": null}, {"id": "eval-3-with-skill", "prompt": "Make a simple landing page for VESSIQ \u2014 something I could send to a prospect before a call so they understand what we do. Keep it short and punchy.", "eval_id": 3, "outputs": [{"name": "landing.html", "type": "text", "content": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>VESSIQ \u2014 Maritime Data Normalization</title>\n  <style>\n    *, *::before, *::after {\n      box-sizing: border-box;\n      margin: 0;\n      padding: 0;\n    }\n\n    :root {\n      --navy: #0B1F3A;\n      --blue: #1A56A0;\n      --accent: #0EA5E9;\n      --green: #10B981;\n      --red: #EF4444;\n      --yellow: #F59E0B;\n      --gray-50: #F8FAFC;\n      --gray-100: #F1F5F9;\n      --gray-200: #E2E8F0;\n      --gray-300: #CBD5E1;\n      --gray-500: #64748B;\n      --gray-700: #334155;\n      --gray-900: #0F172A;\n      --white: #FFFFFF;\n    }\n\n    html {\n      scroll-behavior: smooth;\n    }\n\n    body {\n      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;\n      background: var(--white);\n      color: var(--gray-700);\n      line-height: 1.6;\n    }\n\n    .container {\n      max-width: 1200px;\n      margin: 0 auto;\n      padding: 0 40px;\n    }\n\n    @media (max-width: 768px) {\n      .container {\n        padding: 0 20px;\n      }\n    }\n\n    /* Header */\n    header {\n      background: var(--white);\n      border-bottom: 1px solid var(--gray-200);\n      padding: 24px 0;\n      position: sticky;\n      top: 0;\n      z-index: 100;\n      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);\n    }\n\n    .header-content {\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n    }\n\n    .logo {\n      font-size: 20px;\n      font-weight: 800;\n      color: var(--navy);\n      text-decoration: none;\n    }\n\n    .logo span {\n      color: var(--accent);\n    }\n\n    nav {\n      display: flex;\n      gap: 32px;\n      align-items: center;\n    }\n\n    nav a {\n      color: var(--gray-700);\n      text-decoration: none;\n      font-size: 14px;\n      font-weight: 500;\n      transition: color 0.2s;\n    }\n\n    nav a:hover {\n      color: var(--blue);\n    }\n\n    .cta-button {\n      padding: 12px 24px;\n      border-radius: 8px;\n      font-size: 14px;\n      font-weight: 600;\n      cursor: pointer;\n      border: none;\n      background: var(--blue);\n      color: var(--white);\n      transition: background 0.2s;\n    }\n\n    .cta-button:hover {\n      background: #1a3f7a;\n    }\n\n    @media (max-width: 768px) {\n      nav {\n        display: none;\n      }\n    }\n\n    /* Hero Section */\n    .hero {\n      padding: 80px 0;\n      background: linear-gradient(135deg, var(--navy) 0%, #1a3f5c 100%);\n      color: var(--white);\n    }\n\n    .hero-content {\n      max-width: 600px;\n    }\n\n    .hero h1 {\n      font-size: 48px;\n      font-weight: 800;\n      line-height: 1.2;\n      margin-bottom: 20px;\n    }\n\n    .hero p {\n      font-size: 20px;\n      color: #c7d6e8;\n      margin-bottom: 32px;\n      line-height: 1.5;\n    }\n\n    .hero .stat {\n      display: inline-block;\n      background: rgba(255, 255, 255, 0.1);\n      border-left: 3px solid var(--accent);\n      padding: 16px 24px;\n      margin-right: 24px;\n      margin-bottom: 32px;\n      border-radius: 4px;\n    }\n\n    .hero .stat-value {\n      font-size: 28px;\n      font-weight: 800;\n      color: var(--accent);\n    }\n\n    .hero .stat-label {\n      font-size: 12px;\n      text-transform: uppercase;\n      letter-spacing: 0.5px;\n      color: #a8b8d4;\n      margin-top: 4px;\n    }\n\n    .hero-buttons {\n      display: flex;\n      gap: 16px;\n    }\n\n    .btn-primary {\n      padding: 14px 32px;\n      border-radius: 8px;\n      font-size: 15px;\n      font-weight: 600;\n      cursor: pointer;\n      border: none;\n      background: var(--accent);\n      color: var(--navy);\n      transition: background 0.2s;\n    }\n\n    .btn-primary:hover {\n      background: #06d6ff;\n    }\n\n    .btn-secondary {\n      padding: 14px 32px;\n      border-radius: 8px;\n      font-size: 15px;\n      font-weight: 600;\n      cursor: pointer;\n      border: 2px solid var(--accent);\n      background: transparent;\n      color: var(--accent);\n      transition: all 0.2s;\n    }\n\n    .btn-secondary:hover {\n      background: rgba(14, 165, 233, 0.1);\n    }\n\n    @media (max-width: 768px) {\n      .hero {\n        padding: 60px 0;\n      }\n\n      .hero h1 {\n        font-size: 36px;\n      }\n\n      .hero p {\n        font-size: 16px;\n      }\n\n      .hero-buttons {\n        flex-direction: column;\n      }\n\n      .btn-primary, .btn-secondary {\n        width: 100%;\n        text-align: center;\n      }\n\n      .hero .stat {\n        display: block;\n        margin-bottom: 16px;\n        margin-right: 0;\n      }\n    }\n\n    /* Problem Section */\n    .problem {\n      padding: 80px 0;\n      background: var(--gray-50);\n    }\n\n    .problem h2 {\n      font-size: 36px;\n      font-weight: 800;\n      color: var(--navy);\n      margin-bottom: 48px;\n      text-align: center;\n    }\n\n    .problem-grid {\n      display: grid;\n      grid-template-columns: repeat(3, 1fr);\n      gap: 32px;\n    }\n\n    .problem-card {\n      background: var(--white);\n      border: 1px solid var(--gray-200);\n      border-radius: 12px;\n      padding: 32px;\n      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);\n    }\n\n    .problem-icon {\n      font-size: 40px;\n      margin-bottom: 16px;\n    }\n\n    .problem-card h3 {\n      font-size: 18px;\n      font-weight: 700;\n      color: var(--navy);\n      margin-bottom: 12px;\n    }\n\n    .problem-card p {\n      font-size: 14px;\n      color: var(--gray-500);\n      line-height: 1.6;\n    }\n\n    @media (max-width: 768px) {\n      .problem {\n        padding: 60px 0;\n      }\n\n      .problem h2 {\n        font-size: 28px;\n        margin-bottom: 32px;\n      }\n\n      .problem-grid {\n        grid-template-columns: 1fr;\n        gap: 20px;\n      }\n    }\n\n    /* Solution Section */\n    .solution {\n      padding: 80px 0;\n    }\n\n    .solution h2 {\n      font-size: 36px;\n      font-weight: 800;\n      color: var(--navy);\n      margin-bottom: 48px;\n      text-align: center;\n    }\n\n    .solution-flow {\n      display: grid;\n      grid-template-columns: repeat(4, 1fr);\n      gap: 24px;\n      align-items: center;\n      margin-bottom: 48px;\n    }\n\n    .flow-step {\n      background: var(--white);\n      border: 2px solid var(--gray-200);\n      border-radius: 12px;\n      padding: 28px 20px;\n      text-align: center;\n    }\n\n    .flow-step.active {\n      border-color: var(--accent);\n      background: #f0f9ff;\n    }\n\n    .flow-number {\n      display: inline-block;\n      width: 40px;\n      height: 40px;\n      background: var(--blue);\n      color: var(--white);\n      border-radius: 50%;\n      line-height: 40px;\n      font-weight: 700;\n      margin-bottom: 12px;\n    }\n\n    .flow-step.active .flow-number {\n      background: var(--accent);\n    }\n\n    .flow-step h4 {\n      font-size: 14px;\n      font-weight: 700;\n      color: var(--navy);\n      margin-bottom: 8px;\n    }\n\n    .flow-step p {\n      font-size: 13px;\n      color: var(--gray-500);\n      line-height: 1.5;\n    }\n\n    @media (max-width: 768px) {\n      .solution {\n        padding: 60px 0;\n      }\n\n      .solution h2 {\n        font-size: 28px;\n      }\n\n      .solution-flow {\n        grid-template-columns: 1fr;\n        gap: 16px;\n      }\n    }\n\n    /* Features Section */\n    .features {\n      padding: 80px 0;\n      background: var(--gray-50);\n    }\n\n    .features h2 {\n      font-size: 36px;\n      font-weight: 800;\n      color: var(--navy);\n      margin-bottom: 48px;\n      text-align: center;\n    }\n\n    .features-grid {\n      display: grid;\n      grid-template-columns: repeat(2, 1fr);\n      gap: 40px;\n    }\n\n    .feature-item {\n      display: flex;\n      gap: 20px;\n    }\n\n    .feature-check {\n      flex-shrink: 0;\n      width: 24px;\n      height: 24px;\n      background: var(--green);\n      border-radius: 6px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      color: var(--white);\n      font-weight: 700;\n    }\n\n    .feature-text h3 {\n      font-size: 16px;\n      font-weight: 700;\n      color: var(--navy);\n      margin-bottom: 6px;\n    }\n\n    .feature-text p {\n      font-size: 14px;\n      color: var(--gray-500);\n      line-height: 1.6;\n    }\n\n    @media (max-width: 768px) {\n      .features {\n        padding: 60px 0;\n      }\n\n      .features h2 {\n        font-size: 28px;\n      }\n\n      .features-grid {\n        grid-template-columns: 1fr;\n        gap: 24px;\n      }\n    }\n\n    /* Results Section */\n    .results {\n      padding: 80px 0;\n      background: linear-gradient(135deg, var(--navy) 0%, #1a3f5c 100%);\n      color: var(--white);\n    }\n\n    .results h2 {\n      font-size: 36px;\n      font-weight: 800;\n      margin-bottom: 48px;\n      text-align: center;\n    }\n\n    .results-grid {\n      display: grid;\n      grid-template-columns: repeat(3, 1fr);\n      gap: 40px;\n    }\n\n    .result-card {\n      text-align: center;\n    }\n\n    .result-value {\n      font-size: 48px;\n      font-weight: 800;\n      color: var(--accent);\n      margin-bottom: 8px;\n    }\n\n    .result-label {\n      font-size: 16px;\n      color: #c7d6e8;\n      line-height: 1.5;\n    }\n\n    @media (max-width: 768px) {\n      .results {\n        padding: 60px 0;\n      }\n\n      .results h2 {\n        font-size: 28px;\n      }\n\n      .results-grid {\n        grid-template-columns: 1fr;\n        gap: 32px;\n      }\n    }\n\n    /* CTA Section */\n    .cta-final {\n      padding: 80px 0;\n    }\n\n    .cta-final h2 {\n      font-size: 36px;\n      font-weight: 800;\n      color: var(--navy);\n      margin-bottom: 20px;\n      text-align: center;\n    }\n\n    .cta-final p {\n      font-size: 18px;\n      color: var(--gray-500);\n      margin-bottom: 40px;\n      text-align: center;\n      max-width: 600px;\n      margin-left: auto;\n      margin-right: auto;\n    }\n\n    .cta-buttons {\n      display: flex;\n      gap: 16px;\n      justify-content: center;\n      flex-wrap: wrap;\n    }\n\n    @media (max-width: 768px) {\n      .cta-final {\n        padding: 60px 0;\n      }\n\n      .cta-final h2 {\n        font-size: 28px;\n      }\n\n      .cta-final p {\n        font-size: 16px;\n      }\n\n      .cta-buttons {\n        flex-direction: column;\n      }\n\n      .cta-buttons .btn-primary,\n      .cta-buttons .btn-secondary {\n        width: 100%;\n      }\n    }\n\n    /* Footer */\n    footer {\n      background: var(--gray-900);\n      color: var(--gray-300);\n      padding: 40px 0;\n      font-size: 13px;\n      border-top: 1px solid var(--gray-200);\n    }\n\n    .footer-content {\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n    }\n\n    .footer-links {\n      display: flex;\n      gap: 24px;\n    }\n\n    .footer-links a {\n      color: var(--gray-300);\n      text-decoration: none;\n      transition: color 0.2s;\n    }\n\n    .footer-links a:hover {\n      color: var(--accent);\n    }\n\n    @media (max-width: 768px) {\n      .footer-content {\n        flex-direction: column;\n        gap: 20px;\n      }\n\n      .footer-links {\n        flex-direction: column;\n        gap: 12px;\n      }\n    }\n  </style>\n</head>\n<body>\n  <!-- Header -->\n  <header>\n    <div class=\"container\">\n      <div class=\"header-content\">\n        <a href=\"#\" class=\"logo\">VES<span>SIQ</span></a>\n        <nav>\n          <a href=\"#problem\">The Problem</a>\n          <a href=\"#solution\">How It Works</a>\n          <a href=\"#features\">Features</a>\n          <a href=\"#results\">Results</a>\n          <button class=\"cta-button\">Schedule Demo</button>\n        </nav>\n      </div>\n    </div>\n  </header>\n\n  <!-- Hero Section -->\n  <section class=\"hero\">\n    <div class=\"container\">\n      <div class=\"hero-content\">\n        <h1>Stop Losing Money to Billing Errors</h1>\n        <p>VESSIQ catches overcharges and matches invoices to contract rates automatically \u2014 so your team doesn't have to.</p>\n\n        <div class=\"stat\">\n          <div class=\"stat-value\">Up to 8%</div>\n          <div class=\"stat-label\">Average Recovery</div>\n        </div>\n\n        <div class=\"hero-buttons\">\n          <button class=\"btn-primary\">Start Free Trial</button>\n          <button class=\"btn-secondary\">See a Demo</button>\n        </div>\n      </div>\n    </div>\n  </section>\n\n  <!-- Problem Section -->\n  <section class=\"problem\" id=\"problem\">\n    <div class=\"container\">\n      <h2>The Current State of Freight Invoicing</h2>\n      <div class=\"problem-grid\">\n        <div class=\"problem-card\">\n          <div class=\"problem-icon\">\ud83d\udcc4</div>\n          <h3>Multiple Formats</h3>\n          <p>EDI, PDF, CSV, email attachments. Every carrier and terminal has a different system. Manual data entry is slow and error-prone.</p>\n        </div>\n        <div class=\"problem-card\">\n          <div class=\"problem-icon\">\ud83d\udd0d</div>\n          <h3>Hidden Overcharges</h3>\n          <p>Invoices contain subtle fuel surcharges, documentation fees, and port charges that slip past your team. Margin erosion is silent.</p>\n        </div>\n        <div class=\"problem-card\">\n          <div class=\"problem-icon\">\u2699\ufe0f</div>\n          <h3>Manual Reconciliation</h3>\n          <p>Your team spends hours matching invoices to POs and contracts. It's tedious, and mistakes compound quickly.</p>\n        </div>\n      </div>\n    </div>\n  </section>\n\n  <!-- Solution Section -->\n  <section class=\"solution\" id=\"solution\">\n    <div class=\"container\">\n      <h2>How VESSIQ Works</h2>\n      <div class=\"solution-flow\">\n        <div class=\"flow-step active\">\n          <div class=\"flow-number\">1</div>\n          <h4>Ingest</h4>\n          <p>Feed us invoices in any format \u2014 EDI 315, PDF, CSV, or email. We handle the rest.</p>\n        </div>\n        <div class=\"flow-step\">\n          <div class=\"flow-number\">2</div>\n          <h4>Normalize</h4>\n          <p>Our engine extracts and standardizes every field into a unified schema.</p>\n        </div>\n        <div class=\"flow-step\">\n          <div class=\"flow-number\">3</div>\n          <h4>Validate</h4>\n          <p>Match against your contract rates and flag overcharges in real time.</p>\n        </div>\n        <div class=\"flow-step\">\n          <div class=\"flow-number\">4</div>\n          <h4>Act</h4>\n          <p>Export clean data or trigger disputes. Your team stays in control.</p>\n        </div>\n      </div>\n    </div>\n  </section>\n\n  <!-- Features Section -->\n  <section class=\"features\" id=\"features\">\n    <div class=\"container\">\n      <h2>Built for Logistics Teams</h2>\n      <div class=\"features-grid\">\n        <div class=\"feature-item\">\n          <div class=\"feature-check\">\u2713</div>\n          <div class=\"feature-text\">\n            <h3>Multi-Format Parsing</h3>\n            <p>Automatically extract data from EDI X12 315, CSVs, and PDFs without manual setup.</p>\n          </div>\n        </div>\n        <div class=\"feature-item\">\n          <div class=\"feature-check\">\u2713</div>\n          <div class=\"feature-text\">\n            <h3>Contract Rate Matching</h3>\n            <p>Compare every invoice against your negotiated rates. Flag deviations instantly.</p>\n          </div>\n        </div>\n        <div class=\"feature-item\">\n          <div class=\"feature-check\">\u2713</div>\n          <div class=\"feature-text\">\n            <h3>Unified Schema</h3>\n            <p>All your data in one normalized format, ready for analytics or ERP integration.</p>\n          </div>\n        </div>\n        <div class=\"feature-item\">\n          <div class=\"feature-check\">\u2713</div>\n          <div class=\"feature-text\">\n            <h3>API-First</h3>\n            <p>Simple REST endpoints. Plug VESSIQ into your existing workflow in hours.</p>\n          </div>\n        </div>\n        <div class=\"feature-item\">\n          <div class=\"feature-check\">\u2713</div>\n          <div class=\"feature-text\">\n            <h3>Audit Trail</h3>\n            <p>Every invoice is timestamped and versioned. Full visibility for disputes.</p>\n          </div>\n        </div>\n        <div class=\"feature-item\">\n          <div class=\"feature-check\">\u2713</div>\n          <div class=\"feature-text\">\n            <h3>No Manual Config</h3>\n            <p>YAML-driven mappings. Add new invoice types without touching code.</p>\n          </div>\n        </div>\n      </div>\n    </div>\n  </section>\n\n  <!-- Results Section -->\n  <section class=\"results\" id=\"results\">\n    <div class=\"container\">\n      <h2>What You Get</h2>\n      <div class=\"results-grid\">\n        <div class=\"result-card\">\n          <div class=\"result-value\">8%</div>\n          <div class=\"result-label\">Average invoice recovery through overcharge detection</div>\n        </div>\n        <div class=\"result-card\">\n          <div class=\"result-value\">5h/week</div>\n          <div class=\"result-label\">Freed up from manual invoice reconciliation</div>\n        </div>\n        <div class=\"result-card\">\n          <div class=\"result-value\">99.9%</div>\n          <div class=\"result-label\">Accuracy on normalized data</div>\n        </div>\n      </div>\n    </div>\n  </section>\n\n  <!-- Final CTA -->\n  <section class=\"cta-final\">\n    <div class=\"container\">\n      <h2>See VESSIQ in Action</h2>\n      <p>Let us show you how other logistics companies have cut billing disputes and recovered thousands per month.</p>\n      <div class=\"cta-buttons\">\n        <button class=\"btn-primary\">Schedule 15-Minute Demo</button>\n        <button class=\"btn-secondary\">Explore the API</button>\n      </div>\n    </div>\n  </section>\n\n  <!-- Footer -->\n  <footer>\n    <div class=\"container\">\n      <div class=\"footer-content\">\n        <div>&copy; 2026 VESSIQ. All rights reserved.</div>\n        <div class=\"footer-links\">\n          <a href=\"#\">Privacy</a>\n          <a href=\"#\">Terms</a>\n          <a href=\"#\">Help Center</a>\n          <a href=\"#\">Contact</a>\n        </div>\n      </div>\n    </div>\n  </footer>\n\n  <script>\n    // Smooth scroll for navigation links\n    document.querySelectorAll('a[href^=\"#\"]').forEach(anchor => {\n      anchor.addEventListener('click', function(e) {\n        const href = this.getAttribute('href');\n        if (href !== '#') {\n          e.preventDefault();\n          const target = document.querySelector(href);\n          if (target) {\n            target.scrollIntoView({ behavior: 'smooth' });\n          }\n        }\n      });\n    });\n\n    // Button interactions\n    document.querySelectorAll('.cta-button, .btn-primary, .btn-secondary').forEach(button => {\n      button.addEventListener('click', function() {\n        const text = this.textContent;\n        if (text.includes('Demo') || text.includes('Schedule')) {\n          alert('Schedule a demo with your sales rep.');\n        } else if (text.includes('Trial')) {\n          alert('Create your account to start the free trial.');\n        } else if (text.includes('API')) {\n          alert('Visit our API documentation at api.vessiq.io');\n        }\n      });\n    });\n\n    // Animate flow steps on scroll\n    const observer = new IntersectionObserver(entries => {\n      entries.forEach(entry => {\n        if (entry.isIntersecting) {\n          entry.target.classList.add('active');\n        }\n      });\n    }, { threshold: 0.5 });\n\n    document.querySelectorAll('.flow-step').forEach(step => {\n      observer.observe(step);\n    });\n  </script>\n</body>\n</html>\n"}], "grading": null}, {"id": "eval-3-without-skill", "prompt": "Make a simple landing page for VESSIQ \u2014 something I could send to a prospect before a call so they understand what we do. Keep it short and punchy.", "eval_id": 3, "outputs": [{"name": "landing.html", "type": "text", "content": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>VESSIQ - Maritime Data Normalization Platform</title>\n    <style>\n        * {\n            margin: 0;\n            padding: 0;\n            box-sizing: border-box;\n        }\n\n        body {\n            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;\n            color: #1a1a1a;\n            line-height: 1.6;\n        }\n\n        /* Navigation */\n        nav {\n            display: flex;\n            justify-content: space-between;\n            align-items: center;\n            padding: 20px 60px;\n            background: #fff;\n            border-bottom: 1px solid #eee;\n        }\n\n        .logo {\n            font-size: 24px;\n            font-weight: 700;\n            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);\n            -webkit-background-clip: text;\n            -webkit-text-fill-color: transparent;\n            background-clip: text;\n        }\n\n        nav a {\n            color: #1a1a1a;\n            text-decoration: none;\n            margin-left: 40px;\n            font-size: 14px;\n            font-weight: 500;\n            transition: color 0.3s;\n        }\n\n        nav a:hover {\n            color: #2563eb;\n        }\n\n        /* Hero Section */\n        .hero {\n            padding: 100px 60px;\n            max-width: 1200px;\n            margin: 0 auto;\n            text-align: center;\n        }\n\n        .hero h1 {\n            font-size: 56px;\n            font-weight: 700;\n            margin-bottom: 20px;\n            line-height: 1.2;\n            color: #1a1a1a;\n        }\n\n        .hero .subtitle {\n            font-size: 20px;\n            color: #666;\n            margin-bottom: 12px;\n        }\n\n        .hero p {\n            font-size: 18px;\n            color: #666;\n            max-width: 700px;\n            margin: 0 auto 40px;\n            line-height: 1.8;\n        }\n\n        .cta-button {\n            display: inline-block;\n            padding: 14px 32px;\n            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);\n            color: white;\n            text-decoration: none;\n            border-radius: 6px;\n            font-weight: 600;\n            font-size: 16px;\n            transition: transform 0.3s, box-shadow 0.3s;\n            border: none;\n            cursor: pointer;\n            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);\n        }\n\n        .cta-button:hover {\n            transform: translateY(-2px);\n            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);\n        }\n\n        /* Problem Section */\n        .problem {\n            background: #f9fafb;\n            padding: 80px 60px;\n            margin-top: 60px;\n        }\n\n        .problem-container {\n            max-width: 1200px;\n            margin: 0 auto;\n        }\n\n        .section-title {\n            font-size: 36px;\n            font-weight: 700;\n            margin-bottom: 50px;\n            text-align: center;\n            color: #1a1a1a;\n        }\n\n        .problem-grid {\n            display: grid;\n            grid-template-columns: 1fr 1fr;\n            gap: 40px;\n        }\n\n        .problem-item {\n            background: white;\n            padding: 30px;\n            border-radius: 8px;\n            border: 1px solid #e5e7eb;\n            transition: all 0.3s;\n        }\n\n        .problem-item:hover {\n            border-color: #2563eb;\n            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.1);\n        }\n\n        .problem-item h3 {\n            font-size: 18px;\n            font-weight: 600;\n            margin-bottom: 12px;\n            color: #1a1a1a;\n        }\n\n        .problem-item p {\n            color: #666;\n            font-size: 15px;\n        }\n\n        .icon {\n            font-size: 32px;\n            margin-bottom: 15px;\n        }\n\n        /* Solution Section */\n        .solution {\n            padding: 80px 60px;\n            max-width: 1200px;\n            margin: 0 auto;\n        }\n\n        .solution-content {\n            display: grid;\n            grid-template-columns: 1fr 1fr;\n            gap: 60px;\n            align-items: center;\n        }\n\n        .solution-text h2 {\n            font-size: 36px;\n            font-weight: 700;\n            margin-bottom: 20px;\n            color: #1a1a1a;\n        }\n\n        .solution-text p {\n            color: #666;\n            margin-bottom: 20px;\n            font-size: 16px;\n        }\n\n        .feature-list {\n            list-style: none;\n            margin: 30px 0;\n        }\n\n        .feature-list li {\n            padding: 12px 0;\n            padding-left: 30px;\n            position: relative;\n            color: #1a1a1a;\n            font-weight: 500;\n        }\n\n        .feature-list li:before {\n            content: \"\u2713\";\n            position: absolute;\n            left: 0;\n            color: #10b981;\n            font-weight: 700;\n            font-size: 18px;\n        }\n\n        .solution-graphic {\n            background: linear-gradient(135deg, #f0f9ff 0%, #f0fdf4 100%);\n            padding: 60px;\n            border-radius: 12px;\n            text-align: center;\n            color: #666;\n            font-size: 14px;\n        }\n\n        /* Benefits Section */\n        .benefits {\n            background: #f9fafb;\n            padding: 80px 60px;\n        }\n\n        .benefits-container {\n            max-width: 1200px;\n            margin: 0 auto;\n        }\n\n        .benefits-grid {\n            display: grid;\n            grid-template-columns: 1fr 1fr 1fr;\n            gap: 40px;\n            margin-top: 50px;\n        }\n\n        .benefit-card {\n            background: white;\n            padding: 40px 30px;\n            border-radius: 8px;\n            border: 1px solid #e5e7eb;\n            text-align: center;\n        }\n\n        .benefit-card .number {\n            font-size: 48px;\n            font-weight: 700;\n            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);\n            -webkit-background-clip: text;\n            -webkit-text-fill-color: transparent;\n            background-clip: text;\n            margin-bottom: 15px;\n        }\n\n        .benefit-card h3 {\n            font-size: 18px;\n            font-weight: 600;\n            margin-bottom: 12px;\n            color: #1a1a1a;\n        }\n\n        .benefit-card p {\n            color: #666;\n            font-size: 14px;\n        }\n\n        /* How It Works */\n        .how-it-works {\n            padding: 80px 60px;\n            max-width: 1200px;\n            margin: 0 auto;\n        }\n\n        .steps {\n            display: grid;\n            grid-template-columns: 1fr 1fr 1fr 1fr;\n            gap: 30px;\n            margin-top: 50px;\n        }\n\n        .step {\n            text-align: center;\n        }\n\n        .step-number {\n            width: 50px;\n            height: 50px;\n            background: #2563eb;\n            color: white;\n            border-radius: 50%;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            font-weight: 700;\n            font-size: 20px;\n            margin: 0 auto 20px;\n        }\n\n        .step h3 {\n            font-size: 16px;\n            font-weight: 600;\n            margin-bottom: 10px;\n            color: #1a1a1a;\n        }\n\n        .step p {\n            color: #666;\n            font-size: 14px;\n        }\n\n        .step-arrow {\n            display: none;\n        }\n\n        @media (max-width: 900px) {\n            .steps {\n                grid-template-columns: 1fr 1fr;\n            }\n        }\n\n        /* CTA Section */\n        .cta-section {\n            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);\n            padding: 80px 60px;\n            text-align: center;\n            margin-top: 60px;\n        }\n\n        .cta-section h2 {\n            color: white;\n            font-size: 42px;\n            font-weight: 700;\n            margin-bottom: 20px;\n        }\n\n        .cta-section p {\n            color: rgba(255, 255, 255, 0.9);\n            font-size: 18px;\n            margin-bottom: 30px;\n        }\n\n        .cta-button-white {\n            display: inline-block;\n            padding: 14px 32px;\n            background: white;\n            color: #2563eb;\n            text-decoration: none;\n            border-radius: 6px;\n            font-weight: 600;\n            font-size: 16px;\n            transition: transform 0.3s, box-shadow 0.3s;\n            border: none;\n            cursor: pointer;\n        }\n\n        .cta-button-white:hover {\n            transform: translateY(-2px);\n            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);\n        }\n\n        /* Footer */\n        footer {\n            background: #1f2937;\n            color: #9ca3af;\n            padding: 40px 60px;\n            text-align: center;\n            font-size: 14px;\n        }\n\n        /* Responsive */\n        @media (max-width: 768px) {\n            nav {\n                flex-direction: column;\n                gap: 20px;\n                padding: 20px 30px;\n            }\n\n            .hero {\n                padding: 60px 30px;\n            }\n\n            .hero h1 {\n                font-size: 36px;\n            }\n\n            .problem-grid,\n            .benefits-grid,\n            .solution-content {\n                grid-template-columns: 1fr;\n            }\n\n            .problem,\n            .solution,\n            .benefits,\n            .how-it-works,\n            .cta-section {\n                padding: 60px 30px;\n            }\n\n            .section-title {\n                font-size: 28px;\n            }\n        }\n    </style>\n</head>\n<body>\n    <!-- Navigation -->\n    <nav>\n        <div class=\"logo\">VESSIQ</div>\n        <div>\n            <a href=\"#problem\">Problem</a>\n            <a href=\"#solution\">Solution</a>\n            <a href=\"#how\">How It Works</a>\n        </div>\n    </nav>\n\n    <!-- Hero Section -->\n    <section class=\"hero\">\n        <div class=\"subtitle\">Maritime Data Intelligence</div>\n        <h1>Stop Overpaying for Ocean Freight</h1>\n        <p>VESSIQ automatically detects billing errors and overcharges in your maritime invoices. Normalize messy invoice data from any source, match against contract rates, and recover lost revenue in seconds.</p>\n        <button class=\"cta-button\">Schedule a Demo</button>\n    </section>\n\n    <!-- Problem Section -->\n    <section class=\"problem\" id=\"problem\">\n        <div class=\"problem-container\">\n            <h2 class=\"section-title\">The Shipping Invoice Nightmare</h2>\n            <div class=\"problem-grid\">\n                <div class=\"problem-item\">\n                    <div class=\"icon\">\ud83d\udccb</div>\n                    <h3>Messy Data Formats</h3>\n                    <p>EDI files, PDFs, CSVs, and email attachments. Every freight provider sends invoices in a different format, and integrating them is painful.</p>\n                </div>\n                <div class=\"problem-item\">\n                    <div class=\"icon\">\ud83e\uddee</div>\n                    <h3>Manual Rate Matching</h3>\n                    <p>Your team manually compares invoiced rates against contracts. It's slow, error-prone, and doesn't scale as your volume grows.</p>\n                </div>\n                <div class=\"problem-item\">\n                    <div class=\"icon\">\ud83d\udcb0</div>\n                    <h3>Silent Overcharges</h3>\n                    <p>Billing errors slip through. Carriers systematically overbill on accessorial fees, surcharges, and currency spreads. You never know.</p>\n                </div>\n                <div class=\"problem-item\">\n                    <div class=\"icon\">\u23f1\ufe0f</div>\n                    <h3>Wasted Audit Hours</h3>\n                    <p>Your operations team spends 20+ hours a week on invoice reconciliation instead of strategy and vendor management.</p>\n                </div>\n            </div>\n        </div>\n    </section>\n\n    <!-- Solution Section -->\n    <section class=\"solution\" id=\"solution\">\n        <div class=\"solution-content\">\n            <div class=\"solution-text\">\n                <h2>Meet VESSIQ</h2>\n                <p>Think Stripe for maritime data. We normalize chaotic invoice streams into clean, queryable intelligence.</p>\n                <ul class=\"feature-list\">\n                    <li><strong>Ingest Any Format</strong> \u2014 EDI, PDF, CSV. No custom integrations needed.</li>\n                    <li><strong>Unified Schema</strong> \u2014 All invoices speak the same language.</li>\n                    <li><strong>Automatic Rate Matching</strong> \u2014 Compare charges against your contract terms in real-time.</li>\n                    <li><strong>Flag Overcharges</strong> \u2014 Identify billing errors before payment.</li>\n                    <li><strong>REST API</strong> \u2014 Plug normalized data directly into your systems.</li>\n                </ul>\n                <p style=\"margin-top: 30px; color: #10b981; font-weight: 600;\">Average customer recovers $50K+ in billing errors per year.</p>\n            </div>\n            <div class=\"solution-graphic\">\n                <p style=\"font-weight: 600; margin-bottom: 20px; color: #1a1a1a;\">Invoice Data Flow</p>\n                <p>EDI 315 \u2192 Normalize \u2192 Validate \u2192 Match \u2192 Flag Errors</p>\n                <p style=\"margin-top: 20px; font-size: 12px; color: #999;\">All in your secure environment</p>\n            </div>\n        </div>\n    </section>\n\n    <!-- Benefits Section -->\n    <section class=\"benefits\">\n        <div class=\"benefits-container\">\n            <h2 class=\"section-title\">What You Get</h2>\n            <div class=\"benefits-grid\">\n                <div class=\"benefit-card\">\n                    <div class=\"number\">48hrs</div>\n                    <h3>Quick Setup</h3>\n                    <p>From onboarding to processing invoices in under two days, not two months.</p>\n                </div>\n                <div class=\"benefit-card\">\n                    <div class=\"number\">100%</div>\n                    <h3>Data Coverage</h3>\n                    <p>Process every invoice format your carriers send without manual workarounds.</p>\n                </div>\n                <div class=\"benefit-card\">\n                    <div class=\"number\">$50K+</div>\n                    <h3>Annual Savings</h3>\n                    <p>Typical customer recovers six figures in billing errors and overcharges.</p>\n                </div>\n            </div>\n        </div>\n    </section>\n\n    <!-- How It Works Section -->\n    <section class=\"how-it-works\" id=\"how\">\n        <h2 class=\"section-title\">How It Works</h2>\n        <div class=\"steps\">\n            <div class=\"step\">\n                <div class=\"step-number\">1</div>\n                <h3>Upload</h3>\n                <p>Send invoices in any format to our API.</p>\n            </div>\n            <div class=\"step\">\n                <div class=\"step-number\">2</div>\n                <h3>Normalize</h3>\n                <p>Unified schema instantly makes messy data clean.</p>\n            </div>\n            <div class=\"step\">\n                <div class=\"step-number\">3</div>\n                <h3>Match</h3>\n                <p>Compare against your contract rates automatically.</p>\n            </div>\n            <div class=\"step\">\n                <div class=\"step-number\">4</div>\n                <h3>Act</h3>\n                <p>Flag overcharges before they cost you money.</p>\n            </div>\n        </div>\n    </section>\n\n    <!-- CTA Section -->\n    <section class=\"cta-section\">\n        <h2>Ready to Recover Lost Revenue?</h2>\n        <p>Talk to a shipping expert about how to stop overpaying for ocean freight.</p>\n        <button class=\"cta-button-white\">Schedule a 15-Minute Call</button>\n    </section>\n\n    <!-- Footer -->\n    <footer>\n        <p>&copy; 2026 VESSIQ. Bringing clarity to maritime logistics.</p>\n    </footer>\n</body>\n</html>\n"}], "grading": null}], "previous_feedback": {}, "previous_outputs": {}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VESSIQ — Ocean Freight Invoice Audit</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #0B1F3A;
+      --blue: #1A56A0;
+      --accent: #0EA5E9;
+      --green: #10B981;
+      --red: #EF4444;
+      --yellow: #F59E0B;
+      --gray-50: #F8FAFC;
+      --gray-100: #F1F5F9;
+      --gray-200: #E2E8F0;
+      --gray-300: #CBD5E1;
+      --gray-500: #64748B;
+      --gray-700: #334155;
+      --gray-900: #0F172A;
+      --white: #FFFFFF;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-900);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--navy);
+      padding: 18px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo { display: flex; align-items: center; gap: 12px; }
+    .logo-mark {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 16px; color: white; letter-spacing: -1px;
+    }
+    .logo-text { color: white; font-size: 22px; font-weight: 700; letter-spacing: 1px; }
+    .logo-sub { color: #94A3B8; font-size: 12px; margin-top: 1px; letter-spacing: 0.5px; }
+    .header-badge {
+      background: rgba(14,165,233,0.15);
+      border: 1px solid rgba(14,165,233,0.3);
+      color: var(--accent);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, var(--navy) 0%, #1A3A6B 100%);
+      padding: 56px 48px 48px;
+      text-align: center;
+    }
+    .hero h1 {
+      color: white;
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1.2;
+      max-width: 640px;
+      margin: 0 auto 16px;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero p {
+      color: #94A3B8;
+      font-size: 17px;
+      max-width: 520px;
+      margin: 0 auto 32px;
+      line-height: 1.6;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      margin-top: 8px;
+    }
+    .stat { text-align: center; }
+    .stat-num { color: var(--accent); font-size: 28px; font-weight: 800; }
+    .stat-label { color: #64748B; font-size: 12px; margin-top: 4px; letter-spacing: 0.5px; text-transform: uppercase; }
+
+    /* ── Steps Nav ── */
+    .steps-nav {
+      background: white;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 48px;
+      display: flex;
+      gap: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .step-tab {
+      padding: 18px 28px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-500);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .step-tab:hover { color: var(--blue); }
+    .step-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+    .step-num {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--gray-200);
+      color: var(--gray-500);
+      font-size: 11px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .step-tab.active .step-num { background: var(--blue); color: white; }
+    .step-tab.done .step-num { background: var(--green); color: white; }
+
+    /* ── Content panels ── */
+    .content { padding: 40px 48px; max-width: 1200px; margin: 0 auto; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── Section Headers ── */
+    .section-header {
+      margin-bottom: 28px;
+    }
+    .section-header h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+    .section-header p {
+      color: var(--gray-500);
+      margin-top: 6px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ── Raw Invoice Panel ── */
+    .invoice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+    .invoice-doc {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .invoice-doc-header {
+      background: var(--gray-100);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .invoice-doc-header span { font-size: 12px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; }
+    .format-badge {
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .format-pdf { background: #FEE2E2; color: #B91C1C; }
+    .format-edi { background: #FEF3C7; color: #92400E; }
+    .format-csv { background: #D1FAE5; color: #065F46; }
+    .invoice-body { padding: 20px; font-size: 12px; line-height: 1.8; }
+    .raw-text { font-family: 'Courier New', monospace; font-size: 11px; color: var(--gray-700); line-height: 1.7; white-space: pre-wrap; }
+    .sources-list { display: flex; flex-direction: column; gap: 12px; }
+    .source-item {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .source-icon {
+      width: 40px; height: 40px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .source-icon.pdf { background: #FEE2E2; }
+    .source-icon.edi { background: #FEF3C7; }
+    .source-icon.csv { background: #D1FAE5; }
+    .source-info h4 { font-size: 13px; font-weight: 600; color: var(--gray-900); }
+    .source-info p { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+    .source-meta { margin-top: 6px; display: flex; gap: 8px; }
+    .meta-chip {
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 600;
+      background: var(--gray-100);
+      color: var(--gray-500);
+    }
+
+    /* ── Normalize Panel ── */
+    .schema-card {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+    }
+    .schema-card-header {
+      background: var(--navy);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .schema-card-header h3 { color: white; font-size: 13px; font-weight: 600; }
+    .schema-card-header .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .schema-body { padding: 0; }
+    .field-row {
+      display: grid;
+      grid-template-columns: 200px 140px 1fr;
+      gap: 0;
+      border-bottom: 1px solid var(--gray-100);
+      font-size: 12px;
+      align-items: center;
+    }
+    .field-row:last-child { border-bottom: none; }
+    .field-row.header-row {
+      background: var(--gray-50);
+      font-weight: 700;
+      font-size: 11px;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .field-cell { padding: 10px 16px; }
+    .field-name { font-family: 'Courier New', monospace; font-weight: 600; color: var(--blue); font-size: 11px; }
+    .field-type {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 8px;
+      display: inline-block;
+    }
+    .type-string { background: #EFF6FF; color: #1D4ED8; }
+    .type-enum { background: #F5F3FF; color: #6D28D9; }
+    .type-float { background: #ECFDF5; color: #065F46; }
+    .type-datetime { background: #FFF7ED; color: #92400E; }
+    .type-list { background: #FDF2F8; color: #9D174D; }
+    .field-value { color: var(--gray-700); font-size: 12px; }
+    .field-value em { color: var(--gray-400); font-style: italic; font-size: 11px; }
+    .value-highlight { color: var(--gray-900); font-weight: 600; }
+
+    /* ── Discrepancy Panel ── */
+    .disc-summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .disc-card {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .disc-card.recovery { border-color: var(--green); background: #F0FDF4; }
+    .disc-card.flagged { border-color: var(--red); background: #FFF5F5; }
+    .disc-card.disputed { border-color: var(--yellow); background: #FFFBEB; }
+    .disc-card.rate { border-color: var(--accent); background: #F0F9FF; }
+    .disc-card-num { font-size: 30px; font-weight: 800; margin-bottom: 4px; }
+    .disc-card.recovery .disc-card-num { color: var(--green); }
+    .disc-card.flagged .disc-card-num { color: var(--red); }
+    .disc-card.disputed .disc-card-num { color: var(--yellow); }
+    .disc-card.rate .disc-card-num { color: var(--accent); }
+    .disc-card-label { font-size: 11px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .disc-table-wrap {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .disc-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .disc-table th {
+      background: var(--gray-50);
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .disc-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--gray-100);
+      vertical-align: middle;
+    }
+    .disc-table tr:last-child td { border-bottom: none; }
+    .disc-table tr:hover td { background: var(--gray-50); }
+    .disc-type-badge {
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+      white-space: nowrap;
+    }
+    .badge-rate { background: #FEE2E2; color: #B91C1C; }
+    .badge-surcharge { background: #FEF3C7; color: #92400E; }
+    .badge-unauthorized { background: #F3E8FF; color: #6D28D9; }
+    .badge-dd { background: #DBEAFE; color: #1D4ED8; }
+    .badge-duplicate { background: #FCE7F3; color: #BE185D; }
+    .amount-cell { font-weight: 700; color: var(--red); }
+    .status-badge {
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .status-disputable { background: #ECFDF5; color: #065F46; }
+    .status-flagged { background: #FEF3C7; color: #92400E; }
+    .conf-bar-wrap { display: flex; align-items: center; gap: 8px; }
+    .conf-bar { height: 6px; border-radius: 3px; background: var(--gray-200); overflow: hidden; width: 60px; }
+    .conf-fill { height: 100%; border-radius: 3px; background: var(--green); }
+    .conf-text { font-size: 11px; font-weight: 600; color: var(--gray-500); }
+
+    .recovery-box {
+      margin-top: 24px;
+      background: linear-gradient(135deg, #0B1F3A 0%, #1A3A6B 100%);
+      border-radius: 12px;
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .recovery-box-left h3 { color: white; font-size: 20px; font-weight: 700; }
+    .recovery-box-left p { color: #94A3B8; font-size: 13px; margin-top: 4px; }
+    .recovery-numbers { display: flex; gap: 40px; }
+    .rec-num { text-align: center; }
+    .rec-num-val { color: var(--accent); font-size: 28px; font-weight: 800; }
+    .rec-num-label { color: #64748B; font-size: 11px; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ── Scale Panel ── */
+    .scale-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px; }
+    .scale-card {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .scale-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--gray-900); }
+    .scale-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--gray-100); font-size: 13px; }
+    .scale-row:last-child { border-bottom: none; }
+    .scale-label { color: var(--gray-500); }
+    .scale-val { font-weight: 700; color: var(--gray-900); }
+    .scale-val.green { color: var(--green); }
+    .scale-val.blue { color: var(--blue); }
+    .highlight-row { background: var(--gray-50); border-radius: 8px; padding: 10px 12px; }
+    .next-steps {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 28px;
+    }
+    .next-steps h3 { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+    .step-list { display: flex; flex-direction: column; gap: 16px; }
+    .step-item { display: flex; align-items: flex-start; gap: 16px; }
+    .step-icon {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: white;
+      font-weight: 700;
+      font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-content h4 { font-size: 14px; font-weight: 600; color: var(--gray-900); }
+    .step-content p { font-size: 13px; color: var(--gray-500); margin-top: 3px; line-height: 1.5; }
+
+    /* ── Pipeline diagram ── */
+    .pipeline {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+    .pipe-step {
+      flex: 1;
+      min-width: 120px;
+      text-align: center;
+      padding: 20px 12px;
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      position: relative;
+    }
+    .pipe-step:not(:last-child)::after {
+      content: '→';
+      position: absolute;
+      right: -16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      font-size: 20px;
+      font-weight: 700;
+      z-index: 1;
+    }
+    .pipe-step:not(:last-child) { margin-right: 32px; }
+    .pipe-icon { font-size: 24px; margin-bottom: 8px; }
+    .pipe-label { font-size: 12px; font-weight: 700; color: var(--gray-700); }
+    .pipe-sub { font-size: 10px; color: var(--gray-500); margin-top: 3px; }
+
+    /* ── Buttons ── */
+    .btn-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; }
+    .btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: var(--blue); color: white; }
+    .btn-primary:hover { background: #1346A0; }
+    .btn-outline { background: white; color: var(--gray-700); border: 1px solid var(--gray-300); }
+    .btn-outline:hover { background: var(--gray-50); }
+
+    /* ── Progress indicator ── */
+    .progress-bar {
+      height: 3px;
+      background: var(--gray-200);
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .invoice-grid, .scale-grid { grid-template-columns: 1fr; }
+      .disc-summary { grid-template-columns: 1fr 1fr; }
+      .recovery-box { flex-direction: column; }
+      header { padding: 14px 20px; }
+      .content { padding: 24px 20px; }
+      .steps-nav { padding: 0 20px; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:25%"></div></div>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">V</div>
+    <div>
+      <div class="logo-text">VESSIQ</div>
+      <div class="logo-sub">Maritime Data Intelligence</div>
+    </div>
+  </div>
+  <div class="header-badge">LIVE DEMO — Ocean Freight Audit</div>
+</header>
+
+<div class="hero">
+  <h1>Your carrier invoices are hiding <span>recoverable money.</span><br>VESSIQ finds it automatically.</h1>
+  <p>We ingest ocean freight invoices in any format, normalize them against your contract rates, and flag every discrepancy — before you pay.</p>
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-num">$10B+</div>
+      <div class="stat-label">Ocean freight overcharges 2021–2024</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">80%</div>
+      <div class="stat-label">of carrier invoices contain errors</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">1–8%</div>
+      <div class="stat-label">of freight spend recoverable</div>
+    </div>
+  </div>
+</div>
+
+<nav class="steps-nav">
+  <div class="step-tab active" onclick="showPanel(1)" id="tab1">
+    <div class="step-num" id="num1">1</div> Raw Invoices Received
+  </div>
+  <div class="step-tab" onclick="showPanel(2)" id="tab2">
+    <div class="step-num" id="num2">2</div> VESSIQ Normalizes
+  </div>
+  <div class="step-tab" onclick="showPanel(3)" id="tab3">
+    <div class="step-num" id="num3">3</div> Discrepancies Flagged
+  </div>
+  <div class="step-tab" onclick="showPanel(4)" id="tab4">
+    <div class="step-num" id="num4">4</div> Scale & ROI
+  </div>
+</nav>
+
+<div class="content">
+
+  <!-- PANEL 1: Raw Invoices -->
+  <div class="panel active" id="panel1">
+    <div class="section-header">
+      <h2>Step 1 — Raw Invoices Arrive in Multiple Formats</h2>
+      <p>Pasha Hawaii receives carrier invoices from Maersk, CMA CGM, and others — each in a different format. No standardization. Manual review is time-consuming and error-prone.</p>
+    </div>
+
+    <div class="invoice-grid">
+      <div>
+        <div class="invoice-doc">
+          <div class="invoice-doc-header">
+            <span>Maersk Invoice — PDF Format</span>
+            <span class="format-badge format-pdf">PDF</span>
+          </div>
+          <div class="invoice-body">
+            <pre class="raw-text">MAERSK LINE — FREIGHT INVOICE
+Invoice No:   MAEU-INV-2024-08847
+Invoice Date: 2024-03-15
+Bill To:      Pasha Hawaii Transport Lines
+
+Shipment Details:
+  Bill of Lading:  MAEU123456789
+  Container:       MSCU1234567   (40' HC)
+  Origin:          Shanghai, China (CNSHA)
+  Destination:     Honolulu, Hawaii (USHNL)
+  Vessel / Voyage: MSC MAYA / 2024-W11-E
+  ETD:             2024-03-01
+  ETA:             2024-03-22
+
+Charges:
+  Ocean Freight (40HC)       USD  3,100.00
+  Bunker Adj. Factor (BAF)   USD    520.00
+  Terminal Handling (DTHC)   USD    285.00
+  Documentation Fee          USD     75.00
+  ISPS Security Surcharge    USD     28.00
+  Chassis Usage (5 days)     USD    150.00
+                             ───────────
+  TOTAL DUE                  USD  4,158.00
+
+Payment due: 30 days from invoice date
+Remit to: Maersk Finance, Copenhagen</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="sources-list">
+        <div style="font-size:13px; font-weight:700; color:var(--gray-700); margin-bottom:4px;">Invoice Sources This Month</div>
+
+        <div class="source-item">
+          <div class="source-icon pdf">📄</div>
+          <div class="source-info">
+            <h4>Maersk — PDF Invoices</h4>
+            <p>Emailed monthly as PDF attachments. No machine-readable format.</p>
+            <div class="source-meta">
+              <span class="meta-chip">PDF</span>
+              <span class="meta-chip">34 invoices/month</span>
+              <span class="meta-chip">Manual review</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="source-item">
+          <div class="source-icon edi">⚡</div>
+          <div class="source-info">
+            <h4>CMA CGM — EDI 310 Invoices</h4>
+            <p>Electronic invoices via EDI X12 310. Machine-readable but unique format per carrier.</p>
+            <div class="source-meta">
+              <span class="meta-chip">EDI 310</span>
+              <span class="meta-chip">18 invoices/month</span>
+              <span class="meta-chip">Partially automated</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="source-item">
+          <div class="source-icon csv">📊</div>
+          <div class="source-info">
+            <h4>Freight Forwarder — CSV Exports</h4>
+            <p>Consolidated CSV exports from forwarder portal. Includes pass-through carrier charges.</p>
+            <div class="source-meta">
+              <span class="meta-chip">CSV</span>
+              <span class="meta-chip">12 files/month</span>
+              <span class="meta-chip">Manual reconciliation</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#FFF5F5; border:1px solid #FCA5A5; border-radius:10px; padding:14px 16px; font-size:13px; color:#991B1B; line-height:1.6;">
+          ⚠️ <strong>Current state:</strong> Your AP team manually reviews each invoice. At 64 invoices/month, that's 30–40 hours of reconciliation — with no guarantee errors are caught.
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="showPanel(2)">See How VESSIQ Normalizes This →</button>
+    </div>
+  </div>
+
+  <!-- PANEL 2: Normalize -->
+  <div class="panel" id="panel2">
+    <div class="section-header">
+      <h2>Step 2 — VESSIQ Normalizes Every Invoice to One Schema</h2>
+      <p>Regardless of format — PDF, EDI, or CSV — VESSIQ extracts and maps every field to a unified schema. Your contract rates are loaded once; the engine matches automatically.</p>
+    </div>
+
+    <div class="pipeline">
+      <div class="pipe-step">
+        <div class="pipe-icon">📄</div>
+        <div class="pipe-label">Ingest</div>
+        <div class="pipe-sub">PDF / EDI / CSV</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">⚙️</div>
+        <div class="pipe-label">Parse</div>
+        <div class="pipe-sub">Extract raw fields</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">🔄</div>
+        <div class="pipe-label">Normalize</div>
+        <div class="pipe-sub">Map to schema</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">🔍</div>
+        <div class="pipe-label">Match</div>
+        <div class="pipe-sub">vs. contract rates</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">🚨</div>
+        <div class="pipe-label">Flag</div>
+        <div class="pipe-sub">Discrepancies</div>
+      </div>
+    </div>
+
+    <div class="schema-card">
+      <div class="schema-card-header">
+        <div class="dot"></div>
+        <h3>VesselInvoice — Normalized Output (Maersk Invoice MAEU-INV-2024-08847)</h3>
+      </div>
+      <div class="schema-body">
+        <div class="field-row header-row">
+          <div class="field-cell">Field</div>
+          <div class="field-cell">Type</div>
+          <div class="field-cell">Normalized Value</div>
+        </div>
+        <div class="field-row">
+          <div class="field-cell"><span class="field-name">invoice_id</span></div>
+          <div class="field-cell"><span class="field-type type-string">string</span></div>
+          <div class="field-cell field-value"><span class="value-highlight">MAEU-INV-2024-08847</span></div>
+        </div>
+        <div class="field-row">
+          <div class="field-cell"><span class="field-name">source_format</span></div>
+          <div class="field-cell"><span class="field-type type-enum">enum</span></div>
+          <div class="field-cell field-value"><span class="value-highlight">PDF</span></div>
+        </div>
+        <div class="field-row">
+          <div class="field-cell"><span class="field-name">carrier_name</span></div>
+          <div class="field-cell"><span class="field-type type-string">string</span></div>
+          <div class="field-cell field-value"><span class="value-highlight">MAERSK LINE</span></div>
+        </div>
+        <div class="field-row">
+          <div class="field-cell"><span class="field-name">carrier_scac</span></div>
+          <div class="field-cell"><span class="field-type type-string">string</span></div>
+          <div class="field-cell field-value"><span class="value-highlight">MAEU</span></div>
+        </div>
+        <div class="field-row">
+          <div class="field-cell"><span class="field-name">bill_of_lading</span></div>
+          <div class="field-cell"><span class="field-type type-string">string</span></div>
+          <div class="field-cell field-value"><span class="value-highlight">MAEU123456789</span></div>
+        </div>
+        <div class="field-row">
+          <div class="field-cell"><span class="field-name">container_number</span></div>
+          <div class="field-cell"><span class="field-type type-string">string</span></div>
+          <div class="field-cell field-value"><span class="value-highlight">MSCU1234567</span></div>
+        </div>
+        <div class="field-row">
+          <div class="field-cell"><span class="field-name">container_type</span></div>
+          <div class="field-cell"><span class="field-type type-enum">enum</span></div>
+          <div class="field-cell field-value"><span class="value-highlight">40HC</span></div>
+        </div>
+        <div class="field-row">
+          <div class="field-cell"><span class="field-name">port_of_loading</span></div>
+          <div class="field-cell"><span class="field-type type-string">string</span></div>
+          <div class="field-cell field-value"><span class="value-highlight">CNSHA</span> <em>(Shanghai, China)</em></div>
+        </div>
+        <div class="field-row">
+          <div class="field-cell"><span class="field-name">port_of_discharge</span></div>
+          <div class="field-cell"><span class="field-type type-string">string</span></div>
+          <div class="field-cell field-value"><span class="value-highlight">USHNL</span> <em>(Honolulu, Hawaii)</em></div>
+        </div>
+        <div class="field-row">
+          <div class="field-cell"><span class="field-name">vessel_name</span></div>
+          <div class="field-cell"><span class="field-type type-string">string</span></div>
+          <div class="field-cell field-value"><span class="value-highlight">MSC MAYA</span></div>
+        </div>
+        <div class="field-row">
+          <div class="field-cell"><span class="field-name">invoice_date</span></div>
+          <div class="field-cell"><span class="field-type type-datetime">datetime</span></div>
+          <div class="field-cell field-value"><span class="value-highlight">2024-03-15T00:00:00Z</span></div>
+        </div>
+        <div class="field-row">
+          <div class="field-cell"><span class="field-name">currency</span></div>
+          <div class="field-cell"><span class="field-type type-string">string</span></div>
+          <div class="field-cell field-value"><span class="value-highlight">USD</span></div>
+        </div>
+        <div class="field-row">
+          <div class="field-cell"><span class="field-name">invoice_total</span></div>
+          <div class="field-cell"><span class="field-type type-float">float</span></div>
+          <div class="field-cell field-value"><span class="value-highlight">4,158.00</span></div>
+        </div>
+        <div class="field-row">
+          <div class="field-cell"><span class="field-name">line_items</span></div>
+          <div class="field-cell"><span class="field-type type-list">list</span></div>
+          <div class="field-cell field-value">6 charges normalized <em>(ocean_freight, BAF, DTHC, doc_fee, ISPS, chassis)</em></div>
+        </div>
+        <div class="field-row">
+          <div class="field-cell"><span class="field-name">contract_reference</span></div>
+          <div class="field-cell"><span class="field-type type-string">string</span></div>
+          <div class="field-cell field-value"><span class="value-highlight">PASHA-MAEU-2024-CONTRACT-01</span></div>
+        </div>
+        <div class="field-row">
+          <div class="field-cell"><span class="field-name">matched_at</span></div>
+          <div class="field-cell"><span class="field-type type-datetime">datetime</span></div>
+          <div class="field-cell field-value"><span class="value-highlight">2024-03-15T14:32:07Z</span> <em>(auto)</em></div>
+        </div>
+        <div class="field-row">
+          <div class="field-cell"><span class="field-name">discrepancy_count</span></div>
+          <div class="field-cell"><span class="field-type type-float">int</span></div>
+          <div class="field-cell field-value" style="color:var(--red); font-weight:700;">4 discrepancies detected</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="showPanel(1)">← Back</button>
+      <button class="btn btn-primary" onclick="showPanel(3)">See Discrepancies Found →</button>
+    </div>
+  </div>
+
+  <!-- PANEL 3: Discrepancies -->
+  <div class="panel" id="panel3">
+    <div class="section-header">
+      <h2>Step 3 — Discrepancies Flagged Automatically</h2>
+      <p>VESSIQ matched invoice MAEU-INV-2024-08847 against your Maersk contract. 4 discrepancies found. Total overcharge on a single invoice: <strong style="color:var(--red)">$445.00</strong></p>
+    </div>
+
+    <div class="disc-summary">
+      <div class="disc-card flagged">
+        <div class="disc-card-num">4</div>
+        <div class="disc-card-label">Discrepancies Found</div>
+      </div>
+      <div class="disc-card recovery">
+        <div class="disc-card-num">$445</div>
+        <div class="disc-card-label">Overcharge This Invoice</div>
+      </div>
+      <div class="disc-card disputed">
+        <div class="disc-card-num">4/4</div>
+        <div class="disc-card-label">Auto-Disputable</div>
+      </div>
+      <div class="disc-card rate">
+        <div class="disc-card-num">100%</div>
+        <div class="disc-card-label">Confidence Score</div>
+      </div>
+    </div>
+
+    <div class="disc-table-wrap">
+      <table class="disc-table">
+        <thead>
+          <tr>
+            <th>Charge Type</th>
+            <th>Discrepancy</th>
+            <th>Contract Rate</th>
+            <th>Invoiced Amount</th>
+            <th>Overcharge</th>
+            <th>Confidence</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Ocean Freight (40HC)</strong><br><span style="font-size:11px;color:var(--gray-500)">CNSHA → USHNL</span></td>
+            <td><span class="disc-type-badge badge-rate">Rate Mismatch</span></td>
+            <td style="font-weight:600;">$2,800.00</td>
+            <td style="color:var(--red);font-weight:600;">$3,100.00</td>
+            <td class="amount-cell">−$300.00</td>
+            <td>
+              <div class="conf-bar-wrap">
+                <div class="conf-bar"><div class="conf-fill" style="width:97%"></div></div>
+                <span class="conf-text">97%</span>
+              </div>
+            </td>
+            <td><span class="status-badge status-disputable">Auto-Dispute</span></td>
+          </tr>
+          <tr>
+            <td><strong>Bunker Adj. Factor (BAF)</strong><br><span style="font-size:11px;color:var(--gray-500)">Mar 2024 BAF formula</span></td>
+            <td><span class="disc-type-badge badge-surcharge">Surcharge Error</span></td>
+            <td style="font-weight:600;">$450.00</td>
+            <td style="color:var(--red);font-weight:600;">$520.00</td>
+            <td class="amount-cell">−$70.00</td>
+            <td>
+              <div class="conf-bar-wrap">
+                <div class="conf-bar"><div class="conf-fill" style="width:94%"></div></div>
+                <span class="conf-text">94%</span>
+              </div>
+            </td>
+            <td><span class="status-badge status-disputable">Auto-Dispute</span></td>
+          </tr>
+          <tr>
+            <td><strong>Documentation Fee</strong><br><span style="font-size:11px;color:var(--gray-500)">Not in contract</span></td>
+            <td><span class="disc-type-badge badge-unauthorized">Unauthorized Charge</span></td>
+            <td style="font-weight:600;">$0.00</td>
+            <td style="color:var(--red);font-weight:600;">$75.00</td>
+            <td class="amount-cell">−$75.00</td>
+            <td>
+              <div class="conf-bar-wrap">
+                <div class="conf-bar"><div class="conf-fill" style="width:100%"></div></div>
+                <span class="conf-text">100%</span>
+              </div>
+            </td>
+            <td><span class="status-badge status-disputable">Auto-Dispute</span></td>
+          </tr>
+          <tr>
+            <td><strong>Chassis Usage</strong><br><span style="font-size:11px;color:var(--gray-500)">2 days used, billed 5</span></td>
+            <td><span class="disc-type-badge badge-dd">D&D Overbilling</span></td>
+            <td style="font-weight:600;">$60.00 <span style="font-size:10px;color:var(--gray-500)">(2 days × $30)</span></td>
+            <td style="color:var(--red);font-weight:600;">$150.00</td>
+            <td class="amount-cell">−$90.00</td>
+            <td>
+              <div class="conf-bar-wrap">
+                <div class="conf-bar"><div class="conf-fill" style="width:91%"></div></div>
+                <span class="conf-text">91%</span>
+              </div>
+            </td>
+            <td><span class="status-badge status-disputable">Auto-Dispute</span></td>
+          </tr>
+          <tr style="background:var(--gray-50);">
+            <td colspan="4" style="font-weight:700; text-align:right; padding-right:20px;">Total Overcharge:</td>
+            <td class="amount-cell" style="font-size:16px;">−$535.00</td>
+            <td colspan="2"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="recovery-box">
+      <div class="recovery-box-left">
+        <h3>Recovery Potential — This Invoice</h3>
+        <p>VESSIQ generates a dispute letter automatically. Maersk typically credits within 30–45 days.</p>
+      </div>
+      <div class="recovery-numbers">
+        <div class="rec-num">
+          <div class="rec-num-val">$535</div>
+          <div class="rec-num-label">Overcharged</div>
+        </div>
+        <div class="rec-num">
+          <div class="rec-num-val">$535</div>
+          <div class="rec-num-label">Recoverable</div>
+        </div>
+        <div class="rec-num">
+          <div class="rec-num-val">~35 min</div>
+          <div class="rec-num-label">Time saved vs. manual</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="showPanel(2)">← Back</button>
+      <button class="btn btn-primary" onclick="showPanel(4)">See Full ROI at Scale →</button>
+    </div>
+  </div>
+
+  <!-- PANEL 4: Scale -->
+  <div class="panel" id="panel4">
+    <div class="section-header">
+      <h2>Step 4 — What This Looks Like at Pasha's Scale</h2>
+      <p>One invoice with $535 in overcharges is meaningful. Across 64 monthly invoices — and annualized — the numbers become significant.</p>
+    </div>
+
+    <div class="scale-grid">
+      <div class="scale-card">
+        <h3>📊 Monthly Projection</h3>
+        <div class="scale-row">
+          <span class="scale-label">Invoices processed / month</span>
+          <span class="scale-val">64</span>
+        </div>
+        <div class="scale-row">
+          <span class="scale-label">Avg. overcharge rate (industry)</span>
+          <span class="scale-val">1–8%</span>
+        </div>
+        <div class="scale-row">
+          <span class="scale-label">Assumed avg. overcharge / invoice</span>
+          <span class="scale-val">$535</span>
+        </div>
+        <div class="scale-row highlight-row">
+          <span class="scale-label" style="font-weight:700;">Est. monthly overcharges</span>
+          <span class="scale-val green">~$34,000</span>
+        </div>
+      </div>
+
+      <div class="scale-card">
+        <h3>📈 Annual Projection</h3>
+        <div class="scale-row">
+          <span class="scale-label">Annual invoice volume</span>
+          <span class="scale-val">~768</span>
+        </div>
+        <div class="scale-row">
+          <span class="scale-label">Conservative recovery rate (50%)</span>
+          <span class="scale-val">$204,000</span>
+        </div>
+        <div class="scale-row">
+          <span class="scale-label">Optimistic recovery rate (80%)</span>
+          <span class="scale-val">$326,000</span>
+        </div>
+        <div class="scale-row highlight-row">
+          <span class="scale-label" style="font-weight:700;">AP hours eliminated</span>
+          <span class="scale-val green">360–480 hrs/yr</span>
+        </div>
+      </div>
+
+      <div class="scale-card">
+        <h3>💰 VESSIQ Pricing</h3>
+        <div class="scale-row">
+          <span class="scale-label">Model</span>
+          <span class="scale-val blue">Gainshare</span>
+        </div>
+        <div class="scale-row">
+          <span class="scale-label">VESSIQ fee</span>
+          <span class="scale-val">25% of recovery</span>
+        </div>
+        <div class="scale-row">
+          <span class="scale-label">Your net recovery (conservative)</span>
+          <span class="scale-val green">$153,000 / yr</span>
+        </div>
+        <div class="scale-row highlight-row">
+          <span class="scale-label" style="font-weight:700;">ROI on VESSIQ</span>
+          <span class="scale-val green">3:1 minimum</span>
+        </div>
+      </div>
+
+      <div class="scale-card">
+        <h3>🚀 Pilot Proposal</h3>
+        <div class="scale-row">
+          <span class="scale-label">What we need from you</span>
+          <span class="scale-val">3 months of invoices</span>
+        </div>
+        <div class="scale-row">
+          <span class="scale-label">What we deliver</span>
+          <span class="scale-val">Full audit report</span>
+        </div>
+        <div class="scale-row">
+          <span class="scale-label">Pilot duration</span>
+          <span class="scale-val">2–4 weeks</span>
+        </div>
+        <div class="scale-row highlight-row">
+          <span class="scale-label" style="font-weight:700;">Cost to pilot</span>
+          <span class="scale-val green">$0 upfront</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="next-steps">
+      <h3>What Happens Next</h3>
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-icon">1</div>
+          <div class="step-content">
+            <h4>Share 3 months of carrier invoices</h4>
+            <p>PDF, EDI, CSV — any format works. We handle the normalization. Takes 5 minutes on your end.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-icon">2</div>
+          <div class="step-content">
+            <h4>VESSIQ runs the audit in 2 weeks</h4>
+            <p>We parse every invoice, match against your contract rates, and identify every discrepancy. You get a full report with dollar amounts per carrier.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-icon">3</div>
+          <div class="step-content">
+            <h4>You see your recovery potential before committing</h4>
+            <p>No risk. You see the exact overcharges VESSIQ found. If there's nothing there, you owe us nothing. If there is — we start recovering it together.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-icon">4</div>
+          <div class="step-content">
+            <h4>Go live on all future invoices</h4>
+            <p>VESSIQ runs automatically on every invoice you receive. AP team gets flagged discrepancies before payment. Disputes generated automatically.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="showPanel(3)">← Back</button>
+      <button class="btn btn-primary" onclick="showPanel(1)">↺ Start Over</button>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<script>
+  const panels = [1,2,3,4];
+  const progress = [25, 50, 75, 100];
+
+  function showPanel(n) {
+    panels.forEach(i => {
+      document.getElementById('panel'+i).classList.remove('active');
+      document.getElementById('tab'+i).classList.remove('active');
+      if (i < n) {
+        document.getElementById('tab'+i).classList.add('done');
+        document.getElementById('num'+i).textContent = '✓';
+      } else {
+        document.getElementById('tab'+i).classList.remove('done');
+        document.getElementById('num'+i).textContent = i;
+      }
+    });
+    document.getElementById('panel'+n).classList.add('active');
+    document.getElementById('tab'+n).classList.add('active');
+    document.getElementById('num'+n).textContent = n;
+    document.getElementById('progressFill').style.width = progress[n-1]+'%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
+</body>
+</html>

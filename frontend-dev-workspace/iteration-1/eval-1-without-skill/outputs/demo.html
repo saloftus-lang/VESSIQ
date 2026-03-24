@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VESSIQ Invoice Audit Demo - Pasha Group</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a3a52 0%, #0d5a8f 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+            margin-bottom: 5px;
+        }
+
+        header .subtitle {
+            font-size: 0.95em;
+            opacity: 0.8;
+            margin-top: 15px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .step-section {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .step-section:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #0d5a8f 0%, #1a3a52 100%);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+
+        .step-header h2 {
+            font-size: 1.6em;
+            color: #1a3a52;
+        }
+
+        .step-content {
+            margin-left: 70px;
+            padding: 20px;
+            background: #f9fafb;
+            border-left: 4px solid #0d5a8f;
+            border-radius: 8px;
+        }
+
+        .step-content p {
+            margin-bottom: 12px;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .invoice-table thead {
+            background: #0d5a8f;
+            color: white;
+        }
+
+        .invoice-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .invoice-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .invoice-table tbody tr:hover {
+            background: #f5f5f5;
+        }
+
+        .error-row {
+            background: #fef2f2;
+        }
+
+        .error-row td {
+            color: #d32f2f;
+            font-weight: 500;
+        }
+
+        .finding {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+        }
+
+        .finding-title {
+            font-weight: 700;
+            color: #856404;
+            margin-bottom: 5px;
+        }
+
+        .finding-detail {
+            color: #5a5000;
+            font-size: 0.95em;
+        }
+
+        .roi-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e0e7ff 100%);
+            border-radius: 12px;
+            padding: 40px;
+            margin-top: 40px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .roi-section h2 {
+            font-size: 2em;
+            color: #1a3a52;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .roi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .roi-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid #0d5a8f;
+        }
+
+        .roi-card .number {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #0d5a8f;
+            margin: 10px 0;
+        }
+
+        .roi-card .label {
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 5px;
+        }
+
+        .roi-card .detail {
+            color: #999;
+            font-size: 0.85em;
+            margin-top: 10px;
+        }
+
+        .summary-box {
+            background: white;
+            border-left: 6px solid #0d5a8f;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 25px;
+        }
+
+        .summary-box h3 {
+            color: #1a3a52;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .summary-point {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .summary-point::before {
+            content: "✓";
+            color: #0d5a8f;
+            font-weight: bold;
+            margin-right: 12px;
+            font-size: 1.2em;
+        }
+
+        .summary-point span {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison-item {
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .comparison-item h4 {
+            color: #1a3a52;
+            margin-bottom: 10px;
+            font-size: 1.05em;
+        }
+
+        .comparison-item p {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.7;
+        }
+
+        .before {
+            border-top: 3px solid #d32f2f;
+        }
+
+        .after {
+            border-top: 3px solid #388e3c;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, #0d5a8f 0%, #1a3a52 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 40px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .cta-section h2 {
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .cta-section p {
+            margin-bottom: 25px;
+            font-size: 1.05em;
+            opacity: 0.95;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color: #0d5a8f;
+            padding: 14px 35px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+            background: #f0f0f0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 0.9em;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .step-content {
+                margin-left: 0;
+                padding-left: 15px;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .roi-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .interactive-demo {
+            background: #f0f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .data-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .data-flow-item {
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .data-flow-box {
+            background: white;
+            border: 2px solid #0d5a8f;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            font-weight: 500;
+            color: #0d5a8f;
+        }
+
+        .data-flow-arrow {
+            color: #0d5a8f;
+            font-size: 1.5em;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .step-section {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>VESSIQ Invoice Audit Demo</h1>
+        <p>Automated Carrier Invoice Verification & Overcharge Detection</p>
+        <p class="subtitle">For Pasha Group — See How VESSIQ Recovers Hidden Costs</p>
+    </header>
+
+    <div class="container">
+
+        <!-- STEP 1: DATA INGESTION -->
+        <div class="step-section">
+            <div class="step-header">
+                <div class="step-number">1</div>
+                <h2>Raw Invoice Data Ingestion</h2>
+            </div>
+            <div class="step-content">
+                <p>Carrier invoices arrive in multiple formats — EDI 315, CSV exports, or PDF scans. VESSIQ accepts all common maritime data sources without conversion overhead.</p>
+
+                <div class="data-flow">
+                    <div class="data-flow-item">
+                        <div class="data-flow-box">EDI X12 315</div>
+                        <div class="data-flow-arrow">↓</div>
+                    </div>
+                    <div class="data-flow-item">
+                        <div class="data-flow-box">Terminal CSV</div>
+                        <div class="data-flow-arrow">↓</div>
+                    </div>
+                    <div class="data-flow-item">
+                        <div class="data-flow-box">Custom XML</div>
+                        <div class="data-flow-arrow">↓</div>
+                    </div>
+                    <div class="data-flow-item">
+                        <div class="data-flow-box">VESSIQ Parser</div>
+                    </div>
+                </div>
+
+                <table class="invoice-table">
+                    <thead>
+                        <tr>
+                            <th>Source Format</th>
+                            <th>Example Data</th>
+                            <th>Parsed Automatically</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>EDI 315</strong></td>
+                            <td>Maersk, CMA CGM, Hapag-Lloyd invoices</td>
+                            <td>✓ Yes</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Terminal CSV</strong></td>
+                            <td>Port authority exports (POLB, POLA)</td>
+                            <td>✓ Yes</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Custom Formats</strong></td>
+                            <td>Client-specific proprietary formats</td>
+                            <td>✓ Configurable</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p style="margin-top: 15px;"><strong>Key benefit:</strong> No manual data entry. No format conversions. VESSIQ handles the parsing so your team can focus on strategy.</p>
+            </div>
+        </div>
+
+        <!-- STEP 2: NORMALIZATION -->
+        <div class="step-section">
+            <div class="step-header">
+                <div class="step-number">2</div>
+                <h2>Unified Schema Normalization</h2>
+            </div>
+            <div class="step-content">
+                <p>Raw invoices are normalized into a unified maritime event schema. This creates a "single source of truth" across all carriers and terminals, enabling consistent auditing rules.</p>
+
+                <div class="comparison-grid">
+                    <div class="comparison-item before">
+                        <h4>Before (Raw Data)</h4>
+                        <p><strong>Maersk Invoice:</strong> BKG#, ContainerID, BaseFreight, THC_Port, CFS_Fee, Bunker, Tax...</p>
+                        <p><strong>HAPAG Invoice:</strong> BookingNo, Container, OceanFreight, PortCharges, CFS, Surcharge...</p>
+                        <p style="color: #d32f2f; margin-top: 10px;"><em>Different field names. No consistency. Errors slip through.</em></p>
+                    </div>
+                    <div class="comparison-item after">
+                        <h4>After (Normalized)</h4>
+                        <p><strong>All Carriers:</strong></p>
+                        <p>- vessel_name, voyage_number<br>
+                        - container_number, booking_number<br>
+                        - base_freight, terminal_handling_charge<br>
+                        - origin_port, destination_port<br>
+                        - total_invoice_amount, currency</p>
+                        <p style="color: #388e3c; margin-top: 10px;"><em>Consistent fields. Audit rules work universally.</em></p>
+                    </div>
+                </div>
+
+                <p style="margin-top: 15px;"><strong>Result:</strong> One audit engine. Unlimited carriers. No custom logic per vendor.</p>
+            </div>
+        </div>
+
+        <!-- STEP 3: AUDIT ENGINE -->
+        <div class="step-section">
+            <div class="step-header">
+                <div class="step-number">3</div>
+                <h2>Intelligent Audit Rules Engine</h2>
+            </div>
+            <div class="step-content">
+                <p>VESSIQ applies domain-expert rules designed by maritime auditors. Rules detect systematic overcharges, duplicate fees, rate inconsistencies, and contractual violations.</p>
+
+                <div style="margin: 20px 0;">
+                    <h4 style="color: #1a3a52; margin-bottom: 15px;">Sample Audit Rules in Action</h4>
+                </div>
+
+                <div class="finding">
+                    <div class="finding-title">Rule: Duplicate Port Handling Charges</div>
+                    <div class="finding-detail">
+                        VESSIQ detected PHC (Port Handling Charge) billed twice on invoice #INV-2024-08732 for the same vessel call. One is legitimate; one is a duplicate.
+                        <br><strong>Recovery: $3,200</strong>
+                    </div>
+                </div>
+
+                <div class="finding">
+                    <div class="finding-title">Rule: Rate Variance Detection</div>
+                    <div class="finding-detail">
+                        THC (Terminal Handling Charge) on this shipment is 18% higher than the average for POLB in the past 60 days. Contract specifies maximum variance of 10%.
+                        <br><strong>Flagged for Review: $1,850 potential overcharge</strong>
+                    </div>
+                </div>
+
+                <div class="finding">
+                    <div class="finding-title">Rule: Fuel Surcharge Audit</div>
+                    <div class="finding-detail">
+                        Bunker surcharge applied at $450/TEU. Market rate is $380/TEU on invoice date. Contract caps at $400/TEU.
+                        <br><strong>Recovery: $2,100 (70 containers)</strong>
+                    </div>
+                </div>
+
+                <div class="finding">
+                    <div class="finding-title">Rule: CFS (Container Freight Station) Fees</div>
+                    <div class="finding-detail">
+                        CFS fee applied to 15 containers, but only 8 required CFS handling per port records. Remaining 7 are phantom charges.
+                        <br><strong>Recovery: $950</strong>
+                    </div>
+                </div>
+
+                <p style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 6px; color: #0d5a8f;">
+                    <strong>All rules are configurable:</strong> Match your contracts, your carrier terms, and your historical benchmarks. VESSIQ learns from your data patterns.
+                </p>
+            </div>
+        </div>
+
+        <!-- STEP 4: RESULTS & FINDINGS -->
+        <div class="step-section">
+            <div class="step-header">
+                <div class="step-number">4</div>
+                <h2>Audit Results & Findings Report</h2>
+            </div>
+            <div class="step-content">
+                <p>VESSIQ generates a detailed audit report flagging every discrepancy, with evidence, rule triggers, and recommended recovery actions.</p>
+
+                <table class="invoice-table">
+                    <thead>
+                        <tr>
+                            <th>Invoice #</th>
+                            <th>Finding</th>
+                            <th>Rule Triggered</th>
+                            <th>Impact</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>INV-2024-08732</td>
+                            <td>Duplicate PHC</td>
+                            <td>Duplicate Detection</td>
+                            <td>-$3,200</td>
+                            <td style="color: #ff6f00;">Review</td>
+                        </tr>
+                        <tr>
+                            <td>INV-2024-08741</td>
+                            <td>THC Rate Variance</td>
+                            <td>Rate Variance (18% > 10% cap)</td>
+                            <td>-$1,850</td>
+                            <td style="color: #ff6f00;">Review</td>
+                        </tr>
+                        <tr>
+                            <td>INV-2024-08756</td>
+                            <td>Bunker Surcharge Excess</td>
+                            <td>Fuel Surcharge Audit</td>
+                            <td>-$2,100</td>
+                            <td style="color: #ff6f00;">Review</td>
+                        </tr>
+                        <tr>
+                            <td>INV-2024-08763</td>
+                            <td>Phantom CFS Fees</td>
+                            <td>CFS Validation</td>
+                            <td>-$950</td>
+                            <td style="color: #ff6f00;">Review</td>
+                        </tr>
+                        <tr>
+                            <td>INV-2024-08771</td>
+                            <td>No issues found</td>
+                            <td>All checks passed</td>
+                            <td>$0</td>
+                            <td style="color: #388e3c;">✓ Approved</td>
+                        </tr>
+                        <tr>
+                            <td>INV-2024-08789</td>
+                            <td>Duplicate Surcharge</td>
+                            <td>Duplicate Detection</td>
+                            <td>-$1,200</td>
+                            <td style="color: #ff6f00;">Review</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p style="margin-top: 20px; font-weight: 600; color: #0d5a8f;">
+                    <strong>Total Potential Recovery from 6 Invoices:</strong> $9,300 (14.8% of invoice value)
+                </p>
+            </div>
+        </div>
+
+        <!-- STEP 5: WORKFLOW & RECOVERY -->
+        <div class="step-section">
+            <div class="step-header">
+                <div class="step-number">5</div>
+                <h2>Integrated Dispute & Recovery Workflow</h2>
+            </div>
+            <div class="step-content">
+                <p>VESSIQ doesn't just flag issues — it provides a full audit trail, evidence documentation, and integration with your dispute management process.</p>
+
+                <div class="comparison-grid">
+                    <div class="comparison-item before">
+                        <h4>Traditional Manual Audit</h4>
+                        <p>• Hire auditor or consultant<br>
+                        • Audit 3-5 invoices per day<br>
+                        • Prepare spreadsheet evidence<br>
+                        • Send dispute claim<br>
+                        • Follow up manually<br>
+                        • Cost: $50K-$150K/year</p>
+                    </div>
+                    <div class="comparison-item after">
+                        <h4>VESSIQ Automated Audit</h4>
+                        <p>• Audit 1000+ invoices/month<br>
+                        • Automated rule-based detection<br>
+                        • Digital evidence export (JSON, PDF)<br>
+                        • Auto-generate dispute templates<br>
+                        • Dashboard tracking & reporting<br>
+                        • Cost: $X-Y per invoice</p>
+                    </div>
+                </div>
+
+                <p style="margin-top: 15px;"><strong>Key advantage:</strong> Every discovery is timestamped, rule-based, and defensible. Carriers can't dispute your methodology.</p>
+            </div>
+        </div>
+
+        <!-- ROI SUMMARY -->
+        <div class="roi-section">
+            <h2>ROI Summary: Pasha Group Scenario</h2>
+
+            <p style="text-align: center; color: #666; margin-bottom: 30px; font-size: 1.05em;">
+                Based on Pasha Group's estimated invoice volume and historical overcharge patterns
+            </p>
+
+            <div class="roi-grid">
+                <div class="roi-card">
+                    <div class="label">Monthly Invoice Volume</div>
+                    <div class="number">2,400</div>
+                    <div class="detail">Carrier invoices processed</div>
+                </div>
+
+                <div class="roi-card">
+                    <div class="label">Overcharge Rate (Industry Avg)</div>
+                    <div class="number">8-12%</div>
+                    <div class="detail">Undetected by manual review</div>
+                </div>
+
+                <div class="roi-card">
+                    <div class="label">Average Monthly Recovery</div>
+                    <div class="number">$144K - $216K</div>
+                    <div class="detail">Via VESSIQ audit & dispute</div>
+                </div>
+            </div>
+
+            <div class="roi-grid">
+                <div class="roi-card">
+                    <div class="label">Annual Potential Recovery</div>
+                    <div class="number">$1.7M - $2.6M</div>
+                    <div class="detail">Gross overcharge discovery</div>
+                </div>
+
+                <div class="roi-card">
+                    <div class="label">Implementation Cost</div>
+                    <div class="number">Low</div>
+                    <div class="detail">Data integration only</div>
+                </div>
+
+                <div class="roi-card">
+                    <div class="label">Payback Period</div>
+                    <div class="number">2-4 Weeks</div>
+                    <div class="detail">Typical first recovery batch</div>
+                </div>
+            </div>
+
+            <div class="summary-box">
+                <h3>Why VESSIQ Works for Pasha Group</h3>
+                <div class="summary-point">
+                    <span><strong>Scale:</strong> VESSIQ audits 2,400+ invoices monthly — something manual teams physically cannot achieve</span>
+                </div>
+                <div class="summary-point">
+                    <span><strong>Consistency:</strong> Same audit rules applied to every carrier (Maersk, HAPAG, CMA CGM, ONE, YML, etc.). No blind spots.</span>
+                </div>
+                <div class="summary-point">
+                    <span><strong>Speed:</strong> Findings are actionable within 24 hours of invoice receipt. Recovery is faster.</span>
+                </div>
+                <div class="summary-point">
+                    <span><strong>Evidence:</strong> Every finding is rule-driven and documented. Dispute win rates are higher than manual claims.</span>
+                </div>
+                <div class="summary-point">
+                    <span><strong>Integration:</strong> Works with your existing systems (Navis, TM6, Cargowise). No rip-and-replace.</span>
+                </div>
+                <div class="summary-point">
+                    <span><strong>Defensible:</strong> Transparent audit rules = carriers can't fight the methodology. They can only dispute the facts.</span>
+                </div>
+            </div>
+
+            <div class="summary-box" style="margin-top: 25px; background: #f0f8ff; border-left-color: #0d5a8f;">
+                <h3 style="color: #0d5a8f;">The Math That Matters</h3>
+                <table style="width: 100%; margin-top: 15px;">
+                    <tr style="border-bottom: 2px solid #0d5a8f;">
+                        <td style="padding: 10px 0;"><strong>Invoices Audited (Annual)</strong></td>
+                        <td style="padding: 10px 0; text-align: right;">28,800</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 10px 0;">Avg Invoice Value</td>
+                        <td style="padding: 10px 0; text-align: right;">$4,500</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 10px 0;">Total Invoice Volume</td>
+                        <td style="padding: 10px 0; text-align: right;"><strong>$129.6M</strong></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 10px 0;">Overcharge Rate (Conservative 10%)</td>
+                        <td style="padding: 10px 0; text-align: right;">10%</td>
+                    </tr>
+                    <tr style="border-bottom: 2px solid #0d5a8f;">
+                        <td style="padding: 10px 0;"><strong>Annual Overcharge Value</strong></td>
+                        <td style="padding: 10px 0; text-align: right;"><strong style="color: #0d5a8f;">$12.96M</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px 0;"><strong>VESSIQ Can Recover (Conservative 50% win rate)</strong></td>
+                        <td style="padding: 10px 0; text-align: right;"><strong style="color: #388e3c; font-size: 1.2em;">$6.48M+</strong></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- CTA SECTION -->
+        <div class="cta-section">
+            <h2>See VESSIQ in Action</h2>
+            <p>Ready to recover hidden costs from your carrier invoices?</p>
+            <button class="cta-button" onclick="alert('Thank you for your interest! Contact sales@vessiq.io to schedule a live demo.')">Schedule a Live Demo</button>
+            <p style="margin-top: 20px; font-size: 0.9em; opacity: 0.9;">Data integration typically takes 1-2 weeks. First recoveries within 30 days.</p>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>VESSIQ — Maritime Data Normalization & Carrier Invoice Audit Platform</p>
+        <p>© 2026 VESSIQ, Inc. | Confidential — For Pasha Group</p>
+    </footer>
+
+</body>
+</html>

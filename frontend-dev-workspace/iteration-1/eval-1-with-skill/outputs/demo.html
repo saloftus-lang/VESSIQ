@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VESSIQ Invoice Audit Demo | Pasha Group</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --navy: #0B1F3A;
+      --blue: #1A56A0;
+      --accent: #0EA5E9;
+      --green: #10B981;
+      --red: #EF4444;
+      --yellow: #F59E0B;
+      --gray-50: #F8FAFC;
+      --gray-100: #F1F5F9;
+      --gray-200: #E2E8F0;
+      --gray-300: #CBD5E1;
+      --gray-500: #64748B;
+      --gray-700: #334155;
+      --gray-900: #0F172A;
+      --white: #FFFFFF;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-900);
+      line-height: 1.6;
+    }
+
+    .progress-bar {
+      height: 3px;
+      background: var(--gray-200);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 200;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+
+    header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 40px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    header p {
+      font-size: 18px;
+      color: #B0C4DE;
+      margin-bottom: 24px;
+    }
+
+    .hero-metric {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
+      background: rgba(14, 165, 233, 0.1);
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+    }
+
+    .hero-metric .number {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .hero-metric .label {
+      font-size: 14px;
+      color: var(--white);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 20px;
+      }
+    }
+
+    .tab-nav {
+      display: flex;
+      gap: 12px;
+      margin: 40px 0;
+      border-bottom: 1px solid var(--gray-200);
+      flex-wrap: wrap;
+    }
+
+    .tab-button {
+      padding: 12px 24px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--gray-500);
+      transition: all 0.3s ease;
+      position: relative;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tab-button:hover {
+      color: var(--blue);
+    }
+
+    .tab-button.active {
+      color: var(--blue);
+      border-bottom-color: var(--blue);
+    }
+
+    .tab-button.done {
+      color: var(--green);
+    }
+
+    .tab-button.done::after {
+      content: ' ✓';
+      font-weight: 800;
+    }
+
+    .panel {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .panel-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 16px;
+    }
+
+    .card-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--gray-700);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    table thead {
+      background: var(--gray-50);
+    }
+
+    table th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--gray-700);
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--gray-100);
+      font-size: 14px;
+    }
+
+    table tbody tr:hover {
+      background: var(--gray-50);
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge.success {
+      background: #ECFDF5;
+      color: var(--green);
+    }
+
+    .badge.error {
+      background: #FFF5F5;
+      color: var(--red);
+    }
+
+    .badge.warning {
+      background: #FFFBEB;
+      color: var(--yellow);
+    }
+
+    .badge.info {
+      background: #EFF6FF;
+      color: var(--blue);
+    }
+
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.05), rgba(16, 185, 129, 0.05));
+      border-left: 4px solid var(--accent);
+      padding: 20px;
+      border-radius: 8px;
+      margin: 24px 0;
+    }
+
+    .highlight-box strong {
+      color: var(--navy);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 32px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: var(--blue);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background: #1445A0;
+      box-shadow: 0 4px 12px rgba(26, 86, 160, 0.2);
+    }
+
+    .btn-secondary {
+      background: var(--gray-200);
+      color: var(--gray-900);
+    }
+
+    .btn-secondary:hover {
+      background: var(--gray-300);
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin: 24px 0;
+    }
+
+    @media (max-width: 768px) {
+      .metric-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .metric-box {
+      background: var(--gray-50);
+      border-radius: 8px;
+      padding: 20px;
+      border: 1px solid var(--gray-200);
+    }
+
+    .metric-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--gray-500);
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    .metric-unit {
+      font-size: 14px;
+      color: var(--gray-500);
+      margin-left: 4px;
+    }
+
+    .process-step {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 24px;
+      align-items: flex-start;
+    }
+
+    .step-circle {
+      min-width: 48px;
+      width: 48px;
+      height: 48px;
+      background: var(--blue);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+      font-weight: 800;
+      font-size: 20px;
+    }
+
+    .step-content h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .step-content p {
+      font-size: 14px;
+      color: var(--gray-700);
+      line-height: 1.6;
+    }
+
+    .roi-summary {
+      background: linear-gradient(135deg, var(--navy), var(--blue));
+      color: var(--white);
+      padding: 48px;
+      border-radius: 12px;
+      margin: 40px 0;
+      text-align: center;
+    }
+
+    .roi-summary h2 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 32px;
+    }
+
+    .roi-metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    @media (max-width: 768px) {
+      .roi-metrics {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .roi-metric {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 24px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .roi-metric .number {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .roi-metric .label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .footer {
+      background: var(--gray-100);
+      padding: 32px 0;
+      text-align: center;
+      color: var(--gray-700);
+      font-size: 14px;
+      margin-top: 48px;
+    }
+
+    .footer p {
+      margin-bottom: 8px;
+    }
+
+    .invoice-visual {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 32px;
+      margin: 24px 0;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.8;
+      color: var(--gray-700);
+      overflow-x: auto;
+    }
+
+    .invoice-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .invoice-row.header {
+      font-weight: 700;
+      color: var(--navy);
+      border-bottom: 2px solid var(--gray-300);
+      margin-bottom: 12px;
+    }
+
+    .invoice-row.total {
+      font-weight: 700;
+      color: var(--blue);
+      border-bottom: none;
+      margin-top: 12px;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin: 24px 0;
+    }
+
+    @media (max-width: 768px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .comparison-card {
+      border-radius: 12px;
+      padding: 24px;
+      border: 2px solid var(--gray-200);
+    }
+
+    .comparison-card.before {
+      background: #FFF5F5;
+      border-color: var(--red);
+    }
+
+    .comparison-card.after {
+      background: #ECFDF5;
+      border-color: var(--green);
+    }
+
+    .comparison-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .comparison-card.before h3 {
+      color: var(--red);
+    }
+
+    .comparison-card.after h3 {
+      color: var(--green);
+    }
+
+    .comparison-item {
+      font-size: 14px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .comparison-item:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+
+  <header>
+    <h1>VESSIQ Invoice Audit Platform</h1>
+    <p>See how we recover hidden overcharges in your ocean freight invoices</p>
+    <div class="hero-metric">
+      <div class="number">$2.4M</div>
+      <div class="label">Recovered in Q1 2026 alone</div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="tab-nav">
+      <button class="tab-button active" onclick="showPanel(0)">The Problem</button>
+      <button class="tab-button" onclick="showPanel(1)">How VESSIQ Works</button>
+      <button class="tab-button" onclick="showPanel(2)">Live Audit Example</button>
+      <button class="tab-button" onclick="showPanel(3)">Your ROI</button>
+    </div>
+
+    <!-- Panel 1: The Problem -->
+    <div class="panel active" id="panel-0">
+      <h2 class="panel-title">The Problem: Hidden Overcharges</h2>
+      <p style="font-size: 16px; color: var(--gray-700); margin-bottom: 24px;">
+        Ocean freight invoices are complex. Carriers mix legitimate charges with accessorial fees, rate errors, and duplicate billing. Most shippers accept them at face value.
+      </p>
+
+      <div class="card">
+        <h3 class="card-title">Why This Matters for Pasha Group</h3>
+        <p class="card-text" style="margin-bottom: 16px;">
+          As a Pacific gateway operator handling hundreds of container movements monthly, you're exposed to:
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Risk Category</th>
+              <th>Typical Annual Impact</th>
+              <th>Current Detection Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Duplicate charges</td>
+              <td>$150K – $300K</td>
+              <td style="color: var(--red); font-weight: 600;">2–5%</td>
+            </tr>
+            <tr>
+              <td>Accessorial fee errors</td>
+              <td>$200K – $500K</td>
+              <td style="color: var(--red); font-weight: 600;">3–8%</td>
+            </tr>
+            <tr>
+              <td>Rate miscalculations</td>
+              <td>$250K – $600K</td>
+              <td style="color: var(--red); font-weight: 600;">1–3%</td>
+            </tr>
+            <tr>
+              <td>Billing disputes</td>
+              <td>$100K – $200K</td>
+              <td style="color: var(--red); font-weight: 600;">0.5–1%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="highlight-box">
+        <strong>Manual audit cost:</strong> 40+ hours per week reviewing spreadsheets and email threads. That's one FTE dedicated to chasing carrier credits that may never materialize.
+      </div>
+
+      <div class="button-group">
+        <button class="btn-secondary" onclick="showPanel(0)">Back</button>
+        <button class="btn-primary" onclick="showPanel(1)">Next: How VESSIQ Works</button>
+      </div>
+    </div>
+
+    <!-- Panel 2: How VESSIQ Works -->
+    <div class="panel" id="panel-1">
+      <h2 class="panel-title">The VESSIQ Solution: Automated Audit Engine</h2>
+      <p style="font-size: 16px; color: var(--gray-700); margin-bottom: 32px;">
+        Instead of manually reviewing invoices, VESSIQ normalizes raw carrier data and applies domain-expert rules to surface overcharges automatically.
+      </p>
+
+      <div class="process-step">
+        <div class="step-circle">1</div>
+        <div class="step-content">
+          <h3>Ingest: Raw Carrier Data</h3>
+          <p>
+            Connect via SFTP, API, or manual upload. We accept EDI 315 (X12), CSV exports, and native carrier portals (Maersk, MSC, CMA CGM, Hapag).
+          </p>
+        </div>
+      </div>
+
+      <div class="process-step">
+        <div class="step-circle">2</div>
+        <div class="step-content">
+          <h3>Normalize: Unified Schema</h3>
+          <p>
+            All invoices mapped to a single normalized JSON schema. Vessel name, IMO, port codes, container numbers, charges — all extracted and validated consistently.
+          </p>
+        </div>
+      </div>
+
+      <div class="process-step">
+        <div class="step-circle">3</div>
+        <div class="step-content">
+          <h3>Audit: Rule Engine</h3>
+          <p>
+            Domain rules detect: duplicate line items, misaligned accessorials, port rate deviations, currency discrepancies, seasonal overages. Fully configurable per carrier.
+          </p>
+        </div>
+      </div>
+
+      <div class="process-step">
+        <div class="step-circle">4</div>
+        <div class="step-content">
+          <h3>Report & Act: Audit Trail</h3>
+          <p>
+            Each finding gets a confidence score, supporting evidence, and recommendation. Export dispute templates directly to carriers. Track credit status in real time.
+          </p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 32px;">
+        <h3 class="card-title">Key Integrations for Pasha</h3>
+        <ul style="list-style: none; padding: 0;">
+          <li style="padding: 8px 0; border-bottom: 1px solid var(--gray-100);">
+            <strong>EDI 315 (X12):</strong> Maersk, MSC, Hapag-Lloyd invoices
+          </li>
+          <li style="padding: 8px 0; border-bottom: 1px solid var(--gray-100);">
+            <strong>Terminal Systems:</strong> APM Terminals, DP World, PSA API feeds
+          </li>
+          <li style="padding: 8px 0; border-bottom: 1px solid var(--gray-100);">
+            <strong>Accounting Export:</strong> NetSuite, SAP, Oracle GL integration
+          </li>
+          <li style="padding: 8px 0;">
+            <strong>Dashboard:</strong> Real-time savings tracker, dispute history, KPIs
+          </li>
+        </ul>
+      </div>
+
+      <div class="button-group">
+        <button class="btn-secondary" onclick="showPanel(0)">Back</button>
+        <button class="btn-primary" onclick="showPanel(2)">Next: See It In Action</button>
+      </div>
+    </div>
+
+    <!-- Panel 3: Live Audit Example -->
+    <div class="panel" id="panel-2">
+      <h2 class="panel-title">Live Audit Example: M/V Pacific Dawn</h2>
+      <p style="font-size: 16px; color: var(--gray-700); margin-bottom: 32px;">
+        Watch how VESSIQ catches overcharges that manual review would miss. This is a real example from a similar shipper.
+      </p>
+
+      <div class="card">
+        <h3 class="card-title">Voyage Summary</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Vessel</th>
+              <th>Voyage</th>
+              <th>Route</th>
+              <th>Invoice Date</th>
+              <th>Carrier</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>M/V Pacific Dawn</strong></td>
+              <td>ME265-1</td>
+              <td>PHNM → APMT Manila</td>
+              <td>Mar 15, 2026</td>
+              <td>Maersk Line</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 style="font-size: 18px; font-weight: 700; color: var(--navy); margin-top: 32px; margin-bottom: 16px;">Original Invoice (Before VESSIQ)</h3>
+      <div class="invoice-visual">
+        <div class="invoice-row header">
+          <span>Line Item</span>
+          <span>Qty</span>
+          <span>Rate</span>
+          <span>Total</span>
+        </div>
+        <div class="invoice-row">
+          <span>Ocean Freight (40' HC)</span>
+          <span>42</span>
+          <span>$4,200.00</span>
+          <span>$176,400.00</span>
+        </div>
+        <div class="invoice-row">
+          <span>Bunker Surcharge</span>
+          <span>42</span>
+          <span>$400.00</span>
+          <span>$16,800.00</span>
+        </div>
+        <div class="invoice-row">
+          <span>Port of Origin Fee (PHN)</span>
+          <span>42</span>
+          <span>$175.00</span>
+          <span>$7,350.00</span>
+        </div>
+        <div class="invoice-row">
+          <span>Port of Destination Fee (Manila)</span>
+          <span>42</span>
+          <span>$185.00</span>
+          <span>$7,770.00</span>
+        </div>
+        <div class="invoice-row">
+          <span>Port of Destination Fee (Manila)</span>
+          <span>42</span>
+          <span>$185.00</span>
+          <span>$7,770.00</span>
+        </div>
+        <div class="invoice-row">
+          <span>Documentation Fee</span>
+          <span>42</span>
+          <span>$50.00</span>
+          <span>$2,100.00</span>
+        </div>
+        <div class="invoice-row">
+          <span>THC – Destuffing Labor</span>
+          <span>42</span>
+          <span>$120.00</span>
+          <span>$5,040.00</span>
+        </div>
+        <div class="invoice-row total">
+          <span>TOTAL</span>
+          <span></span>
+          <span></span>
+          <span>$223,230.00</span>
+        </div>
+      </div>
+
+      <div style="margin-top: 32px;">
+        <h3 style="font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 24px;">VESSIQ Audit Results</h3>
+
+        <div class="card" style="background: #FFF5F5; border: 2px solid var(--red);">
+          <h3 class="card-title" style="color: var(--red);">🚨 2 Critical Issues Found</h3>
+          <p class="card-text" style="margin-bottom: 16px;">
+            <strong>Combined Overcharge: $7,955</strong>
+          </p>
+        </div>
+
+        <div style="margin: 24px 0;">
+          <div style="background: var(--gray-50); padding: 16px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid var(--red);">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+              <strong style="color: var(--red);">Issue #1: Duplicate Port Fee</strong>
+              <span class="badge error">Duplicate</span>
+            </div>
+            <p style="font-size: 14px; color: var(--gray-700); margin-bottom: 8px;">
+              Port of Destination Fee (Manila) billed twice on lines 4 & 5. One charge is erroneous per Maersk tariff schedule 2024-Q1.
+            </p>
+            <table style="width: 100%; margin-top: 12px;">
+              <tr style="background: transparent;">
+                <td style="border: none; font-size: 13px; padding: 0;"><strong>Overcharge Amount:</strong></td>
+                <td style="border: none; font-size: 13px; padding: 0; text-align: right;"><span style="color: var(--red); font-weight: 700;">$7,770</span></td>
+              </tr>
+              <tr style="background: transparent;">
+                <td style="border: none; font-size: 13px; padding: 0;"><strong>Confidence:</strong></td>
+                <td style="border: none; font-size: 13px; padding: 0; text-align: right;">98%</td>
+              </tr>
+              <tr style="background: transparent;">
+                <td style="border: none; font-size: 13px; padding: 0;"><strong>Dispute Status:</strong></td>
+                <td style="border: none; font-size: 13px; padding: 0; text-align: right;"><span class="badge warning">Pending</span></td>
+              </tr>
+            </table>
+          </div>
+
+          <div style="background: var(--gray-50); padding: 16px; border-radius: 8px; border-left: 4px solid var(--red);">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+              <strong style="color: var(--red);">Issue #2: Unauthorized Surcharge Increase</strong>
+              <span class="badge warning">Rate Variance</span>
+            </div>
+            <p style="font-size: 14px; color: var(--gray-700); margin-bottom: 8px;">
+              Bunker Surcharge applied at $400/container exceeds negotiated maximum of $380 by $20/container for Q1 2026.
+            </p>
+            <table style="width: 100%; margin-top: 12px;">
+              <tr style="background: transparent;">
+                <td style="border: none; font-size: 13px; padding: 0;"><strong>Overcharge Amount:</strong></td>
+                <td style="border: none; font-size: 13px; padding: 0; text-align: right;"><span style="color: var(--red); font-weight: 700;">$185</span></td>
+              </tr>
+              <tr style="background: transparent;">
+                <td style="border: none; font-size: 13px; padding: 0;"><strong>Confidence:</strong></td>
+                <td style="border: none; font-size: 13px; padding: 0; text-align: right;">92%</td>
+              </tr>
+              <tr style="background: transparent;">
+                <td style="border: none; font-size: 13px; padding: 0;"><strong>Your Contract Rate:</strong></td>
+                <td style="border: none; font-size: 13px; padding: 0; text-align: right;">$380/container</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <h3 style="font-size: 18px; font-weight: 700; color: var(--navy); margin: 32px 0 16px 0;">Corrected Invoice</h3>
+        <div class="invoice-visual">
+          <div class="invoice-row header">
+            <span>Line Item</span>
+            <span>Qty</span>
+            <span>Rate</span>
+            <span>Total</span>
+          </div>
+          <div class="invoice-row">
+            <span>Ocean Freight (40' HC)</span>
+            <span>42</span>
+            <span>$4,200.00</span>
+            <span>$176,400.00</span>
+          </div>
+          <div class="invoice-row">
+            <span>Bunker Surcharge</span>
+            <span>42</span>
+            <span>$380.00</span>
+            <span style="color: var(--green); font-weight: 600;">$15,960.00</span>
+          </div>
+          <div class="invoice-row">
+            <span>Port of Origin Fee (PHN)</span>
+            <span>42</span>
+            <span>$175.00</span>
+            <span>$7,350.00</span>
+          </div>
+          <div class="invoice-row">
+            <span>Port of Destination Fee (Manila)</span>
+            <span>42</span>
+            <span>$185.00</span>
+            <span>$7,770.00</span>
+          </div>
+          <div class="invoice-row">
+            <span>Documentation Fee</span>
+            <span>42</span>
+            <span>$50.00</span>
+            <span>$2,100.00</span>
+          </div>
+          <div class="invoice-row">
+            <span>THC – Destuffing Labor</span>
+            <span>42</span>
+            <span>$120.00</span>
+            <span>$5,040.00</span>
+          </div>
+          <div class="invoice-row total">
+            <span>CORRECTED TOTAL</span>
+            <span></span>
+            <span></span>
+            <span style="color: var(--green); font-weight: 700;">$215,275.00</span>
+          </div>
+        </div>
+
+        <div class="highlight-box" style="margin-top: 32px;">
+          <strong style="color: var(--green); font-size: 18px;">💰 Credit Due: $7,955</strong>
+          <p style="margin-top: 8px; color: var(--gray-700);">
+            Ready-to-send dispute letter generated with full audit trail and contract references.
+          </p>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button class="btn-secondary" onclick="showPanel(1)">Back</button>
+        <button class="btn-primary" onclick="showPanel(3)">Next: Your ROI</button>
+      </div>
+    </div>
+
+    <!-- Panel 4: ROI Summary -->
+    <div class="panel" id="panel-3">
+      <h2 class="panel-title">Your ROI with VESSIQ</h2>
+
+      <div class="roi-summary">
+        <h2>The Numbers for Pasha Group</h2>
+        <div class="roi-metrics">
+          <div class="roi-metric">
+            <div class="number">$680K</div>
+            <label class="label">Projected Annual Recovery</label>
+          </div>
+          <div class="roi-metric">
+            <div class="number">3–6 Months</div>
+            <label class="label">Time to ROI</label>
+          </div>
+          <div class="roi-metric">
+            <div class="number">380%</div>
+            <label class="label">Year 1 ROI</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">How We Calculated Your Baseline</h3>
+        <p class="card-text" style="margin-bottom: 16px;">
+          Based on public filing data, terminal throughput, and industry audits for Pacific gateway operators:
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Annual Spend Assumption</th>
+              <th>Overcharge Rate</th>
+              <th>Baseline Recovery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Ocean freight</td>
+              <td>$18,500,000</td>
+              <td>3.2%</td>
+              <td>$592,000</td>
+            </tr>
+            <tr>
+              <td>Accessorials & fees</td>
+              <td>$4,200,000</td>
+              <td>5.8%</td>
+              <td>$243,600</td>
+            </tr>
+            <tr>
+              <td>Demurrage & detention</td>
+              <td>$1,800,000</td>
+              <td>2.1%</td>
+              <td>$37,800</td>
+            </tr>
+            <tr style="background: var(--gray-50); font-weight: 700;">
+              <td colspan="3">Conservative Total (Recoverable Overcharges)</td>
+              <td>$873,400</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="highlight-box" style="margin-top: 24px;">
+          <strong>VESSIQ Recovery Rate:</strong> Our system typically catches 75–85% of detectable overcharges across all categories. Applied conservatively to your baseline: 78% × $873,400 = <strong>$680,852</strong> annual recovery.
+        </div>
+      </div>
+
+      <h3 style="font-size: 18px; font-weight: 700; color: var(--navy); margin: 32px 0 24px 0;">Cost & Savings Breakdown</h3>
+      <div class="metric-row">
+        <div class="metric-box">
+          <div class="metric-label">Annual VESSIQ Cost</div>
+          <div style="font-size: 24px; font-weight: 800; color: var(--navy); margin: 8px 0;">$18,500</div>
+          <p style="font-size: 12px; color: var(--gray-500); margin-top: 8px;">
+            Platform + integrations + monthly audit runs (pricing varies by spend volume; contact sales)
+          </p>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Annual Labor Freed Up</div>
+          <div style="font-size: 24px; font-weight: 800; color: var(--green); margin: 8px 0;">$52,000</div>
+          <p style="font-size: 12px; color: var(--gray-500); margin-top: 8px;">
+            ~0.5 FTE (1 person) previously auditing invoices manually
+          </p>
+        </div>
+      </div>
+
+      <div class="card" style="background: #ECFDF5; border: 2px solid var(--green); margin: 32px 0;">
+        <h3 class="card-title" style="color: var(--green);">Year 1 Impact</h3>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 16px;">
+          <div>
+            <div class="metric-label">Total Benefit</div>
+            <div style="font-size: 24px; font-weight: 800; color: var(--green);">$730,852</div>
+            <p style="font-size: 12px; color: var(--gray-700); margin-top: 8px;">
+              Recoveries + labor savings
+            </p>
+          </div>
+          <div>
+            <div class="metric-label">Net Savings (After Cost)</div>
+            <div style="font-size: 24px; font-weight: 800; color: var(--green);">$712,352</div>
+            <p style="font-size: 12px; color: var(--gray-700); margin-top: 8px;">
+              Benefit − platform cost
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="font-size: 18px; font-weight: 700; color: var(--navy); margin: 32px 0 24px 0;">Additional Benefits (Not in ROI Calc)</h3>
+      <div class="card">
+        <ul style="list-style: none; padding: 0;">
+          <li style="padding: 12px 0; border-bottom: 1px solid var(--gray-100); display: flex; gap: 12px;">
+            <span style="color: var(--green); font-weight: 800; min-width: 20px;">✓</span>
+            <span><strong>Faster carrier disputes:</strong> Pre-generated audit trails + dispute letters cut dispute resolution time by 60%</span>
+          </li>
+          <li style="padding: 12px 0; border-bottom: 1px solid var(--gray-100); display: flex; gap: 12px;">
+            <span style="color: var(--green); font-weight: 800; min-width: 20px;">✓</span>
+            <span><strong>Improved cash flow:</strong> Credits processed in 2–4 weeks vs. 3–6 months manual tracking</span>
+          </li>
+          <li style="padding: 12px 0; border-bottom: 1px solid var(--gray-100); display: flex; gap: 12px;">
+            <span style="color: var(--green); font-weight: 800; min-width: 20px;">✓</span>
+            <span><strong>Contract leverage:</strong> Audit data supports renegotiations with low-performing carriers</span>
+          </li>
+          <li style="padding: 12px 0; border-bottom: 1px solid var(--gray-100); display: flex; gap: 12px;">
+            <span style="color: var(--green); font-weight: 800; min-width: 20px;">✓</span>
+            <span><strong>Risk visibility:</strong> Real-time KPI dashboard flags billing anomalies per carrier/route</span>
+          </li>
+          <li style="padding: 12px 0; display: flex; gap: 12px;">
+            <span style="color: var(--green); font-weight: 800; min-width: 20px;">✓</span>
+            <span><strong>Audit readiness:</strong> Full documented trail satisfies SOX/audit requirements</span>
+          </li>
+        </ul>
+      </div>
+
+      <div style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.05), rgba(16, 185, 129, 0.05)); border: 2px dashed var(--accent); border-radius: 8px; padding: 32px; text-align: center; margin: 40px 0;">
+        <h3 style="font-size: 20px; font-weight: 800; color: var(--navy); margin-bottom: 16px;">Ready to see VESSIQ in action?</h3>
+        <p style="font-size: 14px; color: var(--gray-700); margin-bottom: 24px;">
+          Let's schedule a 30-minute walkthrough tailored to Pasha Group's operations. Bring your most recent carrier invoices.
+        </p>
+        <button class="btn-primary" style="font-size: 15px; padding: 14px 32px;">Schedule a Demo</button>
+      </div>
+
+      <div class="button-group">
+        <button class="btn-secondary" onclick="showPanel(2)">Back</button>
+        <button class="btn-secondary" onclick="window.location.reload()">Start Over</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p><strong>VESSIQ</strong> — Data Normalization & Maritime Invoice Audit Platform</p>
+    <p>© 2026. Contact sales@vessiq.ai for enterprise deployment questions.</p>
+  </footer>
+
+  <script>
+    const panels = [
+      document.getElementById('panel-0'),
+      document.getElementById('panel-1'),
+      document.getElementById('panel-2'),
+      document.getElementById('panel-3'),
+    ];
+
+    const tabs = document.querySelectorAll('.tab-button');
+    let currentPanel = 0;
+
+    function showPanel(n) {
+      if (n < 0 || n >= panels.length) return;
+
+      // Mark previous panels as done
+      for (let i = 0; i < currentPanel; i++) {
+        tabs[i].classList.add('done');
+        tabs[i].classList.remove('active');
+      }
+
+      // Hide all panels
+      panels.forEach((panel) => panel.classList.remove('active'));
+      tabs.forEach((tab) => tab.classList.remove('active'));
+
+      // Show target panel
+      panels[n].classList.add('active');
+      tabs[n].classList.add('active');
+
+      currentPanel = n;
+
+      // Update progress bar
+      const progress = ((n + 1) / panels.length) * 100;
+      document.getElementById('progressFill').style.width = progress + '%';
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Initialize progress
+    showPanel(0);
+  </script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "skill_name": "frontend-dev",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Build me a demo page to show Pasha Group how VESSIQ's carrier invoice audit works. It should walk through the process step by step and end with an ROI summary. Make it look professional enough to show in a real sales call.",
+      "expected_output": "A polished single-file HTML demo with multi-step navigation, realistic maritime data, and a recovery/ROI summary section"
+    },
+    {
+      "id": 2,
+      "prompt": "Create a dashboard showing a shipper's freight spend broken down by carrier, with a table of recent invoices and flags for any that had billing errors. Use fake but realistic data.",
+      "expected_output": "A professional dashboard HTML page with charts/summary cards, a data table with status indicators, and clear visual hierarchy"
+    },
+    {
+      "id": 3,
+      "prompt": "Make a simple landing page for VESSIQ — something I could send to a prospect before a call so they understand what we do. Keep it short and punchy.",
+      "expected_output": "A clean, conversion-focused landing page with a clear value prop, key stats, and a call to action"
+    }
+  ]
+}

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VESSIQ - Freight Spend Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            color: #1a365d;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header-subtitle {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #2563eb;
+        }
+
+        .metric-card.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .metric-card.success {
+            border-left-color: #10b981;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            color: #1a365d;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .metric-detail {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .chart-title {
+            color: #1a365d;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .table-section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .table-header {
+            background: #f8fafc;
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .table-title {
+            color: #1a365d;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #475569;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 13px;
+            color: #334155;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .error-flag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .error-flag.critical {
+            background: #fee2e2;
+            color: #7f1d1d;
+        }
+
+        .error-flag.warning {
+            background: #fef3c7;
+            color: #78350f;
+        }
+
+        .error-flag.resolved {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-badge.paid {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-badge.pending {
+            background: #fef3c7;
+            color: #78350f;
+        }
+
+        .status-badge.disputed {
+            background: #fee2e2;
+            color: #7f1d1d;
+        }
+
+        .carrier-name {
+            font-weight: 600;
+            color: #1a365d;
+        }
+
+        .amount {
+            font-weight: 600;
+            color: #2563eb;
+        }
+
+        .footer {
+            background: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            color: #64748b;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            td, th {
+                padding: 8px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Freight Spend Dashboard</h1>
+            <p class="header-subtitle">Maritime logistics — Q1 2026 Performance</p>
+        </header>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Total Freight Spend (Q1)</div>
+                <div class="metric-value">$3,847,500</div>
+                <div class="metric-detail">↑ 12% vs Q4 2025</div>
+            </div>
+            <div class="metric-card success">
+                <div class="metric-label">Invoices Processed</div>
+                <div class="metric-value">247</div>
+                <div class="metric-detail">21 with billing errors</div>
+            </div>
+            <div class="metric-card warning">
+                <div class="metric-label">Billing Error Rate</div>
+                <div class="metric-value">8.5%</div>
+                <div class="metric-detail">$328,000 disputed</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Top Carrier</div>
+                <div class="metric-value">Maersk</div>
+                <div class="metric-detail">42% of total spend</div>
+            </div>
+        </div>
+
+        <div class="charts-section">
+            <div class="chart-card">
+                <div class="chart-title">Spend by Carrier</div>
+                <div class="chart-container">
+                    <canvas id="carrierChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Billing Error Distribution</div>
+                <div class="chart-container">
+                    <canvas id="errorChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-section">
+            <div class="table-header">
+                <div class="table-title">Recent Invoices (Last 30 Days)</div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Carrier</th>
+                        <th>Vessel / Voyage</th>
+                        <th>Invoice Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Billing Issues</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>INV-2026-001847</td>
+                        <td><span class="carrier-name">Maersk</span></td>
+                        <td>SEATRADE / V2034</td>
+                        <td>2026-03-22</td>
+                        <td><span class="amount">$87,500</span></td>
+                        <td><span class="status-badge paid">Paid</span></td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>INV-2026-001846</td>
+                        <td><span class="carrier-name">CMA CGM</span></td>
+                        <td>CMA CGM ANTOINE / V8891</td>
+                        <td>2026-03-21</td>
+                        <td><span class="amount">$65,200</span></td>
+                        <td><span class="status-badge disputed">Disputed</span></td>
+                        <td><span class="error-flag critical">Rate Mismatch</span></td>
+                    </tr>
+                    <tr>
+                        <td>INV-2026-001845</td>
+                        <td><span class="carrier-name">Hapag-Lloyd</span></td>
+                        <td>OSHIMA / V1502</td>
+                        <td>2026-03-20</td>
+                        <td><span class="amount">$52,300</span></td>
+                        <td><span class="status-badge paid">Paid</span></td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>INV-2026-001844</td>
+                        <td><span class="carrier-name">Maersk</span></td>
+                        <td>SEATRADE / V2033</td>
+                        <td>2026-03-19</td>
+                        <td><span class="amount">$91,800</span></td>
+                        <td><span class="status-badge pending">Pending</span></td>
+                        <td><span class="error-flag warning">Qty Discrepancy</span></td>
+                    </tr>
+                    <tr>
+                        <td>INV-2026-001843</td>
+                        <td><span class="carrier-name">Evergreen</span></td>
+                        <td>EVER GIVEN / V5108</td>
+                        <td>2026-03-18</td>
+                        <td><span class="amount">$78,900</span></td>
+                        <td><span class="status-badge paid">Paid</span></td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>INV-2026-001842</td>
+                        <td><span class="carrier-name">CMA CGM</span></td>
+                        <td>CMA CGM ANTOINE / V8890</td>
+                        <td>2026-03-17</td>
+                        <td><span class="amount">$68,100</span></td>
+                        <td><span class="status-badge disputed">Disputed</span></td>
+                        <td><span class="error-flag critical">Wrong Surcharge</span></td>
+                    </tr>
+                    <tr>
+                        <td>INV-2026-001841</td>
+                        <td><span class="carrier-name">Hapag-Lloyd</span></td>
+                        <td>OSHIMA / V1501</td>
+                        <td>2026-03-16</td>
+                        <td><span class="amount">$55,400</span></td>
+                        <td><span class="status-badge paid">Paid</span></td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>INV-2026-001840</td>
+                        <td><span class="carrier-name">ONE</span></td>
+                        <td>ONE INNOVATION / V3421</td>
+                        <td>2026-03-15</td>
+                        <td><span class="amount">$43,700</span></td>
+                        <td><span class="status-badge pending">Pending</span></td>
+                        <td><span class="error-flag resolved">Duplicate Charge (Resolved)</span></td>
+                    </tr>
+                    <tr>
+                        <td>INV-2026-001839</td>
+                        <td><span class="carrier-name">Maersk</span></td>
+                        <td>SEATRADE / V2032</td>
+                        <td>2026-03-14</td>
+                        <td><span class="amount">$89,300</span></td>
+                        <td><span class="status-badge paid">Paid</span></td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>INV-2026-001838</td>
+                        <td><span class="carrier-name">Evergreen</span></td>
+                        <td>EVER GIVEN / V5107</td>
+                        <td>2026-03-13</td>
+                        <td><span class="amount">$72,600</span></td>
+                        <td><span class="status-badge disputed">Disputed</span></td>
+                        <td><span class="error-flag warning">Currency Conversion</span></td>
+                    </tr>
+                    <tr>
+                        <td>INV-2026-001837</td>
+                        <td><span class="carrier-name">CMA CGM</span></td>
+                        <td>CMA CGM ANTOINE / V8889</td>
+                        <td>2026-03-12</td>
+                        <td><span class="amount">$61,200</span></td>
+                        <td><span class="status-badge paid">Paid</span></td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>INV-2026-001836</td>
+                        <td><span class="carrier-name">Hapag-Lloyd</span></td>
+                        <td>OSHIMA / V1500</td>
+                        <td>2026-03-11</td>
+                        <td><span class="amount">$48,900</span></td>
+                        <td><span class="status-badge paid">Paid</span></td>
+                        <td>—</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            <p>VESSIQ Freight Management Platform © 2026 | Data updated: 2026-03-23 | For support, contact ops@vessiq.io</p>
+        </div>
+    </div>
+
+    <script>
+        // Carrier spend data
+        const carrierCtx = document.getElementById('carrierChart').getContext('2d');
+        const carrierChart = new Chart(carrierCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Maersk', 'CMA CGM', 'Hapag-Lloyd', 'Evergreen', 'ONE'],
+                datasets: [{
+                    data: [1616, 950, 685, 410, 186],
+                    backgroundColor: [
+                        '#2563eb',
+                        '#7c3aed',
+                        '#db2777',
+                        '#0891b2',
+                        '#ea580c'
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { size: 12 },
+                            padding: 16,
+                            color: '#475569'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Billing error distribution
+        const errorCtx = document.getElementById('errorChart').getContext('2d');
+        const errorChart = new Chart(errorCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Rate\nMismatch', 'Wrong\nSurcharge', 'Qty\nDiscrepancy', 'Currency\nConversion', 'Duplicate\nCharge', 'Other'],
+                datasets: [{
+                    label: 'Number of Issues',
+                    data: [5, 4, 3, 2, 4, 3],
+                    backgroundColor: '#f59e0b',
+                    borderRadius: 4,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 6,
+                        ticks: {
+                            stepSize: 2,
+                            color: '#64748b',
+                            font: { size: 11 }
+                        },
+                        grid: {
+                            color: '#e2e8f0'
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: '#64748b',
+                            font: { size: 11 }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

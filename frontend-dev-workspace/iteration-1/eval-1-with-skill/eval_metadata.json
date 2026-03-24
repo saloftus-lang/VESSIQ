@@ -1,0 +1,6 @@
+{
+  "eval_id": 1,
+  "eval_name": "pasha-sales-demo",
+  "prompt": "Build me a demo page to show Pasha Group how VESSIQ's carrier invoice audit works. It should walk through the process step by step and end with an ROI summary. Make it look professional enough to show in a real sales call.",
+  "assertions": []
+}

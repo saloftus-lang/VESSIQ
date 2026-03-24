@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VESSIQ — Maritime Data Infrastructure</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.0.76/build/spline-viewer.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: '#070E1A',
+            'navy-mid': '#0B1829',
+            'navy-light': '#0F2240',
+            blue: '#0EA5E9',
+            'blue-dim': '#0369A1',
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+          },
+          animation: {
+            'fade-up': 'fadeUp 0.6s ease forwards',
+            'pulse-slow': 'pulse 4s ease-in-out infinite',
+          },
+          keyframes: {
+            fadeUp: {
+              '0%': { opacity: '0', transform: 'translateY(24px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { background: #070E1A; }
+
+    /* Nav blur */
+    .nav-blur { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+
+    /* Hero overlay gradient */
+    .hero-overlay {
+      background: linear-gradient(
+        to right,
+        rgba(7, 14, 26, 0.97) 0%,
+        rgba(7, 14, 26, 0.85) 45%,
+        rgba(7, 14, 26, 0.4) 100%
+      );
+    }
+    .hero-overlay-mobile {
+      background: linear-gradient(
+        to bottom,
+        rgba(7, 14, 26, 0.92) 0%,
+        rgba(7, 14, 26, 0.75) 60%,
+        rgba(7, 14, 26, 0.97) 100%
+      );
+    }
+
+    /* CTA section overlay */
+    .cta-overlay {
+      background: linear-gradient(
+        to bottom,
+        rgba(7, 14, 26, 0.88) 0%,
+        rgba(7, 14, 26, 0.75) 50%,
+        rgba(7, 14, 26, 0.93) 100%
+      );
+    }
+
+    /* Glow effect */
+    .blue-glow { box-shadow: 0 0 40px rgba(14, 165, 233, 0.15); }
+    .blue-glow-sm { box-shadow: 0 0 20px rgba(14, 165, 233, 0.1); }
+
+    /* Code panel */
+    .code-panel {
+      background: #080F1C;
+      border: 1px solid rgba(14, 165, 233, 0.2);
+      border-radius: 12px;
+    }
+
+    /* Card */
+    .data-card {
+      background: rgba(15, 34, 64, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      transition: border-color 0.3s ease, transform 0.3s ease;
+    }
+    .data-card:hover {
+      border-color: rgba(14, 165, 233, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* Step connector */
+    .step-line {
+      background: linear-gradient(to right, rgba(14,165,233,0.6), rgba(14,165,233,0.1));
+    }
+
+    /* Spline container */
+    spline-viewer {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Eyebrow */
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(14, 165, 233, 0.08);
+      border: 1px solid rgba(14, 165, 233, 0.25);
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #0EA5E9;
+    }
+
+    /* Stat divider */
+    .stat-divider { border-left: 1px solid rgba(255,255,255,0.1); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #070E1A; }
+    ::-webkit-scrollbar-thumb { background: #0F2240; border-radius: 2px; }
+
+    /* Mobile nav */
+    #mobile-menu { display: none; }
+    #mobile-menu.open { display: flex; }
+  </style>
+</head>
+<body class="bg-navy text-white font-sans antialiased">
+
+  <!-- ── NAVIGATION ── -->
+  <header class="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-white/5 bg-navy/80">
+    <nav class="max-w-7xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
+      <!-- Logo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-8 h-8 rounded-lg bg-blue flex items-center justify-center font-black text-sm tracking-tighter text-white">V</div>
+        <span class="font-bold text-lg tracking-widest text-white">VESSIQ</span>
+      </a>
+
+      <!-- Desktop links -->
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#product" class="text-sm text-white/50 hover:text-white transition-colors">Product</a>
+        <a href="#how-it-works" class="text-sm text-white/50 hover:text-white transition-colors">How It Works</a>
+        <a href="#contact" class="text-sm text-white/50 hover:text-white transition-colors">Contact</a>
+      </div>
+
+      <!-- CTA -->
+      <div class="flex items-center gap-4">
+        <a href="#contact" class="hidden md:inline-flex items-center gap-2 bg-blue hover:bg-blue-dim text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
+          Request Access
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <!-- Mobile hamburger -->
+        <button class="md:hidden text-white/60 hover:text-white" onclick="toggleMenu()">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="md:hidden flex-col px-6 pb-4 gap-4 bg-navy/95 border-t border-white/5">
+      <a href="#product" class="text-sm text-white/60 hover:text-white py-2" onclick="toggleMenu()">Product</a>
+      <a href="#how-it-works" class="text-sm text-white/60 hover:text-white py-2" onclick="toggleMenu()">How It Works</a>
+      <a href="#contact" class="text-sm text-white/60 hover:text-white py-2" onclick="toggleMenu()">Contact</a>
+      <a href="#contact" class="inline-flex items-center gap-2 bg-blue text-white text-sm font-semibold px-5 py-2.5 rounded-lg mt-2 w-fit">Request Access</a>
+    </div>
+  </header>
+
+  <!-- ── HERO ── -->
+  <section class="relative min-h-screen flex items-center overflow-hidden">
+
+    <!-- Background: aerial teal ocean -->
+    <div class="absolute inset-0 z-0">
+      <img
+        src="https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&w=2400&q=85"
+        alt="Aerial view of teal blue ocean"
+        class="w-full h-full object-cover object-center"
+        loading="eager"
+      />
+      <div class="hero-overlay absolute inset-0"></div>
+      <!-- Blue vignette bottom -->
+      <div class="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-navy to-transparent"></div>
+    </div>
+
+    <!-- Content -->
+    <div class="relative z-10 max-w-7xl mx-auto px-6 md:px-10 pt-24 pb-16 w-full">
+      <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-0">
+
+        <!-- Left: Copy -->
+        <div class="flex-1 max-w-xl">
+          <div class="eyebrow mb-8">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue animate-pulse-slow"></span>
+            Maritime Data Infrastructure
+          </div>
+
+          <h1 class="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.05] tracking-tight text-white mb-6">
+            One layer.<br />
+            Clean data.<br />
+            <span class="text-blue">Every source.</span>
+          </h1>
+
+          <p class="text-lg text-white/50 leading-relaxed mb-10 max-w-md">
+            VESSIQ normalizes fragmented maritime data — EDI, PDFs, terminal exports — into a single verified schema. Built for operators who can't afford data chaos.
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-4">
+            <a href="#contact" class="inline-flex items-center justify-center gap-2 bg-blue hover:bg-blue-dim text-white font-semibold px-7 py-4 rounded-lg transition-colors blue-glow-sm text-sm">
+              Request Early Access
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <a href="#how-it-works" class="inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white font-semibold px-7 py-4 rounded-lg transition-all text-sm">
+              See How It Works
+            </a>
+          </div>
+
+          <!-- Trust bar -->
+          <div class="mt-12 flex items-center gap-6 pt-8 border-t border-white/8">
+            <span class="text-xs text-white/30 uppercase tracking-widest">Used by operators in</span>
+            <div class="flex items-center gap-4">
+              <span class="text-xs font-semibold text-white/40">Hawaii</span>
+              <span class="text-white/15">·</span>
+              <span class="text-xs font-semibold text-white/40">Pacific</span>
+              <span class="text-white/15">·</span>
+              <span class="text-xs font-semibold text-white/40">Gulf</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Spline 3D Interactive -->
+        <div class="flex-1 w-full lg:w-auto h-[420px] lg:h-[580px] relative">
+          <!-- Subtle frame -->
+          <div class="absolute inset-0 rounded-2xl border border-blue/10 blue-glow overflow-hidden bg-navy-mid/40">
+            <spline-viewer
+              url="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+              style="width:100%;height:100%;"
+            ></spline-viewer>
+            <!-- Branded corner tag -->
+            <div class="absolute bottom-4 left-4 eyebrow text-xs opacity-60">
+              Interactive 3D — drag to explore
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STATS STRIP ── -->
+  <section class="border-y border-white/5 bg-navy-mid/60">
+    <div class="max-w-7xl mx-auto px-6 md:px-10 py-10">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0">
+        <div class="text-center md:pr-8">
+          <div class="text-4xl font-black text-white mb-1">$10B+</div>
+          <div class="text-xs text-white/35 uppercase tracking-widest">Ocean freight overcharges 2021–24</div>
+        </div>
+        <div class="text-center md:px-8 md:stat-divider">
+          <div class="text-4xl font-black text-white mb-1">80%</div>
+          <div class="text-xs text-white/35 uppercase tracking-widest">Of carrier invoices contain errors</div>
+        </div>
+        <div class="text-center md:px-8 md:stat-divider">
+          <div class="text-4xl font-black text-white mb-1">3–8%</div>
+          <div class="text-xs text-white/35 uppercase tracking-widest">Of freight spend recoverable</div>
+        </div>
+        <div class="text-center md:pl-8 md:stat-divider">
+          <div class="text-4xl font-black text-blue mb-1">1 API</div>
+          <div class="text-xs text-white/35 uppercase tracking-widest">Clean data from any source</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PROBLEM ── -->
+  <section id="product" class="py-28 md:py-36">
+    <div class="max-w-7xl mx-auto px-6 md:px-10">
+
+      <div class="max-w-2xl mb-16">
+        <div class="eyebrow mb-6">The Problem</div>
+        <h2 class="text-4xl md:text-5xl font-black text-white leading-tight mb-5">
+          Your data arrives in<br />every format but one.
+        </h2>
+        <p class="text-white/45 text-lg leading-relaxed">
+          Maritime operations run on EDI, PDFs, CSV exports, and emails — each carrier, terminal, and forwarder with their own format. The result is data chaos that costs time and money.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-5">
+        <!-- Card 1 -->
+        <div class="data-card rounded-xl p-7 blue-glow-sm">
+          <div class="w-10 h-10 rounded-lg bg-blue/10 border border-blue/20 flex items-center justify-center mb-5">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+          </div>
+          <div class="text-xs text-blue font-semibold uppercase tracking-widest mb-3">EDI 315 / 310</div>
+          <h3 class="text-lg font-bold text-white mb-3">Carrier Electronic Data</h3>
+          <p class="text-white/40 text-sm leading-relaxed">Each carrier transmits a different EDI dialect. Maersk, CMA CGM, and Evergreen all require separate parsers. One bad segment breaks your entire pipeline.</p>
+          <div class="mt-5 pt-5 border-t border-white/5">
+            <div class="font-mono text-xs text-white/25 leading-relaxed">
+              ISA*00* *00* *ZZ*MAERSK*...<br/>
+              GS*QM*MAERSK*PASHA*2024...<br/>
+              B4*I*0*MSCU1234567*20240315
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="data-card rounded-xl p-7">
+          <div class="w-10 h-10 rounded-lg bg-blue/10 border border-blue/20 flex items-center justify-center mb-5">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13,2 13,9 20,9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+          </div>
+          <div class="text-xs text-blue font-semibold uppercase tracking-widest mb-3">PDF Invoices</div>
+          <h3 class="text-lg font-bold text-white mb-3">Carrier & Forwarder Invoices</h3>
+          <p class="text-white/40 text-sm leading-relaxed">20+ line items per invoice — base rates, BAF, THC, ISPS, chassis, documentation fees. Each forwarder formats them differently. Manual review misses errors.</p>
+          <div class="mt-5 pt-5 border-t border-white/5">
+            <div class="text-xs text-white/25 leading-relaxed">
+              Ocean Freight 40HC ........... $3,100<br/>
+              BAF (Mar 2024) ............... $520<br/>
+              Documentation Fee ............ $75<br/>
+              <span class="text-red-500/60">← Not in contract</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="data-card rounded-xl p-7">
+          <div class="w-10 h-10 rounded-lg bg-blue/10 border border-blue/20 flex items-center justify-center mb-5">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+          </div>
+          <div class="text-xs text-blue font-semibold uppercase tracking-widest mb-3">Terminal CSV Exports</div>
+          <h3 class="text-lg font-bold text-white mb-3">Terminal & TOS Data</h3>
+          <p class="text-white/40 text-sm leading-relaxed">Terminal operating systems export raw CSV with inconsistent column names, date formats, and status codes. No two terminals produce the same schema.</p>
+          <div class="mt-5 pt-5 border-t border-white/5">
+            <div class="font-mono text-xs text-white/25 leading-relaxed">
+              CNTR_NO,STS,LOC,DT_IN...<br/>
+              MSCU1234567,DSCH,PIER38...<br/>
+              <span class="text-yellow-500/50">← vs CONTAINER_NUMBER, STATUS...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── HOW IT WORKS ── -->
+  <section id="how-it-works" class="py-28 md:py-36 bg-navy-mid/40 border-y border-white/5">
+    <div class="max-w-7xl mx-auto px-6 md:px-10">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+
+        <!-- Left: Copy -->
+        <div>
+          <div class="eyebrow mb-6">How It Works</div>
+          <h2 class="text-4xl md:text-5xl font-black text-white leading-tight mb-6">
+            One engine.<br />Every format<br /><span class="text-blue">normalized.</span>
+          </h2>
+          <p class="text-white/45 text-lg leading-relaxed mb-8">
+            VESSIQ sits between your raw data sources and the systems that need clean data. Send us any format — we return a verified, unified schema every time.
+          </p>
+
+          <div class="space-y-5">
+            <div class="flex gap-4">
+              <div class="w-8 h-8 rounded-full bg-blue/10 border border-blue/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>
+              </div>
+              <div>
+                <div class="font-semibold text-white mb-1">Config-driven normalization</div>
+                <div class="text-white/40 text-sm">Add new data sources with YAML mapping files — no new code required.</div>
+              </div>
+            </div>
+            <div class="flex gap-4">
+              <div class="w-8 h-8 rounded-full bg-blue/10 border border-blue/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>
+              </div>
+              <div>
+                <div class="font-semibold text-white mb-1">Validated Pydantic schema</div>
+                <div class="text-white/40 text-sm">Every event validated against a strict VesselEvent schema before delivery.</div>
+              </div>
+            </div>
+            <div class="flex gap-4">
+              <div class="w-8 h-8 rounded-full bg-blue/10 border border-blue/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>
+              </div>
+              <div>
+                <div class="font-semibold text-white mb-1">REST API delivery</div>
+                <div class="text-white/40 text-sm">Clean JSON out. Pipe directly into your TMS, ERP, or analytics stack.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Schema panel -->
+        <div class="code-panel p-0 overflow-hidden">
+          <!-- Panel header -->
+          <div class="flex items-center gap-3 px-5 py-3.5 border-b border-blue/10 bg-blue/5">
+            <div class="flex gap-1.5">
+              <div class="w-3 h-3 rounded-full bg-white/10"></div>
+              <div class="w-3 h-3 rounded-full bg-white/10"></div>
+              <div class="w-3 h-3 rounded-full bg-white/10"></div>
+            </div>
+            <span class="font-mono text-xs text-blue/70">VesselEvent — Normalized Output</span>
+          </div>
+          <!-- Code -->
+          <div class="p-6 font-mono text-xs leading-7 overflow-x-auto">
+            <div class="text-white/25">// POST /ingest/edi315 → normalized VesselEvent</div>
+            <br/>
+            <div><span class="text-blue/70">{</span></div>
+            <div class="pl-4">
+              <div><span class="text-blue">"event_id"</span><span class="text-white/30">:</span> <span class="text-green-400/70">"evt_8e4f2a"</span><span class="text-white/30">,</span></div>
+              <div><span class="text-blue">"source_format"</span><span class="text-white/30">:</span> <span class="text-green-400/70">"EDI_315"</span><span class="text-white/30">,</span></div>
+              <div><span class="text-blue">"carrier_name"</span><span class="text-white/30">:</span> <span class="text-green-400/70">"MAERSK LINE"</span><span class="text-white/30">,</span></div>
+              <div><span class="text-blue">"vessel_name"</span><span class="text-white/30">:</span> <span class="text-green-400/70">"MSC MAYA"</span><span class="text-white/30">,</span></div>
+              <div><span class="text-blue">"event_type"</span><span class="text-white/30">:</span> <span class="text-yellow-400/70">"ARRIVAL"</span><span class="text-white/30">,</span></div>
+              <div><span class="text-blue">"port_locode"</span><span class="text-white/30">:</span> <span class="text-green-400/70">"USHNL"</span><span class="text-white/30">,</span></div>
+              <div><span class="text-blue">"container_number"</span><span class="text-white/30">:</span> <span class="text-green-400/70">"MSCU1234567"</span><span class="text-white/30">,</span></div>
+              <div><span class="text-blue">"bill_of_lading"</span><span class="text-white/30">:</span> <span class="text-green-400/70">"MAEU123456789"</span><span class="text-white/30">,</span></div>
+              <div><span class="text-blue">"event_timestamp"</span><span class="text-white/30">:</span> <span class="text-orange-400/70">"2024-03-22T14:30:00Z"</span><span class="text-white/30">,</span></div>
+              <div><span class="text-blue">"invoice_total"</span><span class="text-white/30">:</span> <span class="text-purple-400/70">4158.00</span><span class="text-white/30">,</span></div>
+              <div><span class="text-blue">"discrepancies"</span><span class="text-white/30">:</span> <span class="text-white/30">[</span></div>
+              <div class="pl-4">
+                <div><span class="text-white/30">{</span> <span class="text-blue">"type"</span><span class="text-white/30">:</span> <span class="text-red-400/70">"RATE_MISMATCH"</span><span class="text-white/30">,</span> <span class="text-blue">"amount"</span><span class="text-white/30">:</span> <span class="text-red-400/70">-300.00</span> <span class="text-white/30">}</span></div>
+                <div><span class="text-white/30">{</span> <span class="text-blue">"type"</span><span class="text-white/30">:</span> <span class="text-red-400/70">"UNAUTHORIZED_CHARGE"</span><span class="text-white/30">,</span> <span class="text-blue">"amount"</span><span class="text-white/30">:</span> <span class="text-red-400/70">-75.00</span> <span class="text-white/30">}</span></div>
+              </div>
+              <div><span class="text-white/30">]</span></div>
+            </div>
+            <div><span class="text-blue/70">}</span></div>
+          </div>
+          <!-- Footer tag -->
+          <div class="px-5 py-3 border-t border-white/5 flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+            <span class="font-mono text-xs text-white/25">Validated · 43ms · 4 discrepancies flagged</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PROCESS ── -->
+  <section class="py-28 md:py-36">
+    <div class="max-w-7xl mx-auto px-6 md:px-10">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <div class="eyebrow mb-6 mx-auto w-fit">The Process</div>
+        <h2 class="text-4xl md:text-5xl font-black text-white leading-tight">
+          Send data in.<br />Get clarity out.
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8 relative">
+        <!-- Connector lines (desktop) -->
+        <div class="hidden md:block absolute top-8 left-[calc(33%+24px)] right-[calc(33%+24px)] h-px bg-gradient-to-r from-blue/40 via-blue/20 to-blue/40"></div>
+
+        <!-- Step 1 -->
+        <div class="relative">
+          <div class="data-card rounded-xl p-7 h-full">
+            <div class="w-10 h-10 rounded-full bg-blue flex items-center justify-center font-black text-sm text-white mb-5 blue-glow-sm">1</div>
+            <h3 class="text-xl font-bold text-white mb-3">Ingest</h3>
+            <p class="text-white/40 text-sm leading-relaxed">Send raw EDI files, PDF invoices, or CSV exports via API or email. Any format, any carrier, any terminal.</p>
+            <div class="mt-5 flex flex-wrap gap-2">
+              <span class="px-2.5 py-1 rounded bg-white/5 border border-white/8 text-xs text-white/40 font-mono">EDI 315</span>
+              <span class="px-2.5 py-1 rounded bg-white/5 border border-white/8 text-xs text-white/40 font-mono">PDF</span>
+              <span class="px-2.5 py-1 rounded bg-white/5 border border-white/8 text-xs text-white/40 font-mono">CSV</span>
+              <span class="px-2.5 py-1 rounded bg-white/5 border border-white/8 text-xs text-white/40 font-mono">Email</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="relative">
+          <div class="data-card rounded-xl p-7 h-full border-blue/20 blue-glow">
+            <div class="w-10 h-10 rounded-full bg-blue flex items-center justify-center font-black text-sm text-white mb-5 blue-glow-sm">2</div>
+            <h3 class="text-xl font-bold text-white mb-3">Normalize</h3>
+            <p class="text-white/40 text-sm leading-relaxed">VESSIQ parses, maps, and validates every field against the unified VesselEvent schema. Discrepancies flagged automatically.</p>
+            <div class="mt-5 flex flex-wrap gap-2">
+              <span class="px-2.5 py-1 rounded bg-blue/10 border border-blue/20 text-xs text-blue font-mono">Parse</span>
+              <span class="px-2.5 py-1 rounded bg-blue/10 border border-blue/20 text-xs text-blue font-mono">Map</span>
+              <span class="px-2.5 py-1 rounded bg-blue/10 border border-blue/20 text-xs text-blue font-mono">Validate</span>
+              <span class="px-2.5 py-1 rounded bg-blue/10 border border-blue/20 text-xs text-blue font-mono">Flag</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="relative">
+          <div class="data-card rounded-xl p-7 h-full">
+            <div class="w-10 h-10 rounded-full bg-blue flex items-center justify-center font-black text-sm text-white mb-5 blue-glow-sm">3</div>
+            <h3 class="text-xl font-bold text-white mb-3">Deliver</h3>
+            <p class="text-white/40 text-sm leading-relaxed">Clean JSON via REST API. Pipe directly into your TMS, ERP, analytics platform, or BI tool. One integration, every source.</p>
+            <div class="mt-5 flex flex-wrap gap-2">
+              <span class="px-2.5 py-1 rounded bg-white/5 border border-white/8 text-xs text-white/40 font-mono">REST API</span>
+              <span class="px-2.5 py-1 rounded bg-white/5 border border-white/8 text-xs text-white/40 font-mono">Webhooks</span>
+              <span class="px-2.5 py-1 rounded bg-white/5 border border-white/8 text-xs text-white/40 font-mono">JSON</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA / CARGO SHIP ── -->
+  <section id="contact" class="relative py-36 md:py-48 overflow-hidden">
+    <!-- Background: aerial cargo ship -->
+    <div class="absolute inset-0 z-0">
+      <img
+        src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=2400&q=85"
+        alt="Aerial view of container cargo ship"
+        class="w-full h-full object-cover object-center"
+        loading="lazy"
+      />
+      <div class="cta-overlay absolute inset-0"></div>
+      <div class="absolute inset-0 bg-navy/50"></div>
+      <!-- Blue accent glow -->
+      <div class="absolute inset-0 bg-gradient-to-t from-navy via-transparent to-navy"></div>
+    </div>
+
+    <div class="relative z-10 max-w-3xl mx-auto px-6 md:px-10 text-center">
+      <div class="eyebrow mb-8 mx-auto w-fit">Early Access</div>
+      <h2 class="text-5xl md:text-6xl font-black text-white leading-tight mb-6">
+        Your data.<br />
+        <span class="text-blue">Under control.</span>
+      </h2>
+      <p class="text-white/45 text-lg leading-relaxed mb-10 max-w-xl mx-auto">
+        We're onboarding a small group of maritime operators for our pilot program. Bring your invoices — we'll show you what's recoverable in 2 weeks.
+      </p>
+
+      <form class="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto" onsubmit="handleSubmit(event)">
+        <input
+          type="email"
+          placeholder="your@company.com"
+          class="flex-1 bg-white/5 border border-white/15 hover:border-white/25 focus:border-blue/60 outline-none text-white placeholder-white/25 px-5 py-4 rounded-lg text-sm transition-colors"
+          required
+        />
+        <button type="submit" class="bg-blue hover:bg-blue-dim text-white font-semibold px-7 py-4 rounded-lg transition-colors text-sm whitespace-nowrap blue-glow-sm">
+          Request Access
+        </button>
+      </form>
+
+      <p class="text-white/20 text-xs mt-5">No commitment. Pilot results delivered in 2 weeks.</p>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer class="border-t border-white/5 py-10">
+    <div class="max-w-7xl mx-auto px-6 md:px-10 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-7 h-7 rounded-md bg-blue flex items-center justify-center font-black text-xs text-white">V</div>
+        <span class="font-bold tracking-widest text-white/60 text-sm">VESSIQ</span>
+      </div>
+      <div class="text-white/20 text-xs">© 2024 VESSIQ. Maritime Data Infrastructure.</div>
+      <div class="flex items-center gap-6">
+        <a href="#" class="text-xs text-white/25 hover:text-white/50 transition-colors">Privacy</a>
+        <a href="#" class="text-xs text-white/25 hover:text-white/50 transition-colors">Terms</a>
+        <a href="mailto:hello@vessiq.com" class="text-xs text-white/25 hover:text-white/50 transition-colors">hello@vessiq.com</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('open');
+    }
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      btn.textContent = 'Request Sent ✓';
+      btn.disabled = true;
+      btn.classList.add('opacity-60');
+    }
+
+    // Smooth nav highlight on scroll
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('nav a[href^="#"]');
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(s => {
+        if (window.scrollY >= s.offsetTop - 100) current = s.id;
+      });
+      navLinks.forEach(a => {
+        a.classList.toggle('text-white', a.getAttribute('href') === `#${current}`);
+        a.classList.toggle('text-white/50', a.getAttribute('href') !== `#${current}`);
+      });
+    });
+  </script>
+
+</body>
+</html>

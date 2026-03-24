@@ -1,0 +1,55 @@
+{
+  "eval_id": 1,
+  "eval_name": "pasha-sales-demo-baseline",
+  "prompt": "Build me a demo page to show Pasha Group how VESSIQ's carrier invoice audit works. It should walk through the process step by step and end with an ROI summary. Make it look professional enough to show in a real sales call.",
+  "assertions": [
+    {
+      "type": "structure",
+      "description": "Demo includes 5-step walkthrough of VESSIQ invoice audit process"
+    },
+    {
+      "type": "visual",
+      "description": "Professional design with maritime-themed color scheme (navy blue, white, clean typography)"
+    },
+    {
+      "type": "content",
+      "description": "Step 1: Raw invoice data ingestion from multiple formats (EDI 315, CSV, XML)"
+    },
+    {
+      "type": "content",
+      "description": "Step 2: Unified schema normalization showing before/after comparison"
+    },
+    {
+      "type": "content",
+      "description": "Step 3: Intelligent audit rules engine with real-world examples (duplicate charges, rate variance, fuel surcharge, CFS fees)"
+    },
+    {
+      "type": "content",
+      "description": "Step 4: Audit results report with sample findings table and recovery amounts"
+    },
+    {
+      "type": "content",
+      "description": "Step 5: Integrated dispute & recovery workflow comparison (manual vs automated)"
+    },
+    {
+      "type": "content",
+      "description": "ROI section with Pasha Group-specific scenario (2,400 monthly invoices, $1.7M-$2.6M annual recovery)"
+    },
+    {
+      "type": "content",
+      "description": "Detailed ROI breakdown showing invoice volume, overcharge rates, recovery potential, and payback period"
+    },
+    {
+      "type": "interactive",
+      "description": "CTA button for scheduling live demo"
+    },
+    {
+      "type": "responsive",
+      "description": "Mobile-friendly design with responsive grid layouts"
+    },
+    {
+      "type": "accessibility",
+      "description": "Semantic HTML structure, proper heading hierarchy, color contrast compliance"
+    }
+  ]
+}
