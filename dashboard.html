@@ -396,12 +396,12 @@
       white-space: nowrap;
     }
 
-    .source-ocean {
+    .source-badge.ocean {
       background: rgba(26,86,160,0.25);
       color: #93C5FD;
     }
 
-    .source-rail {
+    .source-badge.rail {
       background: rgba(16,185,129,0.2);
       color: #6EE7B7;
     }
@@ -415,16 +415,16 @@
       white-space: nowrap;
     }
 
-    .status-pending   { background: rgba(245,158,11,0.2);   color: #FDE68A; }
-    .status-filed     { background: rgba(14,165,233,0.2);   color: #7DD3FC; }
-    .status-won       { background: rgba(16,185,129,0.2);   color: #6EE7B7; }
-    .status-recovered {
+    .status-badge.pending   { background: rgba(245,158,11,0.2);   color: #FDE68A; }
+    .status-badge.filed     { background: rgba(14,165,233,0.2);   color: #7DD3FC; }
+    .status-badge.won       { background: rgba(16,185,129,0.2);   color: #6EE7B7; }
+    .status-badge.recovered {
       background: rgba(16,185,129,0.15);
       color: #34D399;
       border: 1px solid rgba(16,185,129,0.3);
     }
 
-    .chevron {
+    .expand-chevron {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -474,12 +474,12 @@
       margin-bottom: var(--space-sm);
     }
 
-    .line-items-table {
+    .breakdown-table {
       width: 100%;
       border-collapse: collapse;
     }
 
-    .line-items-table th {
+    .breakdown-table th {
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.3px;
@@ -489,14 +489,14 @@
       font-weight: 700;
     }
 
-    .line-items-table td {
+    .breakdown-table td {
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
       padding: 4px 8px;
       color: var(--text-primary);
     }
 
-    .line-items-table .delta-cell { color: var(--red); font-weight: 700; }
+    .breakdown-table .delta-cell { color: var(--red); font-weight: 700; }
 
     .charge-type-badge {
       display: inline-block;
@@ -748,7 +748,7 @@
 
     <!-- Invoice Table -->
     <div class="table-container" id="disputes">
-      <table>
+      <table class="invoice-table">
         <thead>
           <tr>
             <th>Source</th>
@@ -763,7 +763,7 @@
             <th></th>
           </tr>
         </thead>
-        <tbody id="invoice-tbody"></tbody>
+        <tbody id="invoiceTableBody"></tbody>
       </table>
     </div>
 
@@ -1282,7 +1282,7 @@
     // ── renderTable ───────────────────────────────────────────────────────────
     function renderTable() {
       const filtered = getFilteredData();
-      const tbody = document.getElementById('invoice-tbody');
+      const tbody = document.getElementById('invoiceTableBody');
 
       if (filtered.length === 0) {
         tbody.innerHTML = `
@@ -1300,9 +1300,9 @@
       let html = '';
       filtered.forEach(row => {
         const isExpanded = state.expandedRowId === row.id;
-        const sourceCls = row.source === 'ocean' ? 'source-ocean' : 'source-rail';
+        const sourceCls = row.source === 'ocean' ? 'ocean' : 'rail';
         const sourceLabel = row.source === 'ocean' ? 'Ocean' : 'Rail';
-        const statusCls = 'status-' + row.status.toLowerCase();
+        const statusCls = row.status.toLowerCase();
 
         html += `
           <tr class="data-row" data-invoice-id="${row.id}">
@@ -1316,7 +1316,7 @@
             <td class="overcharge">+${fmt(row.overchargeAmount)}</td>
             <td><span class="status-badge ${statusCls}">${row.status}</span></td>
             <td style="text-align:center">
-              <button class="chevron${isExpanded ? ' expanded' : ''}"
+              <button class="expand-chevron${isExpanded ? ' expanded' : ''}"
                 aria-label="${isExpanded ? 'Collapse invoice details' : 'Expand invoice details'}">
                 &#8964;
               </button>
@@ -1338,7 +1338,7 @@
                 <div class="row-detail-inner open">
                   <div>
                     <div class="detail-section-title">Line-Item Breakdown</div>
-                    <table class="line-items-table">
+                    <table class="breakdown-table">
                       <thead><tr>
                         <th>Charge Type</th><th>Contracted</th><th>Billed</th><th>Delta</th>
                       </tr></thead>
@@ -1482,7 +1482,7 @@
     });
 
     // ── Row expand / collapse (event delegation) ──────────────────────────────
-    document.getElementById('invoice-tbody').addEventListener('click', e => {
+    document.getElementById('invoiceTableBody').addEventListener('click', e => {
       const row = e.target.closest('tr[data-invoice-id]');
       if (!row) return;
       const id = row.dataset.invoiceId;
