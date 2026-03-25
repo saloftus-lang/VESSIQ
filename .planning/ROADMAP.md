@@ -30,7 +30,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Foundation: design system, fonts, header, KPI tiles with GSAP animation, DATA array
+- [x] 01-01-PLAN.md — Foundation: design system, fonts, header, KPI tiles with GSAP animation, DATA array
 - [ ] 01-02-PLAN.md — Interactive table: filter bar, invoice table, expandable rows, dispute badges
 - [ ] 01-03-PLAN.md — Charts, ROI calculator, and final demo verification
 
@@ -55,5 +55,5 @@ Phases execute in numeric order: 1 → 2
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Invoice Demo Dashboard | 0/3 | Planning complete | - |
+| 1. Invoice Demo Dashboard | 1/3 | In Progress|  |
 | 2. Founder Ops Dashboard | 0/TBD | Not started | - |

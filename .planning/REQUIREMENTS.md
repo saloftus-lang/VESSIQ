@@ -7,26 +7,26 @@
 
 ### Design System
 
-- [ ] **DS-01**: Dark navy color system (#0B1F3A background, #1A56A0 primary, #0EA5E9 accent, #10B981 success, #EF4444 danger) applied consistently across both files
-- [ ] **DS-02**: CSS custom properties (two-tier: primitive tokens + semantic aliases) duplicated verbatim in both HTML files as the single coordination point
-- [ ] **DS-03**: Subtle 3D depth applied via CSS perspective transforms, glassmorphism panels (backdrop-filter + rgba fill + 1px border + box-shadow), and layered floating cards
-- [ ] **DS-04**: Glassmorphism panels have non-transparent background-color and -webkit-backdrop-filter prefix (Safari compatibility)
-- [ ] **DS-05**: Inter or system-UI font stack — no external font CDN dependency (offline-safe)
-- [ ] **DS-06**: ApexCharts used for all charts (dark theme via config, DOM-based tooltips, transparent background locked — no mode toggle)
-- [ ] **DS-07**: GSAP CDN used for counter animations and entrance transitions; CSS transitions for everything else
+- [x] **DS-01**: Dark navy color system (#0B1F3A background, #1A56A0 primary, #0EA5E9 accent, #10B981 success, #EF4444 danger) applied consistently across both files
+- [x] **DS-02**: CSS custom properties (two-tier: primitive tokens + semantic aliases) duplicated verbatim in both HTML files as the single coordination point
+- [x] **DS-03**: Subtle 3D depth applied via CSS perspective transforms, glassmorphism panels (backdrop-filter + rgba fill + 1px border + box-shadow), and layered floating cards
+- [x] **DS-04**: Glassmorphism panels have non-transparent background-color and -webkit-backdrop-filter prefix (Safari compatibility)
+- [x] **DS-05**: Inter or system-UI font stack — no external font CDN dependency (offline-safe)
+- [x] **DS-06**: ApexCharts used for all charts (dark theme via config, DOM-based tooltips, transparent background locked — no mode toggle)
+- [x] **DS-07**: GSAP CDN used for counter animations and entrance transitions; CSS transitions for everything else
 
 ### Invoice Dashboard (dashboard.html)
 
-- [ ] **INV-01**: Header with VESSIQ logo, nav links, and "Book Demo" CTA
-- [ ] **INV-02**: KPI summary row — 4 tiles: Total Invoices Audited, Total Overcharges Found, Recovery Amount ($), Dispute Win Rate (%)
-- [ ] **INV-03**: KPI tile numbers animate (count up) on page load using GSAP
+- [x] **INV-01**: Header with VESSIQ logo, nav links, and "Book Demo" CTA
+- [x] **INV-02**: KPI summary row — 4 tiles: Total Invoices Audited, Total Overcharges Found, Recovery Amount ($), Dispute Win Rate (%)
+- [x] **INV-03**: KPI tile numbers animate (count up) on page load using GSAP
 - [ ] **INV-04**: Invoice table showing ocean freight and rail/terminal charges in a unified view, with source badge (Ocean / Rail) per row
 - [ ] **INV-05**: Table filterable by carrier and date range — filter state managed via centralized JS state object
 - [ ] **INV-06**: Each invoice row expandable on click (event delegation on table container) to reveal line-item breakdown: billed amount vs. contract amount, discrepancy type (BAF, THC, D&D, per diem), and dispute status
 - [ ] **INV-07**: Dispute status badges (Pending / Filed / Won / Recovered) with color coding
 - [ ] **INV-08**: ROI calculator panel — single input (monthly freight spend $) → output (estimated annual recovery minus VESSIQ fee) using industry benchmark recovery rate
-- [ ] **INV-09**: Realistic fake data: Maersk, MSC, Evergreen, Hapag-Lloyd (ocean) + Pasha Hawaii, BNSF (rail/terminal) — correct SCAC codes, UN/LOCODE port codes, ISO 6346 container number format
-- [ ] **INV-10**: All KPI totals mathematically reconcile with the invoice table data (no disconnected numbers)
+- [x] **INV-09**: Realistic fake data: Maersk, MSC, Evergreen, Hapag-Lloyd (ocean) + Pasha Hawaii, BNSF (rail/terminal) — correct SCAC codes, UN/LOCODE port codes, ISO 6346 container number format
+- [x] **INV-10**: All KPI totals mathematically reconcile with the invoice table data (no disconnected numbers)
 - [ ] **INV-11**: ApexCharts bar chart: overcharge amount by carrier
 - [ ] **INV-12**: ApexCharts donut/pie: breakdown by charge type (BAF, THC, D&D, Other)
 - [ ] **INV-13**: Page works when served over HTTP (python3 -m http.server) — no file:// fetch() calls
@@ -43,11 +43,11 @@
 
 ### Demo Reliability
 
-- [ ] **REL-01**: All external assets (fonts, chart libraries, GSAP) either served locally or from a single pinned CDN URL — no multi-origin loading that can partially fail
-- [ ] **REL-02**: Page renders correctly at 1280×800 and 1440×900 (common laptop screen share resolutions)
+- [x] **REL-01**: All external assets (fonts, chart libraries, GSAP) either served locally or from a single pinned CDN URL — no multi-origin loading that can partially fail
+- [x] **REL-02**: Page renders correctly at 1280×800 and 1440×900 (common laptop screen share resolutions)
 - [ ] **REL-03**: No console errors on load or during interactions
 - [ ] **REL-04**: Expandable rows, filters, and ROI calculator all work without page reload
-- [ ] **REL-05**: Fake maritime data passes credibility check: valid SCAC codes (MAEU, MSCU, EGLV, HLCU, PSHA), valid LOCODEs (USLAX, USLGB, USSEA, USHON), ISO 6346 container format (4-letter prefix + 7 digits + check digit pattern)
+- [x] **REL-05**: Fake maritime data passes credibility check: valid SCAC codes (MAEU, MSCU, EGLV, HLCU, PSHA), valid LOCODEs (USLAX, USLGB, USSEA, USHON), ISO 6346 container format (4-letter prefix + 7 digits + check digit pattern)
 
 ## v2 Requirements
 
@@ -76,31 +76,31 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DS-01 | Phase 1: Invoice Demo Dashboard | Pending |
-| DS-02 | Phase 1: Invoice Demo Dashboard | Pending |
-| DS-03 | Phase 1: Invoice Demo Dashboard | Pending |
-| DS-04 | Phase 1: Invoice Demo Dashboard | Pending |
-| DS-05 | Phase 1: Invoice Demo Dashboard | Pending |
-| DS-06 | Phase 1: Invoice Demo Dashboard | Pending |
-| DS-07 | Phase 1: Invoice Demo Dashboard | Pending |
-| INV-01 | Phase 1: Invoice Demo Dashboard | Pending |
-| INV-02 | Phase 1: Invoice Demo Dashboard | Pending |
-| INV-03 | Phase 1: Invoice Demo Dashboard | Pending |
+| DS-01 | Phase 1: Invoice Demo Dashboard | Complete |
+| DS-02 | Phase 1: Invoice Demo Dashboard | Complete |
+| DS-03 | Phase 1: Invoice Demo Dashboard | Complete |
+| DS-04 | Phase 1: Invoice Demo Dashboard | Complete |
+| DS-05 | Phase 1: Invoice Demo Dashboard | Complete |
+| DS-06 | Phase 1: Invoice Demo Dashboard | Complete |
+| DS-07 | Phase 1: Invoice Demo Dashboard | Complete |
+| INV-01 | Phase 1: Invoice Demo Dashboard | Complete |
+| INV-02 | Phase 1: Invoice Demo Dashboard | Complete |
+| INV-03 | Phase 1: Invoice Demo Dashboard | Complete |
 | INV-04 | Phase 1: Invoice Demo Dashboard | Pending |
 | INV-05 | Phase 1: Invoice Demo Dashboard | Pending |
 | INV-06 | Phase 1: Invoice Demo Dashboard | Pending |
 | INV-07 | Phase 1: Invoice Demo Dashboard | Pending |
 | INV-08 | Phase 1: Invoice Demo Dashboard | Pending |
-| INV-09 | Phase 1: Invoice Demo Dashboard | Pending |
-| INV-10 | Phase 1: Invoice Demo Dashboard | Pending |
+| INV-09 | Phase 1: Invoice Demo Dashboard | Complete |
+| INV-10 | Phase 1: Invoice Demo Dashboard | Complete |
 | INV-11 | Phase 1: Invoice Demo Dashboard | Pending |
 | INV-12 | Phase 1: Invoice Demo Dashboard | Pending |
 | INV-13 | Phase 1: Invoice Demo Dashboard | Pending |
-| REL-01 | Phase 1: Invoice Demo Dashboard | Pending |
-| REL-02 | Phase 1: Invoice Demo Dashboard | Pending |
+| REL-01 | Phase 1: Invoice Demo Dashboard | Complete |
+| REL-02 | Phase 1: Invoice Demo Dashboard | Complete |
 | REL-03 | Phase 1: Invoice Demo Dashboard | Pending |
 | REL-04 | Phase 1: Invoice Demo Dashboard | Pending |
-| REL-05 | Phase 1: Invoice Demo Dashboard | Pending |
+| REL-05 | Phase 1: Invoice Demo Dashboard | Complete |
 | FND-01 | Phase 2: Founder Ops Dashboard | Pending |
 | FND-02 | Phase 2: Founder Ops Dashboard | Pending |
 | FND-03 | Phase 2: Founder Ops Dashboard | Pending |

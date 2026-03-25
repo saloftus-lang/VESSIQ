@@ -2,16 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-stopped_at: Phase 1 UI-SPEC approved
-last_updated: "2026-03-24T23:24:16.620Z"
-last_activity: 2026-03-24 — Roadmap created, phases defined
+status: Ready to execute
+stopped_at: Completed 01-01-PLAN.md — dashboard.html foundation with KPI tiles, DATA array, renderKPIs
+last_updated: "2026-03-25T17:26:32.742Z"
 progress:
   total_phases: 2
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 3
+  completed_plans: 1
 ---
 
 # Project State
@@ -21,16 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-24)
 
 **Core value:** A demo-quality invoice chargeback dashboard that makes any prospect say "we need this" in the first 30 seconds.
-**Current focus:** Phase 1 — Invoice Demo Dashboard
+**Current focus:** Phase 01 — invoice-demo-dashboard
 
 ## Current Position
 
-Phase: 1 of 2 (Invoice Demo Dashboard)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-03-24 — Roadmap created, phases defined
-
-Progress: [░░░░░░░░░░] 0%
+Phase: 01 (invoice-demo-dashboard) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -52,6 +46,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: -
 
 *Updated after each plan completion*
+| Phase 01 P01 | 15 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -63,6 +58,8 @@ Recent decisions affecting current work:
 - Standalone HTML over React: zero infra, opens in any browser, easy to share
 - CSS 3D depth over WebGL/Three.js: same premium feel, fraction of the weight
 - Realistic fake data baked in: demo works offline, no API dependency
+- [Phase 01]: DATA array of 23 rows crafted so Won+Recovered overchargeAmount sums to exactly $187,500 and win rate is 15/22 = 68.2%
+- [Phase 01]: KPI tiles 2-4 computed from getFilteredData() at runtime — PORTFOLIO_TOTAL = 847 is the only permitted static constant
 
 ### Pending Todos
 
@@ -75,6 +72,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-24T23:24:16.617Z
-Stopped at: Phase 1 UI-SPEC approved
-Resume file: .planning/phases/01-invoice-demo-dashboard/01-UI-SPEC.md
+Last session: 2026-03-25T17:26:32.740Z
+Stopped at: Completed 01-01-PLAN.md — dashboard.html foundation with KPI tiles, DATA array, renderKPIs
+Resume file: None
