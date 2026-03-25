@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>VESSIQ — Invoice Chargeback Audit</title>
   <style>
-    /* ── Self-hosted fonts ── */
     @font-face {
       font-family: 'Inter';
       src: url('/fonts/inter-variable.woff2') format('woff2');
@@ -19,718 +18,586 @@
       font-display: swap;
     }
 
-    /* ── Design tokens ── */
     :root {
-      /* Primitives */
-      --navy:      #0B1F3A;
-      --blue:      #1A56A0;
-      --accent:    #0EA5E9;
-      --green:     #10B981;
-      --red:       #EF4444;
-      --yellow:    #F59E0B;
-      --gray-50:   #F8FAFC;
-      --gray-100:  #F1F5F9;
-      --gray-200:  #E2E8F0;
-      --gray-300:  #CBD5E1;
-      --gray-500:  #64748B;
-      --gray-700:  #334155;
-      --gray-900:  #0F172A;
-      --white:     #FFFFFF;
-
-      /* Semantic aliases */
-      --surface-page:       var(--navy);
-      --surface-card:       rgba(255,255,255,0.05);
-      --surface-card-solid: #132B4E;
-      --surface-content:    var(--white);
-      --border-glass:       rgba(255,255,255,0.12);
-      --border-subtle:      var(--gray-200);
-      --text-primary:       var(--white);
-      --text-secondary:     #94A3B8;
-      --text-muted:         var(--gray-500);
-      --text-dark:          var(--gray-900);
-      --status-won:         var(--green);
-      --status-pending:     var(--yellow);
-      --status-filed:       var(--accent);
-      --status-recovered:   var(--green);
-      --status-approved:    var(--gray-300);
-      --cta-bg:             var(--accent);
-      --cta-hover:          #0284C7;
-
-      /* Spacing scale */
-      --space-xs:  4px;
-      --space-sm:  8px;
-      --space-md:  16px;
-      --space-lg:  24px;
-      --space-xl:  32px;
-      --space-2xl: 48px;
-      --space-3xl: 64px;
+      --navy:    #0B1F3A;
+      --blue:    #1A56A0;
+      --accent:  #0EA5E9;
+      --green:   #10B981;
+      --red:     #EF4444;
+      --yellow:  #F59E0B;
+      --gray-50:  #F8FAFC;
+      --gray-100: #F1F5F9;
+      --gray-200: #E2E8F0;
+      --gray-300: #CBD5E1;
+      --gray-400: #94A3B8;
+      --gray-500: #64748B;
+      --gray-700: #334155;
+      --gray-900: #0F172A;
+      --white:   #FFFFFF;
     }
 
-    /* ── Reset ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* ── Body + gradient mesh ── */
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background:
-        radial-gradient(ellipse at 20% 50%, rgba(14,165,233,0.12) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 20%, rgba(26,86,160,0.15) 0%, transparent 50%),
-        #0B1F3A;
-      color: var(--text-primary);
+      background: var(--gray-50);
+      color: var(--gray-900);
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ── Glassmorphism card ── */
-    .glass-card {
-      background-color: #132B4E; /* Safari fallback */
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(12px) saturate(180%);
-      -webkit-backdrop-filter: blur(12px) saturate(180%);
-      border: 1px solid rgba(255,255,255,0.12);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.37);
-      border-radius: 16px;
+    /* Progress bar */
+    .progress-bar {
+      height: 3px;
+      background: var(--gray-200);
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 300;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.3s ease;
     }
 
-    /* ── Header ── */
+    /* Header */
     header {
-      height: 68px;
-      position: sticky;
-      top: 0;
-      z-index: 200;
-      background: #0B1F3A;
+      background: var(--navy);
+      padding: 18px 48px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 var(--space-2xl);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
     }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: var(--space-lg);
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
+    .logo { display: flex; align-items: center; gap: 12px; }
     .logo-mark {
-      width: 36px;
-      height: 36px;
-      background: #0EA5E9;
+      width: 36px; height: 36px;
+      background: var(--accent);
       border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 900;
-      font-size: 16px;
-      color: white;
-      letter-spacing: -1px;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 16px; color: white; letter-spacing: -1px;
     }
-
-    .logo-text-wrap {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .logo-wordmark {
-      color: white;
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      line-height: 1;
-    }
-
-    .logo-sub {
-      color: #94A3B8;
-      font-size: 12px;
-      margin-top: 2px;
-      letter-spacing: 0.3px;
-    }
-
+    .logo-text { color: white; font-size: 22px; font-weight: 700; letter-spacing: 1px; }
+    .logo-sub  { color: #94A3B8; font-size: 12px; margin-top: 1px; letter-spacing: 0.5px; }
     .header-badge {
       background: rgba(14,165,233,0.15);
       border: 1px solid rgba(14,165,233,0.3);
-      color: #0EA5E9;
-      padding: 5px 12px;
+      color: var(--accent);
+      padding: 6px 14px;
       border-radius: 20px;
       font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.3px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
     }
 
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: var(--space-xl);
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, var(--navy) 0%, #1A3A6B 100%);
+      padding: 48px 48px 40px;
+      text-align: center;
     }
-
-    nav {
-      display: flex;
-      align-items: center;
-      gap: var(--space-xl);
-    }
-
-    nav a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 400;
-      transition: color 0.15s;
-    }
-
-    nav a:hover { color: var(--white); }
-
-    .btn-cta {
-      background: #0EA5E9;
+    .hero h1 {
       color: white;
-      border: none;
-      padding: 8px 24px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 700;
+      font-size: 34px;
+      font-weight: 800;
+      line-height: 1.2;
+      max-width: 640px;
+      margin: 0 auto 14px;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero p {
+      color: #94A3B8;
+      font-size: 16px;
+      max-width: 520px;
+      margin: 0 auto 28px;
+      line-height: 1.6;
+    }
+    .stat-row { display: flex; justify-content: center; gap: 48px; }
+    .stat { text-align: center; }
+    .stat-num   { color: var(--accent); font-size: 28px; font-weight: 800; }
+    .stat-label { color: #64748B; font-size: 12px; margin-top: 4px; letter-spacing: 0.5px; text-transform: uppercase; }
+
+    /* Steps nav */
+    .steps-nav {
+      background: white;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 48px;
+      display: flex;
+      position: sticky;
+      top: 3px;
+      z-index: 200;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .step-tab {
+      padding: 18px 28px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-500);
       cursor: pointer;
-      transition: background 0.15s;
-      font-family: inherit;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .step-tab:hover { color: var(--blue); }
+    .step-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+    .step-num {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--gray-200);
+      color: var(--gray-500);
+      font-size: 11px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .step-tab.active .step-num { background: var(--blue); color: white; }
+    .step-tab.done   .step-num { background: var(--green); color: white; }
+
+    /* Content */
+    .content { padding: 40px 48px; max-width: 1200px; margin: 0 auto; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .section-header { margin-bottom: 28px; }
+    .section-header h2 { font-size: 22px; font-weight: 700; color: var(--gray-900); }
+    .section-header p  { color: var(--gray-500); margin-top: 6px; font-size: 14px; line-height: 1.6; }
+
+    /* Card */
+    .card {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     }
 
-    .btn-cta:hover { background: #0284C7; }
-
-    /* ── Content wrapper ── */
-    .content {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 var(--space-2xl);
-    }
-
-    /* ── KPI tiles ── */
+    /* KPI grid */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: var(--space-lg);
-      margin-top: var(--space-xl);
+      gap: 16px;
+      margin-bottom: 20px;
     }
-
     .kpi-tile {
-      padding: var(--space-lg);
-      min-height: 120px;
+      padding: 20px 24px;
+      min-height: 100px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transform-style: preserve-3d;
-      perspective: 1000px;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-
     .kpi-tile:hover {
-      transform: translateY(-4px) rotateX(2deg);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
     }
-
     .kpi-label {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: var(--text-secondary);
-      margin-bottom: var(--space-sm);
+      color: var(--gray-500);
+      margin-bottom: 8px;
     }
+    .kpi-number { font-size: 32px; font-weight: 800; line-height: 1.1; }
+    .kpi-number.dark  { color: var(--gray-900); }
+    .kpi-number.red   { color: var(--red); }
+    .kpi-number.green { color: var(--green); }
+    .kpi-number.blue  { color: var(--blue); }
 
-    .kpi-number {
-      font-size: 36px;
-      font-weight: 700;
-      line-height: 1.2;
-    }
-
-    .kpi-number.white  { color: var(--white); }
-    .kpi-number.red    { color: var(--red); }
-    .kpi-number.accent { color: var(--accent); }
-
-    /* ── Filter bar ── */
+    /* Filter bar */
     .filter-bar {
-      margin-top: var(--space-lg);
-      padding: var(--space-md) var(--space-lg);
+      padding: 14px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: var(--space-sm);
+      gap: 10px;
+      margin-bottom: 16px;
     }
-
-    .filter-group {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
+    .filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .filter-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-
     .filter-pill {
-      background: transparent;
-      border: 1px solid var(--border-glass);
-      color: var(--text-secondary);
-      padding: 6px 14px;
+      background: white;
+      border: 1px solid var(--gray-200);
+      color: var(--gray-700);
+      padding: 5px 14px;
       border-radius: 20px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.15s;
       font-family: inherit;
     }
-
-    .filter-pill:hover {
-      border-color: rgba(14,165,233,0.3);
-      color: #0EA5E9;
-    }
-
-    .filter-pill.active {
-      background: rgba(14,165,233,0.15);
-      border-color: rgba(14,165,233,0.3);
-      color: #0EA5E9;
-    }
-
+    .filter-pill:hover { border-color: var(--blue); color: var(--blue); }
+    .filter-pill.active { background: var(--blue); border-color: var(--blue); color: white; }
     .date-toggle {
       display: flex;
-      border: 1px solid var(--border-glass);
+      border: 1px solid var(--gray-200);
       border-radius: 8px;
       overflow: hidden;
+      background: white;
     }
-
     .date-btn {
       background: transparent;
       border: none;
-      color: var(--text-secondary);
-      padding: 6px 14px;
-      font-size: 13px;
+      border-right: 1px solid var(--gray-200);
+      color: var(--gray-500);
+      padding: 5px 14px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.15s;
       font-family: inherit;
-      border-right: 1px solid var(--border-glass);
     }
-
     .date-btn:last-child { border-right: none; }
+    .date-btn:hover  { color: var(--blue); background: var(--gray-50); }
+    .date-btn.active { background: var(--blue); color: white; }
 
-    .date-btn:hover { color: #0EA5E9; background: rgba(14,165,233,0.08); }
-
-    .date-btn.active {
-      background: rgba(14,165,233,0.15);
-      color: #0EA5E9;
-    }
-
-    /* ── Invoice table ── */
-    .table-container {
-      margin-top: var(--space-lg);
-      border-radius: 16px;
-      overflow: hidden;
-      background: #132B4E;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    thead tr {
-      background: rgba(0,0,0,0.2);
-    }
-
+    /* Table */
+    .table-wrap { overflow: hidden; border-radius: 12px; }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: var(--gray-50); }
     th {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: var(--gray-300);
-      padding: 0 var(--space-md);
-      height: 52px;
+      color: var(--gray-500);
+      padding: 12px 16px;
       text-align: left;
+      border-bottom: 1px solid var(--gray-200);
       white-space: nowrap;
     }
-
     th:last-child { width: 40px; text-align: center; }
-
     tbody tr.data-row {
-      height: 52px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 1px solid var(--gray-100);
       cursor: pointer;
       transition: background 0.12s;
     }
-
-    tbody tr.data-row:hover { background: rgba(255,255,255,0.04); }
-
+    tbody tr.data-row:hover { background: var(--gray-50); }
     tbody tr.data-row:last-of-type { border-bottom: none; }
-
     td {
-      padding: 0 var(--space-md);
-      font-size: 14px;
-      color: var(--text-primary);
+      padding: 13px 16px;
+      font-size: 13px;
+      color: var(--gray-900);
       white-space: nowrap;
     }
-
     td.mono {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      font-size: 11px;
+      color: var(--gray-700);
     }
-
     td.overcharge {
       color: var(--red);
       font-family: 'JetBrains Mono', monospace;
       font-size: 12px;
       font-weight: 700;
     }
-
     td.amount {
       font-family: 'JetBrains Mono', monospace;
       font-size: 12px;
+      color: var(--gray-700);
     }
 
     .source-badge {
       display: inline-block;
       padding: 3px 8px;
       border-radius: 4px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       white-space: nowrap;
     }
-
-    .source-badge.ocean {
-      background: rgba(26,86,160,0.25);
-      color: #93C5FD;
-    }
-
-    .source-badge.rail {
-      background: rgba(16,185,129,0.2);
-      color: #6EE7B7;
-    }
+    .source-badge.ocean { background: #EFF6FF; color: #1D4ED8; }
+    .source-badge.rail  { background: #ECFDF5; color: #065F46; }
 
     .status-badge {
       display: inline-block;
       padding: 4px 10px;
       border-radius: 12px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       white-space: nowrap;
     }
-
-    .status-badge.pending   { background: rgba(245,158,11,0.2);   color: #FDE68A; }
-    .status-badge.filed     { background: rgba(14,165,233,0.2);   color: #7DD3FC; }
-    .status-badge.won       { background: rgba(16,185,129,0.2);   color: #6EE7B7; }
-    .status-badge.recovered {
-      background: rgba(16,185,129,0.15);
-      color: #34D399;
-      border: 1px solid rgba(16,185,129,0.3);
-    }
+    .status-badge.pending   { background: #FEF3C7; color: #92400E; }
+    .status-badge.filed     { background: #EFF6FF; color: #1D4ED8; }
+    .status-badge.won       { background: #D1FAE5; color: #065F46; }
+    .status-badge.recovered { background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; }
 
     .expand-chevron {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 28px;
-      height: 28px;
+      width: 28px; height: 28px;
       border-radius: 6px;
       background: transparent;
       border: none;
       cursor: pointer;
-      color: var(--text-secondary);
+      color: var(--gray-400);
       transition: transform 0.2s, color 0.15s;
       font-size: 14px;
     }
+    .expand-chevron.expanded { transform: rotate(180deg); color: var(--blue); }
 
-    .chevron.expanded {
-      transform: rotate(180deg);
-      color: #0EA5E9;
-    }
-
-    /* ── Expanded row detail ── */
-    tr.row-detail td {
-      padding: 0;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-
+    tr.row-detail td { padding: 0; border-bottom: 1px solid var(--gray-100); }
     .row-detail-inner {
-      background: rgba(0,0,0,0.15);
+      background: var(--gray-50);
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: var(--space-lg);
+      gap: 20px;
       overflow: hidden;
       max-height: 0;
       transition: max-height 0.25s ease;
     }
-
-    .row-detail-inner.open {
-      max-height: 400px;
-      padding: var(--space-md) var(--space-lg);
-    }
-
+    .row-detail-inner.open { max-height: 400px; padding: 16px; }
     .detail-section-title {
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: var(--text-secondary);
-      margin-bottom: var(--space-sm);
+      color: var(--gray-500);
+      margin-bottom: 8px;
     }
-
-    .breakdown-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
+    .breakdown-table { width: 100%; border-collapse: collapse; }
     .breakdown-table th {
-      font-size: 11px;
+      font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.3px;
-      color: var(--text-muted);
+      color: var(--gray-500);
       height: auto;
       padding: 4px 8px;
       font-weight: 700;
+      border-bottom: none;
+      background: transparent;
     }
-
     .breakdown-table td {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
       font-size: 11px;
       padding: 4px 8px;
-      color: var(--text-primary);
+      color: var(--gray-700);
+      white-space: normal;
     }
-
     .breakdown-table .delta-cell { color: var(--red); font-weight: 700; }
 
     .charge-type-badge {
       display: inline-block;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
+      background: var(--gray-100);
+      border: 1px solid var(--gray-200);
       border-radius: 8px;
       padding: 6px 12px;
       font-size: 12px;
       font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: var(--space-sm);
+      color: var(--gray-700);
+      margin-bottom: 8px;
     }
-
     .dispute-text-block {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
       font-size: 11px;
-      background: rgba(0,0,0,0.2);
+      background: white;
+      border: 1px solid var(--gray-200);
       border-radius: 8px;
-      padding: 12px 16px;
-      color: var(--text-secondary);
+      padding: 12px 14px;
+      color: var(--gray-700);
       line-height: 1.6;
       white-space: pre-wrap;
       word-break: break-word;
     }
+    .confidence-bar-wrap { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .confidence-bar-bg { flex: 1; height: 6px; background: var(--gray-200); border-radius: 3px; overflow: hidden; }
+    .confidence-bar-fill { height: 100%; background: var(--green); border-radius: 3px; }
+    .confidence-pct { font-size: 12px; font-weight: 700; color: var(--green); white-space: nowrap; }
 
-    .confidence-bar-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: var(--space-sm);
-    }
+    .table-empty { text-align: center; padding: 48px 24px; }
+    .table-empty h3 { font-size: 16px; font-weight: 600; color: var(--gray-500); margin-bottom: 8px; }
+    .table-empty p  { font-size: 14px; color: var(--gray-400); }
 
-    .confidence-bar-bg {
-      flex: 1;
-      height: 6px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-
-    .confidence-bar-fill {
-      height: 100%;
-      background: var(--green);
-      border-radius: 3px;
-    }
-
-    .confidence-pct {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--green);
-      white-space: nowrap;
-    }
-
-    /* ── Empty state ── */
-    .table-empty {
-      text-align: center;
-      padding: 48px 24px;
-    }
-
-    .table-empty h3 {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
-    }
-
-    .table-empty p { font-size: 14px; color: var(--text-muted); }
-
-    /* ── Charts row ── */
-    .charts-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--space-lg);
-      margin-top: var(--space-lg);
-    }
-
-    .chart-panel { padding: var(--space-lg); }
-
-    .chart-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: white;
-      margin-bottom: 8px;
-    }
-
+    /* Charts */
+    .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .chart-panel { padding: 24px; }
+    .chart-title    { font-size: 16px; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
+    .chart-subtitle { font-size: 13px; color: var(--gray-500); margin-bottom: 16px; }
     .chart-container { background: transparent !important; }
 
-    /* ── ROI calculator ── */
-    .roi-panel {
-      margin-top: var(--space-lg);
-      margin-bottom: var(--space-2xl);
-      padding: var(--space-xl);
-    }
-
-    .roi-heading {
-      font-size: 24px;
-      font-weight: 700;
-      color: white;
-      margin-bottom: 6px;
-    }
-
-    .roi-sub {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin-bottom: var(--space-lg);
-    }
-
-    .roi-input-wrap {
-      position: relative;
-      margin-bottom: var(--space-lg);
-    }
-
+    /* ROI */
+    .roi-panel { padding: 32px 36px; }
+    .roi-heading { font-size: 22px; font-weight: 700; color: var(--gray-900); margin-bottom: 6px; }
+    .roi-sub { font-size: 14px; color: var(--gray-500); margin-bottom: 24px; }
+    .roi-input-wrap { position: relative; margin-bottom: 24px; max-width: 400px; }
     .roi-input-prefix {
       position: absolute;
-      left: 16px;
-      top: 50%;
+      left: 14px; top: 50%;
       transform: translateY(-50%);
       font-family: 'JetBrains Mono', monospace;
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--text-secondary);
+      font-size: 20px; font-weight: 700;
+      color: var(--gray-400);
       pointer-events: none;
     }
-
     .roi-input {
       width: 100%;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.15);
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
       border-radius: 8px;
-      padding: 16px 16px 16px 40px;
-      font-size: 24px;
+      padding: 14px 14px 14px 36px;
+      font-size: 20px;
       font-family: 'JetBrains Mono', monospace;
       font-weight: 700;
-      color: white;
+      color: var(--gray-900);
       outline: none;
       transition: border-color 0.15s;
     }
-
-    .roi-input:focus { border-color: rgba(14,165,233,0.5); }
-
-    .roi-output-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--space-lg);
-    }
-
+    .roi-input:focus { border-color: var(--accent); background: white; }
+    .roi-output-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     .roi-output-tile {
-      background: rgba(0,0,0,0.2);
-      border: 1px solid rgba(255,255,255,0.08);
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
       border-radius: 12px;
-      padding: var(--space-md);
+      padding: 20px;
     }
-
     .roi-output-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--gray-500); margin-bottom: 10px;
     }
-
-    .roi-output-value {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 24px;
-      font-weight: 700;
-    }
-
+    .roi-output-value { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; }
     .roi-output-value.green  { color: var(--green); }
     .roi-output-value.accent { color: var(--accent); }
-    .roi-output-value.white  { color: white; }
+    .roi-output-value.dark   { color: var(--gray-900); }
 
-    /* ── Responsive ── */
-    @media (max-width: 1300px) {
-      .content { padding: 0 var(--space-lg); }
-      header { padding: 0 var(--space-lg); }
+    /* Scale panel */
+    .scale-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+    .scale-card { background: white; border: 1px solid var(--gray-200); border-radius: 12px; padding: 24px; }
+    .scale-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--gray-900); }
+    .scale-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--gray-100); font-size: 13px; }
+    .scale-row:last-child { border-bottom: none; }
+    .scale-label { color: var(--gray-500); }
+    .scale-val { font-weight: 700; color: var(--gray-900); }
+    .scale-val.green { color: var(--green); }
+    .scale-val.blue  { color: var(--blue); }
+    .highlight-row { background: var(--gray-50); border-radius: 8px; padding: 10px 12px; }
+    .next-steps { background: white; border: 1px solid var(--gray-200); border-radius: 12px; padding: 28px; }
+    .next-steps h3 { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+    .step-list { display: flex; flex-direction: column; gap: 16px; }
+    .step-item { display: flex; align-items: flex-start; gap: 16px; }
+    .step-icon {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--blue); color: white;
+      font-weight: 700; font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
     }
+    .step-content h4 { font-size: 14px; font-weight: 600; color: var(--gray-900); }
+    .step-content p  { font-size: 13px; color: var(--gray-500); margin-top: 3px; line-height: 1.5; }
 
+    /* Buttons */
+    .btn-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; }
+    .btn { padding: 10px 22px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; font-family: inherit; }
+    .btn-primary { background: var(--blue); color: white; }
+    .btn-primary:hover { background: #1346A0; }
+    .btn-outline { background: white; color: var(--gray-700); border: 1px solid var(--gray-300); }
+    .btn-outline:hover { background: var(--gray-50); }
+
+    /* Responsive */
     @media (max-width: 1100px) {
       .kpi-grid { grid-template-columns: repeat(2, 1fr); }
       .charts-row { grid-template-columns: 1fr; }
+      .roi-output-grid { grid-template-columns: 1fr; }
+      .scale-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 900px) {
+      header, .content { padding-left: 20px; padding-right: 20px; }
+      .steps-nav { padding: 0 20px; overflow-x: auto; }
+      .hero { padding: 32px 20px; }
+      .stat-row { gap: 24px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ── Header ── -->
-  <header>
-    <div class="header-left">
-      <div class="logo">
-        <div class="logo-mark">V</div>
-        <div class="logo-text-wrap">
-          <span class="logo-wordmark">VESSIQ</span>
-          <span class="logo-sub">Freight Audit Platform</span>
-        </div>
-      </div>
-      <span class="header-badge">Live Demo &middot; Q1 2025</span>
-    </div>
-    <div class="header-right">
-      <nav>
-        <a href="#overview">Overview</a>
-        <a href="#disputes">Disputes</a>
-        <a href="#roi">ROI</a>
-      </nav>
-      <button class="btn-cta">Book a Demo</button>
-    </div>
-  </header>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:25%"></div></div>
 
-  <!-- ── Main content ── -->
-  <div class="content">
+<header>
+  <div class="logo">
+    <div class="logo-mark">V</div>
+    <div>
+      <div class="logo-text">VESSIQ</div>
+      <div class="logo-sub">Freight Audit Platform</div>
+    </div>
+  </div>
+  <div class="header-badge">LIVE DEMO — Invoice Chargeback Audit</div>
+</header>
 
-    <!-- KPI Tiles -->
+<div class="hero">
+  <h1>Your carrier invoices are hiding <span>recoverable money.</span><br>VESSIQ finds it automatically.</h1>
+  <p>We ingest ocean freight invoices in any format, normalize them against your contract rates, and flag every discrepancy — before you pay.</p>
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-num">$10B+</div>
+      <div class="stat-label">Ocean freight overcharges 2021–2024</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">80%</div>
+      <div class="stat-label">of carrier invoices contain errors</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">1–8%</div>
+      <div class="stat-label">of freight spend recoverable</div>
+    </div>
+  </div>
+</div>
+
+<nav class="steps-nav">
+  <div class="step-tab active" onclick="showPanel(1)" id="tab1">
+    <div class="step-num" id="num1">1</div> Invoice Audit Dashboard
+  </div>
+  <div class="step-tab" onclick="showPanel(2)" id="tab2">
+    <div class="step-num" id="num2">2</div> Analytics &amp; Breakdown
+  </div>
+  <div class="step-tab" onclick="showPanel(3)" id="tab3">
+    <div class="step-num" id="num3">3</div> ROI Calculator
+  </div>
+  <div class="step-tab" onclick="showPanel(4)" id="tab4">
+    <div class="step-num" id="num4">4</div> Scale &amp; Pilot
+  </div>
+</nav>
+
+<div class="content">
+
+  <!-- PANEL 1: Invoice Audit Dashboard -->
+  <div class="panel active" id="panel1">
+    <div class="section-header">
+      <h2>Live Invoice Audit — Q1 2025</h2>
+      <p>23 carrier invoices audited across MAEU, MSCU, EGLV, HLCU, PSHA, and BNSF. Filter by carrier or date range, then click any row to see the full line-item breakdown and auto-generated dispute language.</p>
+    </div>
+
     <div class="kpi-grid">
-      <div class="glass-card kpi-tile">
+      <div class="card kpi-tile">
         <div class="kpi-label">Invoices Audited</div>
-        <div class="kpi-number white" id="kpi-audited">0</div>
+        <div class="kpi-number dark" id="kpi-audited">0</div>
       </div>
-      <div class="glass-card kpi-tile">
+      <div class="card kpi-tile">
         <div class="kpi-label">Overcharges Found</div>
         <div class="kpi-number red" id="kpi-overcharges">0</div>
       </div>
-      <div class="glass-card kpi-tile">
+      <div class="card kpi-tile">
         <div class="kpi-label">Recovery Amount</div>
-        <div class="kpi-number accent" id="kpi-recovery">0</div>
+        <div class="kpi-number green" id="kpi-recovery">$0</div>
       </div>
-      <div class="glass-card kpi-tile">
+      <div class="card kpi-tile">
         <div class="kpi-label">Dispute Win Rate</div>
-        <div class="kpi-number accent" id="kpi-winrate">0</div>
+        <div class="kpi-number blue" id="kpi-winrate">0%</div>
       </div>
     </div>
 
-    <!-- Filter Bar -->
-    <div class="glass-card filter-bar">
+    <div class="card filter-bar">
       <div class="filter-group" id="carrierFilters">
+        <span class="filter-label">Carrier:</span>
         <button class="filter-pill active" data-carrier="ALL">All</button>
         <button class="filter-pill" data-carrier="MAEU">MAEU</button>
         <button class="filter-pill" data-carrier="MSCU">MSCU</button>
@@ -746,9 +613,8 @@
       </div>
     </div>
 
-    <!-- Invoice Table -->
-    <div class="table-container" id="disputes">
-      <table class="invoice-table">
+    <div class="card table-wrap">
+      <table>
         <thead>
           <tr>
             <th>Source</th>
@@ -767,22 +633,47 @@
       </table>
     </div>
 
-    <!-- Charts Row -->
-    <div class="charts-row" id="overview">
-      <div class="glass-card chart-panel">
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="showPanel(2)">See Analytics &amp; Breakdown →</button>
+    </div>
+  </div>
+
+  <!-- PANEL 2: Analytics -->
+  <div class="panel" id="panel2">
+    <div class="section-header">
+      <h2>Analytics &amp; Breakdown</h2>
+      <p>Overcharge distribution by carrier and discrepancy type. Carrier and date filters from Panel 1 carry through here.</p>
+    </div>
+
+    <div class="charts-row">
+      <div class="card chart-panel">
         <div class="chart-title">Overcharge Amount by Carrier</div>
+        <div class="chart-subtitle">Total overcharge $ identified per carrier (current filter)</div>
         <div id="barChart" class="chart-container"></div>
       </div>
-      <div class="glass-card chart-panel">
+      <div class="card chart-panel">
         <div class="chart-title">Breakdown by Charge Type</div>
+        <div class="chart-subtitle">Count of flagged invoices by discrepancy category</div>
         <div id="donutChart" class="chart-container"></div>
       </div>
     </div>
 
-    <!-- ROI Calculator -->
-    <div class="glass-card roi-panel" id="roi">
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="showPanel(1)">← Back</button>
+      <button class="btn btn-primary" onclick="showPanel(3)">Calculate Your ROI →</button>
+    </div>
+  </div>
+
+  <!-- PANEL 3: ROI Calculator -->
+  <div class="panel" id="panel3">
+    <div class="section-header">
+      <h2>ROI Calculator</h2>
+      <p>Enter your monthly freight spend to estimate what VESSIQ would recover for your portfolio annually.</p>
+    </div>
+
+    <div class="card roi-panel">
       <div class="roi-heading">Calculate Your Recovery Potential</div>
-      <div class="roi-sub">Enter your monthly freight spend to estimate annual recovery</div>
+      <div class="roi-sub">Based on industry average: 3.5% of freight spend contains recoverable overcharges</div>
       <div class="roi-input-wrap">
         <span class="roi-input-prefix">$</span>
         <input
@@ -796,766 +687,380 @@
       </div>
       <div class="roi-output-grid">
         <div class="roi-output-tile">
-          <div class="roi-output-label">ESTIMATED ANNUAL RECOVERY</div>
+          <div class="roi-output-label">Estimated Annual Recovery</div>
           <div class="roi-output-value green" id="roiRecovery">$&mdash;</div>
         </div>
         <div class="roi-output-tile">
-          <div class="roi-output-label">VESSIQ FEE (25% GAINSHARE)</div>
+          <div class="roi-output-label">VESSIQ Fee (25% Gainshare)</div>
           <div class="roi-output-value accent" id="roiFee">$&mdash;</div>
         </div>
         <div class="roi-output-tile">
-          <div class="roi-output-label">NET BENEFIT TO YOU</div>
-          <div class="roi-output-value white" id="roiNet">$&mdash;</div>
+          <div class="roi-output-label">Net Benefit to You</div>
+          <div class="roi-output-value dark" id="roiNet">$&mdash;</div>
         </div>
       </div>
     </div>
 
-  </div><!-- /content -->
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="showPanel(2)">← Back</button>
+      <button class="btn btn-primary" onclick="showPanel(4)">See How a Pilot Works →</button>
+    </div>
+  </div>
 
-  <!-- CDN Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.1/dist/apexcharts.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <!-- PANEL 4: Scale & Pilot -->
+  <div class="panel" id="panel4">
+    <div class="section-header">
+      <h2>What This Looks Like at Scale</h2>
+      <p>One invoice with hundreds in overcharges is meaningful. Across your full portfolio — annualized — the numbers become significant.</p>
+    </div>
 
-  <script>
-    // ─────────────────────────────────────────────────────────────────────────
-    // DATA — 23 maritime invoice records
-    //
-    // Status distribution: Won(15), Filed(7), Recovered(1) = 23 rows
-    // Win rate:   15 Won / (15 Won + 7 Filed) = 68.2% ✓
-    // Recovery:   Won(15) + Recovered(1) overchargeAmount = $187,500.00 ✓
-    // Overcharges found: 23 (all rows have overchargeAmount > 0) ✓
-    //
-    // Carriers: MAEU(5), MSCU(4), EGLV(3), HLCU(3), PSHA(4), BNSF(4)
-    // Sources:  MAEU/MSCU/EGLV/HLCU/PSHA → ocean; BNSF → rail
-    // LOCODEs:  USLAX, USLGB, USSEA, USHON, CNSHA, SGSIN, DEHAM
-    // ─────────────────────────────────────────────────────────────────────────
+    <div class="scale-grid">
+      <div class="scale-card">
+        <h3>📊 Monthly Projection</h3>
+        <div class="scale-row"><span class="scale-label">Invoices processed / month</span><span class="scale-val">64</span></div>
+        <div class="scale-row"><span class="scale-label">Avg. overcharge rate (industry)</span><span class="scale-val">1–8%</span></div>
+        <div class="scale-row"><span class="scale-label">Assumed avg. overcharge / invoice</span><span class="scale-val">$535</span></div>
+        <div class="scale-row highlight-row"><span class="scale-label" style="font-weight:700;">Est. monthly overcharges</span><span class="scale-val green">~$34,000</span></div>
+      </div>
+      <div class="scale-card">
+        <h3>📈 Annual Projection</h3>
+        <div class="scale-row"><span class="scale-label">Annual invoice volume</span><span class="scale-val">~768</span></div>
+        <div class="scale-row"><span class="scale-label">Conservative recovery rate (50%)</span><span class="scale-val">$204,000</span></div>
+        <div class="scale-row"><span class="scale-label">Optimistic recovery rate (80%)</span><span class="scale-val">$326,000</span></div>
+        <div class="scale-row highlight-row"><span class="scale-label" style="font-weight:700;">AP hours eliminated</span><span class="scale-val green">360–480 hrs/yr</span></div>
+      </div>
+      <div class="scale-card">
+        <h3>💰 VESSIQ Pricing</h3>
+        <div class="scale-row"><span class="scale-label">Model</span><span class="scale-val blue">Gainshare</span></div>
+        <div class="scale-row"><span class="scale-label">VESSIQ fee</span><span class="scale-val">25% of recovery</span></div>
+        <div class="scale-row"><span class="scale-label">Your net recovery (conservative)</span><span class="scale-val green">$153,000 / yr</span></div>
+        <div class="scale-row highlight-row"><span class="scale-label" style="font-weight:700;">ROI on VESSIQ</span><span class="scale-val green">3:1 minimum</span></div>
+      </div>
+      <div class="scale-card">
+        <h3>🚀 Pilot Proposal</h3>
+        <div class="scale-row"><span class="scale-label">What we need from you</span><span class="scale-val">3 months of invoices</span></div>
+        <div class="scale-row"><span class="scale-label">What we deliver</span><span class="scale-val">Full audit report</span></div>
+        <div class="scale-row"><span class="scale-label">Pilot duration</span><span class="scale-val">2–4 weeks</span></div>
+        <div class="scale-row highlight-row"><span class="scale-label" style="font-weight:700;">Cost to pilot</span><span class="scale-val green">$0 upfront</span></div>
+      </div>
+    </div>
 
-    const DATA = [
+    <div class="next-steps">
+      <h3>What Happens Next</h3>
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-icon">1</div>
+          <div class="step-content">
+            <h4>Share 3 months of carrier invoices</h4>
+            <p>PDF, EDI, CSV — any format works. We handle the normalization. Takes 5 minutes on your end.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-icon">2</div>
+          <div class="step-content">
+            <h4>VESSIQ runs the audit in 2 weeks</h4>
+            <p>We parse every invoice, match against your contract rates, and identify every discrepancy. You get a full report with dollar amounts per carrier.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-icon">3</div>
+          <div class="step-content">
+            <h4>You see your recovery potential before committing</h4>
+            <p>No risk. You see the exact overcharges VESSIQ found. If there's nothing there, you owe us nothing.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-icon">4</div>
+          <div class="step-content">
+            <h4>Go live on all future invoices</h4>
+            <p>VESSIQ runs automatically on every invoice you receive. AP team gets flagged discrepancies before payment. Disputes generated automatically.</p>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      // ── MAEU (Maersk) — 5 rows ─────────────────────────────────────────────
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="showPanel(3)">← Back</button>
+      <button class="btn btn-primary" onclick="showPanel(1)">↺ Start Over</button>
+    </div>
+  </div>
 
-      {
-        id: 'INV-001', source: 'ocean',
-        invoiceId: 'MAEU-2024-38472', carrier: 'MAEU', carrierName: 'Maersk',
-        portPair: 'CNSHA > USLAX', date: '2024-10-14',
-        billedAmount: 142847.34, contractAmount: 123386.04, overchargeAmount: 19461.30,
-        status: 'Won',
-        containerNumber: 'MAEU1234567', voyageNumber: 'AE1-024E', chargeType: 'BAF',
-        lineItems: [
-          { type: 'Base Ocean Freight (22 TEU)', contracted: 110000.00, billed: 110000.00, delta: 0 },
-          { type: 'BAF Surcharge', contracted: 9571.04, billed: 26720.34, delta: 17149.30 },
-          { type: 'THC Destination (USLAX)', contracted: 3815.00, billed: 6127.00, delta: 2312.00 }
-        ],
-        disputeText: 'Per contract MAEU-VESQ-2024, BAF capped at $435.05/TEU for CNSHA-USLAX (22 TEU). Invoice BAF at $1,214.56/TEU — overcharge $17,149.30. USLAX THC also above contracted $173.41/TEU. Total: $19,461.30.',
-        confidence: 94
-      },
+</div><!-- /content -->
 
-      {
-        id: 'INV-002', source: 'ocean',
-        invoiceId: 'MAEU-2024-41836', carrier: 'MAEU', carrierName: 'Maersk',
-        portPair: 'CNSHA > USLGB', date: '2024-11-02',
-        billedAmount: 98143.75, contractAmount: 86303.50, overchargeAmount: 11840.25,
-        status: 'Won',
-        containerNumber: 'MAEU2345678', voyageNumber: 'AE1-026E', chargeType: 'THC',
-        lineItems: [
-          { type: 'Base Ocean Freight (18 TEU)', contracted: 79200.00, billed: 79200.00, delta: 0 },
-          { type: 'THC Destination (USLGB)', contracted: 5467.50, billed: 14363.75, delta: 8896.25 },
-          { type: 'Documentation & AMS', contracted: 1636.00, billed: 4580.00, delta: 2944.00 }
-        ],
-        disputeText: 'USLGB THC contracted at $303.75/TEU (18 TEU). Invoice shows $797.99/TEU — delta $8,896.25. Documentation fees exceed schedule by $2,944.00. Total dispute: $11,840.25.',
-        confidence: 91
-      },
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.1/dist/apexcharts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 
-      {
-        id: 'INV-003', source: 'ocean',
-        invoiceId: 'MAEU-2024-49271', carrier: 'MAEU', carrierName: 'Maersk',
-        portPair: 'SGSIN > USSEA', date: '2024-12-08',
-        billedAmount: 76762.90, contractAmount: 67290.50, overchargeAmount: 9472.40,
-        status: 'Won',
-        containerNumber: 'MAEU3456789', voyageNumber: 'AE6-031W', chargeType: 'D&D',
-        lineItems: [
-          { type: 'Base Ocean Freight (14 TEU)', contracted: 61600.00, billed: 61600.00, delta: 0 },
-          { type: 'D&D Charges', contracted: 3290.50, billed: 10818.90, delta: 7528.40 },
-          { type: 'Port Security Surcharge', contracted: 2400.00, billed: 4344.00, delta: 1944.00 }
-        ],
-        disputeText: 'Container available 2024-11-29. Free time per contract: 10 days. Pickup: 2024-12-02 (3 days). No detention applies. D&D of $10,818.90 is entirely unauthorized. Port security above schedule. Total: $9,472.40.',
-        confidence: 87
-      },
+<script>
+  // ── DATA — 23 maritime invoice records ──────────────────────────────────────
+  // Status: Won(15), Filed(7), Recovered(1)
+  // Win rate: 15/(15+7) = 68.2% | Recovery: $187,500 (Won+Recovered overcharges)
 
-      {
-        id: 'INV-004', source: 'ocean',
-        invoiceId: 'MAEU-2025-01347', carrier: 'MAEU', carrierName: 'Maersk',
-        portPair: 'DEHAM > USLAX', date: '2025-01-09',
-        billedAmount: 89823.60, contractAmount: 76673.60, overchargeAmount: 13150.00,
-        status: 'Won',
-        containerNumber: 'MAEU4567890', voyageNumber: 'AE11-003W', chargeType: 'Unauthorized',
-        lineItems: [
-          { type: 'Base Ocean Freight (20 TEU)', contracted: 72000.00, billed: 72000.00, delta: 0 },
-          { type: 'Peak Season Surcharge', contracted: 0, billed: 13150.00, delta: 13150.00 },
-          { type: 'Documentation Fee', contracted: 4673.60, billed: 4673.60, delta: 0 }
-        ],
-        disputeText: 'PSS not applicable under MAEU-VESQ-2024 contract per amendment clause 7.3. $13,150.00 (20 TEU × $657.50) is unauthorized. Contract reference provided. Full reversal expected.',
-        confidence: 96
-      },
+  const DATA = [
+    { id:'INV-001', source:'ocean', invoiceId:'MAEU-2024-38472', carrier:'MAEU', carrierName:'Maersk', portPair:'CNSHA > USLAX', date:'2024-10-14', billedAmount:142847.34, contractAmount:123386.04, overchargeAmount:19461.30, status:'Won', containerNumber:'MAEU1234567', voyageNumber:'AE1-024E', chargeType:'BAF', lineItems:[{type:'Base Ocean Freight (22 TEU)',contracted:110000.00,billed:110000.00,delta:0},{type:'BAF Surcharge',contracted:9571.04,billed:26720.34,delta:17149.30},{type:'THC Destination (USLAX)',contracted:3815.00,billed:6127.00,delta:2312.00}], disputeText:'Per contract MAEU-VESQ-2024, BAF capped at $435.05/TEU for CNSHA-USLAX (22 TEU). Invoice BAF at $1,214.56/TEU — overcharge $17,149.30. USLAX THC also above contracted $173.41/TEU. Total: $19,461.30.', confidence:94 },
+    { id:'INV-002', source:'ocean', invoiceId:'MAEU-2024-41836', carrier:'MAEU', carrierName:'Maersk', portPair:'CNSHA > USLGB', date:'2024-11-02', billedAmount:98143.75, contractAmount:86303.50, overchargeAmount:11840.25, status:'Won', containerNumber:'MAEU2345678', voyageNumber:'AE1-026E', chargeType:'THC', lineItems:[{type:'Base Ocean Freight (18 TEU)',contracted:79200.00,billed:79200.00,delta:0},{type:'THC Destination (USLGB)',contracted:5467.50,billed:14363.75,delta:8896.25},{type:'Documentation & AMS',contracted:1636.00,billed:4580.00,delta:2944.00}], disputeText:'USLGB THC contracted at $303.75/TEU (18 TEU). Invoice shows $797.99/TEU — delta $8,896.25. Documentation fees exceed schedule by $2,944.00. Total dispute: $11,840.25.', confidence:91 },
+    { id:'INV-003', source:'ocean', invoiceId:'MAEU-2024-49271', carrier:'MAEU', carrierName:'Maersk', portPair:'SGSIN > USSEA', date:'2024-12-08', billedAmount:76762.90, contractAmount:67290.50, overchargeAmount:9472.40, status:'Won', containerNumber:'MAEU3456789', voyageNumber:'AE6-031W', chargeType:'D&D', lineItems:[{type:'Base Ocean Freight (14 TEU)',contracted:61600.00,billed:61600.00,delta:0},{type:'D&D Charges',contracted:3290.50,billed:10818.90,delta:7528.40},{type:'Port Security Surcharge',contracted:2400.00,billed:4344.00,delta:1944.00}], disputeText:'Container available 2024-11-29. Free time per contract: 10 days. Pickup: 2024-12-02 (3 days). No detention applies. D&D of $10,818.90 is entirely unauthorized. Port security above schedule. Total: $9,472.40.', confidence:87 },
+    { id:'INV-004', source:'ocean', invoiceId:'MAEU-2025-01347', carrier:'MAEU', carrierName:'Maersk', portPair:'DEHAM > USLAX', date:'2025-01-09', billedAmount:89823.60, contractAmount:76673.60, overchargeAmount:13150.00, status:'Won', containerNumber:'MAEU4567890', voyageNumber:'AE11-003W', chargeType:'Unauthorized', lineItems:[{type:'Base Ocean Freight (20 TEU)',contracted:72000.00,billed:72000.00,delta:0},{type:'Peak Season Surcharge',contracted:0,billed:13150.00,delta:13150.00},{type:'Documentation Fee',contracted:4673.60,billed:4673.60,delta:0}], disputeText:'PSS not applicable under MAEU-VESQ-2024 contract per amendment clause 7.3. $13,150.00 (20 TEU × $657.50) is unauthorized. Contract reference provided. Full reversal expected.', confidence:96 },
+    { id:'INV-005', source:'ocean', invoiceId:'MAEU-2024-55923', carrier:'MAEU', carrierName:'Maersk', portPair:'CNSHA > USSEA', date:'2024-11-28', billedAmount:63947.15, contractAmount:55720.35, overchargeAmount:8226.80, status:'Filed', containerNumber:'MAEU5678901', voyageNumber:'AE1-028E', chargeType:'BAF', lineItems:[{type:'Base Ocean Freight (16 TEU)',contracted:51200.00,billed:51200.00,delta:0},{type:'BAF Surcharge',contracted:3824.35,billed:10441.15,delta:6616.80},{type:'CFS Handling',contracted:696.00,billed:2306.00,delta:1610.00}], disputeText:'BAF at contracted $238.77/TEU (16 TEU) = $3,824.35. Invoice applies $652.57/TEU = $10,441.15. Variance $6,616.80 requires carrier justification. CFS exceeds schedule by $1,610.00. Total: $8,226.80.', confidence:78 },
+    { id:'INV-006', source:'ocean', invoiceId:'MSC-8374621', carrier:'MSCU', carrierName:'MSC', portPair:'CNSHA > USLAX', date:'2024-10-22', billedAmount:128918.40, contractAmount:113537.65, overchargeAmount:15380.75, status:'Won', containerNumber:'MSCU7654321', voyageNumber:'SEAS024', chargeType:'THC', lineItems:[{type:'Base Ocean Freight (24 TEU)',contracted:105600.00,billed:105600.00,delta:0},{type:'THC Origin (CNSHA)',contracted:5764.65,billed:16580.40,delta:10815.75},{type:'Bunker Recovery Factor',contracted:2173.00,billed:6738.00,delta:4565.00}], disputeText:'CNSHA THC per MSC-TARIFF-2024-Q4: $240.19/TEU (24 TEU) = $5,764.65. Invoice at $690.85/TEU. Delta $10,815.75. BRF capped at $90.54/TEU per spot agreement; billed $280.75. Total: $15,380.75.', confidence:92 },
+    { id:'INV-007', source:'ocean', invoiceId:'MSC-8491037', carrier:'MSCU', carrierName:'MSC', portPair:'SGSIN > USLGB', date:'2024-11-15', billedAmount:117834.20, contractAmount:105373.90, overchargeAmount:12460.30, status:'Won', containerNumber:'MSCU8765432', voyageNumber:'SEAS031', chargeType:'BAF', lineItems:[{type:'Base Ocean Freight (20 TEU)',contracted:96000.00,billed:96000.00,delta:0},{type:'BAF Surcharge',contracted:7573.90,billed:18204.20,delta:10630.30},{type:'Telex Release Fee',contracted:1800.00,billed:3630.00,delta:1830.00}], disputeText:'BAF for SGSIN-USLGB per contract: $378.70/TEU (20 TEU) = $7,573.90. Invoice at $910.21 — delta $10,630.30. Telex release fee exceeds $90.00/doc schedule. Total: $12,460.30.', confidence:89 },
+    { id:'INV-008', source:'ocean', invoiceId:'MSC-8612874', carrier:'MSCU', carrierName:'MSC', portPair:'CNSHA > USLAX', date:'2024-12-19', billedAmount:84283.60, contractAmount:76831.00, overchargeAmount:7452.60, status:'Filed', containerNumber:'MSCU9876543', voyageNumber:'SEAS038', chargeType:'Duplicate', lineItems:[{type:'Base Ocean Freight (16 TEU)',contracted:72800.00,billed:72800.00,delta:0},{type:'BAF Surcharge',contracted:2631.00,billed:9883.60,delta:7252.60},{type:'Port Security',contracted:1400.00,billed:1600.00,delta:200.00}], disputeText:'BAF charge appears to have been billed twice in this cycle. Reference invoice MSC-8601234 (same vessel, same container) already reflects $2,631.00. Duplicate of $7,252.60 evident from billing ledger. Total: $7,452.60.', confidence:97 },
+    { id:'INV-009', source:'ocean', invoiceId:'MSC-8729145', carrier:'MSCU', carrierName:'MSC', portPair:'DEHAM > USLAX', date:'2025-01-06', billedAmount:96571.80, contractAmount:86028.70, overchargeAmount:10543.10, status:'Filed', containerNumber:'MSCU0987654', voyageNumber:'SEAS044', chargeType:'Unauthorized', lineItems:[{type:'Base Ocean Freight (18 TEU)',contracted:82800.00,billed:82800.00,delta:0},{type:'IMO Compliance Surcharge',contracted:0,billed:10543.10,delta:10543.10},{type:'Port Handling (DEHAM)',contracted:3228.70,billed:3228.70,delta:0}], disputeText:'IMO surcharge of $10,543.10 not authorized under MSC-VESQ-2024 (applies only to non-contract spot bookings per tariff bulletin 2024-Q3). No tariff filing located for this effective date. Full reversal requested.', confidence:83 },
+    { id:'INV-010', source:'ocean', invoiceId:'EGLV-2024-20184', carrier:'EGLV', carrierName:'Evergreen', portPair:'CNSHA > USLAX', date:'2024-10-31', billedAmount:99634.70, contractAmount:85914.50, overchargeAmount:13720.20, status:'Won', containerNumber:'EGLV1122334', voyageNumber:'EX1-024N', chargeType:'THC', lineItems:[{type:'Base Ocean Freight (20 TEU)',contracted:80000.00,billed:80000.00,delta:0},{type:'THC (CNSHA + USLAX)',contracted:3914.50,billed:14254.70,delta:10340.20},{type:'EBS Surcharge',contracted:2000.00,billed:5380.00,delta:3380.00}], disputeText:'Combined THC per Evergreen tariff 2024: $195.73/TEU (20 TEU) = $3,914.50. Invoice at $712.74. Delta $10,340.20. EBS contracted at $100.00/TEU — billed $269.00. Total: $13,720.20.', confidence:90 },
+    { id:'INV-011', source:'ocean', invoiceId:'EGLV-2024-23456', carrier:'EGLV', carrierName:'Evergreen', portPair:'SGSIN > USSEA', date:'2024-11-22', billedAmount:72729.90, contractAmount:65454.10, overchargeAmount:7275.80, status:'Won', containerNumber:'EGLV2233445', voyageNumber:'EX6-028W', chargeType:'D&D', lineItems:[{type:'Base Ocean Freight (16 TEU)',contracted:60800.00,billed:60800.00,delta:0},{type:'D&D Charges',contracted:3054.10,billed:9529.90,delta:6475.80},{type:'Lift-On Lift-Off',contracted:1600.00,billed:2400.00,delta:800.00}], disputeText:'Container available 2024-11-10; free time 7 days; pickup 2024-11-17. No D&D should apply. $9,529.90 charged — entirely unwarranted per contract. LoLo fee also above $100.00/TEU schedule. Total: $7,275.80.', confidence:85 },
+    { id:'INV-012', source:'ocean', invoiceId:'EGLV-2025-01782', carrier:'EGLV', carrierName:'Evergreen', portPair:'CNSHA > USLGB', date:'2025-01-14', billedAmount:103382.45, contractAmount:92091.65, overchargeAmount:11290.80, status:'Won', containerNumber:'EGLV3344556', voyageNumber:'EX1-034N', chargeType:'BAF', lineItems:[{type:'Base Ocean Freight (20 TEU)',contracted:88000.00,billed:88000.00,delta:0},{type:'BAF',contracted:2291.65,billed:12182.45,delta:9890.80},{type:'AMS / ISF Fee',contracted:1800.00,billed:3200.00,delta:1400.00}], disputeText:'BAF per EGLV contract CNSHA-USLGB: $114.58/TEU (20 TEU) = $2,291.65. Billed at $609.12. Overcharge: $9,890.80. AMS/ISF documentation above contracted $90.00/doc. Total: $11,290.80.', confidence:93 },
+    { id:'INV-013', source:'ocean', invoiceId:'HLCU-2024-847291', carrier:'HLCU', carrierName:'Hapag-Lloyd', portPair:'DEHAM > USLAX', date:'2024-10-18', billedAmount:119143.25, contractAmount:104512.50, overchargeAmount:14630.75, status:'Won', containerNumber:'HLCU4455667', voyageNumber:'AL5-024W', chargeType:'BAF', lineItems:[{type:'Base Ocean Freight (22 TEU)',contracted:97240.00,billed:97240.00,delta:0},{type:'BAF Surcharge',contracted:5612.50,billed:19043.25,delta:13430.75},{type:'Security Surcharge',contracted:1660.00,billed:2860.00,delta:1200.00}], disputeText:'HLCU BAF for DEHAM-USLAX Q4 2024: $255.11/TEU (22 TEU) = $5,612.50. Invoice at $865.60. Delta $13,430.75. Security surcharge exceeds fixed $75.45/TEU schedule by $1,200.00. Total: $14,630.75.', confidence:88 },
+    { id:'INV-014', source:'ocean', invoiceId:'HLCU-2024-903817', carrier:'HLCU', carrierName:'Hapag-Lloyd', portPair:'CNSHA > USLGB', date:'2024-12-05', billedAmount:95927.30, contractAmount:83747.10, overchargeAmount:12180.20, status:'Won', containerNumber:'HLCU5566778', voyageNumber:'AL3-030W', chargeType:'THC', lineItems:[{type:'Base Ocean Freight (18 TEU)',contracted:79200.00,billed:79200.00,delta:0},{type:'THC Destination (USLGB)',contracted:2547.10,billed:13427.30,delta:10880.20},{type:'Chassis Split Fee',contracted:2000.00,billed:3300.00,delta:1300.00}], disputeText:'USLGB THC per HL-VESQ-2024: $141.51/TEU (18 TEU) = $2,547.10. Invoice at $745.96. Overcharge: $10,880.20. Chassis split fee capped at $111.11/TEU per side letter — overbilled by $1,300.00. Total: $12,180.20.', confidence:86 },
+    { id:'INV-015', source:'ocean', invoiceId:'HLCU-2025-001284', carrier:'HLCU', carrierName:'Hapag-Lloyd', portPair:'SGSIN > USLAX', date:'2025-01-03', billedAmount:78218.90, contractAmount:68874.90, overchargeAmount:9344.00, status:'Filed', containerNumber:'HLCU6677889', voyageNumber:'AL5-037W', chargeType:'Unauthorized', lineItems:[{type:'Base Ocean Freight (18 TEU)',contracted:64800.00,billed:64800.00,delta:0},{type:'CO2 Levy',contracted:0,billed:9344.00,delta:9344.00},{type:'THC (SGSIN)',contracted:4074.90,billed:4074.90,delta:0}], disputeText:'CO2 levy of $9,344.00 was not included in HL-VESQ-2024 framework. Per opt-out clause 9.1, VESQ explicitly excluded this charge for 2024. No contractual basis for this assessment. Full reversal requested.', confidence:80 },
+    { id:'INV-016', source:'ocean', invoiceId:'PSHA-2024-18472', carrier:'PSHA', carrierName:'Pasha Hawaii', portPair:'USLAX > USHON', date:'2024-10-09', billedAmount:66382.40, contractAmount:55441.80, overchargeAmount:10940.60, status:'Won', containerNumber:'PSHA7788990', voyageNumber:'HW1-042W', chargeType:'THC', lineItems:[{type:'Base Freight Rate (18 TEU)',contracted:50400.00,billed:50400.00,delta:0},{type:'THC Honolulu',contracted:3041.80,billed:12182.40,delta:9140.60},{type:'Fuel Adjustment Factor',contracted:2000.00,billed:3800.00,delta:1800.00}], disputeText:'USHON THC per PH-VESQ-2024: $168.99/TEU (18 TEU) = $3,041.80. Invoice at $676.80. Overcharge: $9,140.60. FAF capped at $111.11/TEU — billed $211.11. Total: $10,940.60.', confidence:91 },
+    { id:'INV-017', source:'ocean', invoiceId:'PSHA-2024-21836', carrier:'PSHA', carrierName:'Pasha Hawaii', portPair:'USLAX > USHON', date:'2024-11-13', billedAmount:58874.65, contractAmount:47203.30, overchargeAmount:11671.35, status:'Won', containerNumber:'PSHA8899001', voyageNumber:'HW1-046W', chargeType:'D&D', lineItems:[{type:'Base Freight Rate (16 TEU)',contracted:44800.00,billed:44800.00,delta:0},{type:'D&D Terminal (Honolulu)',contracted:1003.30,billed:10837.65,delta:9834.35},{type:'Port Security',contracted:1400.00,billed:3237.00,delta:1837.00}], disputeText:'Container available 2024-11-03; pickup 2024-11-08 (5 days). Free time per PH-VESQ-2024: 7 days. No D&D applies. $10,837.65 charged — unauthorized in full. Port security also above schedule. Total: $11,671.35.', confidence:88 },
+    { id:'INV-018', source:'ocean', invoiceId:'PSHA-2024-25914', carrier:'PSHA', carrierName:'Pasha Hawaii', portPair:'USSEA > USHON', date:'2024-12-01', billedAmount:52127.80, contractAmount:45683.60, overchargeAmount:6444.20, status:'Filed', containerNumber:'PSHA9900112', voyageNumber:'HW3-050W', chargeType:'BAF', lineItems:[{type:'Base Freight Rate (14 TEU)',contracted:42000.00,billed:42000.00,delta:0},{type:'BAF / CAF',contracted:1883.60,billed:7427.80,delta:5544.20},{type:'Chassis Fee',contracted:1800.00,billed:2700.00,delta:900.00}], disputeText:'BAF/CAF for USSEA-USHON: $134.54/TEU (14 TEU) = $1,883.56. Invoice at $530.56/TEU — variance $5,544.20 not supported by any FMC tariff filing. Chassis fee also above contracted $128.57/TEU. Total: $6,444.20.', confidence:76 },
+    { id:'INV-019', source:'ocean', invoiceId:'PSHA-2025-00841', carrier:'PSHA', carrierName:'Pasha Hawaii', portPair:'USLAX > USHON', date:'2025-01-17', billedAmount:47543.20, contractAmount:45839.20, overchargeAmount:1704.00, status:'Recovered', containerNumber:'PSHA0011223', voyageNumber:'HW1-054W', chargeType:'Duplicate', lineItems:[{type:'Base Freight Rate (14 TEU)',contracted:44200.00,billed:44200.00,delta:0},{type:'Port Handling (Duplicate)',contracted:1639.20,billed:3343.20,delta:1704.00},{type:'Documentation',contracted:0,billed:0,delta:0}], disputeText:'Port handling billed at $3,343.20 — charged twice in same cycle. Reference PSHA-2025-00738 (same container PSHA0011223) already includes $1,639.20. Duplicate $1,704.00 confirmed; credit issued 2025-01-22.', confidence:98 },
+    { id:'INV-020', source:'rail', invoiceId:'BNSF-2024-IT-74821', carrier:'BNSF', carrierName:'BNSF Railway', portPair:'USLAX > USSEA', date:'2024-10-27', billedAmount:64293.75, contractAmount:53353.15, overchargeAmount:10940.60, status:'Won', containerNumber:'BNSF1234567', voyageNumber:'BNSF-Q43-24', chargeType:'THC', lineItems:[{type:'Base Intermodal Rate (20 units)',contracted:48000.00,billed:48000.00,delta:0},{type:'Intermodal Lift Fee',contracted:3953.15,billed:12253.75,delta:8300.60},{type:'Fuel Surcharge',contracted:1400.00,billed:4040.00,delta:2640.00}], disputeText:'Lift fee contracted at $197.66/unit (20) = $3,953.20. Invoice at $612.69 — delta $8,300.60. FSC per BNSF tariff index for Q4 2024: $70.00/unit. Billed at $202.00. Total overcharge: $10,940.60.', confidence:87 },
+    { id:'INV-021', source:'rail', invoiceId:'BNSF-2024-IT-81937', carrier:'BNSF', carrierName:'BNSF Railway', portPair:'USLAX > USSEA', date:'2024-11-19', billedAmount:57827.40, contractAmount:46446.70, overchargeAmount:11380.70, status:'Won', containerNumber:'BNSF2345678', voyageNumber:'BNSF-Q45-24', chargeType:'BAF', lineItems:[{type:'Base Intermodal Rate (22 units)',contracted:42240.00,billed:42240.00,delta:0},{type:'Fuel Surcharge',contracted:2806.70,billed:13037.40,delta:10230.70},{type:'Equipment Repositioning',contracted:1400.00,billed:2550.00,delta:1150.00}], disputeText:'FSC billed at $592.61/unit — BNSF public index for this shipment date: $127.58/unit. Overcharge: $10,230.70. Equipment repositioning exceeds contracted $63.64/unit by $1,150.00. Total: $11,380.70.', confidence:84 },
+    { id:'INV-022', source:'rail', invoiceId:'BNSF-2024-IT-89274', carrier:'BNSF', carrierName:'BNSF Railway', portPair:'USLGB > USSEA', date:'2024-12-14', billedAmount:68518.60, contractAmount:59284.80, overchargeAmount:9233.80, status:'Filed', containerNumber:'BNSF3456789', voyageNumber:'BNSF-Q50-24', chargeType:'D&D', lineItems:[{type:'Base Intermodal Rate (20 units)',contracted:56000.00,billed:56000.00,delta:0},{type:'Detention / Dwell',contracted:1484.80,billed:9768.60,delta:8283.80},{type:'Ramp Handling',contracted:1800.00,billed:2750.00,delta:950.00}], disputeText:'Dwell at USLGB: 4 days. Contract free time: 5 days. No detention applies. $9,768.60 charged — entirely unauthorized. Contracted rate $74.24/unit/day only after free time. Ramp handling also above schedule. Total: $9,233.80.', confidence:82 },
+    { id:'INV-023', source:'rail', invoiceId:'BNSF-2025-IT-00382', carrier:'BNSF', carrierName:'BNSF Railway', portPair:'USLAX > USSEA', date:'2025-01-11', billedAmount:53294.85, contractAmount:47294.85, overchargeAmount:6000.00, status:'Filed', containerNumber:'BNSF4567890', voyageNumber:'BNSF-Q02-25', chargeType:'Unauthorized', lineItems:[{type:'Base Intermodal Rate (18 units)',contracted:43200.00,billed:43200.00,delta:0},{type:'Congestion Surcharge',contracted:0,billed:6000.00,delta:6000.00},{type:'Standard Fuel Surcharge',contracted:4094.85,billed:4094.85,delta:0}], disputeText:'Congestion surcharge of $6,000.00 applied without authorization under BNSF-Q02-25. Per BNSF tariff rules, new surcharges require 30-day advance filing — no such filing found. Removal and credit requested.', confidence:79 }
+  ];
 
-      {
-        id: 'INV-005', source: 'ocean',
-        invoiceId: 'MAEU-2024-55923', carrier: 'MAEU', carrierName: 'Maersk',
-        portPair: 'CNSHA > USSEA', date: '2024-11-28',
-        billedAmount: 63947.15, contractAmount: 55720.35, overchargeAmount: 8226.80,
-        status: 'Filed',
-        containerNumber: 'MAEU5678901', voyageNumber: 'AE1-028E', chargeType: 'BAF',
-        lineItems: [
-          { type: 'Base Ocean Freight (16 TEU)', contracted: 51200.00, billed: 51200.00, delta: 0 },
-          { type: 'BAF Surcharge', contracted: 3824.35, billed: 10441.15, delta: 6616.80 },
-          { type: 'CFS Handling', contracted: 696.00, billed: 2306.00, delta: 1610.00 }
-        ],
-        disputeText: 'BAF at contracted $238.77/TEU (16 TEU) = $3,824.35. Invoice applies $652.57/TEU = $10,441.15. Variance $6,616.80 requires carrier justification. CFS exceeds schedule by $1,610.00. Total: $8,226.80.',
-        confidence: 78
-      },
+  // Portfolio context label — NOT a filtered KPI
+  const PORTFOLIO_TOTAL = 847;
 
-      // ── MSCU (MSC) — 4 rows ────────────────────────────────────────────────
+  // ── State ──────────────────────────────────────────────────────────────────
+  const state = { selectedCarrier: 'ALL', dateRange: '3M', expandedRowId: null };
 
-      {
-        id: 'INV-006', source: 'ocean',
-        invoiceId: 'MSC-8374621', carrier: 'MSCU', carrierName: 'MSC',
-        portPair: 'CNSHA > USLAX', date: '2024-10-22',
-        billedAmount: 128918.40, contractAmount: 113537.65, overchargeAmount: 15380.75,
-        status: 'Won',
-        containerNumber: 'MSCU7654321', voyageNumber: 'SEAS024', chargeType: 'THC',
-        lineItems: [
-          { type: 'Base Ocean Freight (24 TEU)', contracted: 105600.00, billed: 105600.00, delta: 0 },
-          { type: 'THC Origin (CNSHA)', contracted: 5764.65, billed: 16580.40, delta: 10815.75 },
-          { type: 'Bunker Recovery Factor', contracted: 2173.00, billed: 6738.00, delta: 4565.00 }
-        ],
-        disputeText: 'CNSHA THC per MSC-TARIFF-2024-Q4: $240.19/TEU (24 TEU) = $5,764.65. Invoice at $690.85/TEU. Delta $10,815.75. BRF capped at $90.54/TEU per spot agreement; billed $280.75. Total: $15,380.75.',
-        confidence: 92
-      },
+  function setState(patch) { Object.assign(state, patch); render(); }
 
-      {
-        id: 'INV-007', source: 'ocean',
-        invoiceId: 'MSC-8491037', carrier: 'MSCU', carrierName: 'MSC',
-        portPair: 'SGSIN > USLGB', date: '2024-11-15',
-        billedAmount: 117834.20, contractAmount: 105373.90, overchargeAmount: 12460.30,
-        status: 'Won',
-        containerNumber: 'MSCU8765432', voyageNumber: 'SEAS031', chargeType: 'BAF',
-        lineItems: [
-          { type: 'Base Ocean Freight (20 TEU)', contracted: 96000.00, billed: 96000.00, delta: 0 },
-          { type: 'BAF Surcharge', contracted: 7573.90, billed: 18204.20, delta: 10630.30 },
-          { type: 'Telex Release Fee', contracted: 1800.00, billed: 3630.00, delta: 1830.00 }
-        ],
-        disputeText: 'BAF for SGSIN-USLGB per contract: $378.70/TEU (20 TEU) = $7,573.90. Invoice at $910.21 — delta $10,630.30. Telex release fee exceeds $90.00/doc schedule. Total: $12,460.30.',
-        confidence: 89
-      },
-
-      {
-        id: 'INV-008', source: 'ocean',
-        invoiceId: 'MSC-8612874', carrier: 'MSCU', carrierName: 'MSC',
-        portPair: 'CNSHA > USLAX', date: '2024-12-19',
-        billedAmount: 84283.60, contractAmount: 76831.00, overchargeAmount: 7452.60,
-        status: 'Filed',
-        containerNumber: 'MSCU9876543', voyageNumber: 'SEAS038', chargeType: 'Duplicate',
-        lineItems: [
-          { type: 'Base Ocean Freight (16 TEU)', contracted: 72800.00, billed: 72800.00, delta: 0 },
-          { type: 'BAF Surcharge', contracted: 2631.00, billed: 9883.60, delta: 7252.60 },
-          { type: 'Port Security', contracted: 1400.00, billed: 1600.00, delta: 200.00 }
-        ],
-        disputeText: 'BAF charge appears to have been billed twice in this cycle. Reference invoice MSC-8601234 (same vessel, same container) already reflects $2,631.00. Duplicate of $7,252.60 evident from billing ledger. Total: $7,452.60.',
-        confidence: 97
-      },
-
-      {
-        id: 'INV-009', source: 'ocean',
-        invoiceId: 'MSC-8729145', carrier: 'MSCU', carrierName: 'MSC',
-        portPair: 'DEHAM > USLAX', date: '2025-01-06',
-        billedAmount: 96571.80, contractAmount: 86028.70, overchargeAmount: 10543.10,
-        status: 'Filed',
-        containerNumber: 'MSCU0987654', voyageNumber: 'SEAS044', chargeType: 'Unauthorized',
-        lineItems: [
-          { type: 'Base Ocean Freight (18 TEU)', contracted: 82800.00, billed: 82800.00, delta: 0 },
-          { type: 'IMO Compliance Surcharge', contracted: 0, billed: 10543.10, delta: 10543.10 },
-          { type: 'Port Handling (DEHAM)', contracted: 3228.70, billed: 3228.70, delta: 0 }
-        ],
-        disputeText: 'IMO surcharge of $10,543.10 not authorized under MSC-VESQ-2024 (applies only to non-contract spot bookings per tariff bulletin 2024-Q3). No tariff filing located for this effective date. Full reversal requested.',
-        confidence: 83
-      },
-
-      // ── EGLV (Evergreen) — 3 rows ──────────────────────────────────────────
-
-      {
-        id: 'INV-010', source: 'ocean',
-        invoiceId: 'EGLV-2024-20184', carrier: 'EGLV', carrierName: 'Evergreen',
-        portPair: 'CNSHA > USLAX', date: '2024-10-31',
-        billedAmount: 99634.70, contractAmount: 85914.50, overchargeAmount: 13720.20,
-        status: 'Won',
-        containerNumber: 'EGLV1122334', voyageNumber: 'EX1-024N', chargeType: 'THC',
-        lineItems: [
-          { type: 'Base Ocean Freight (20 TEU)', contracted: 80000.00, billed: 80000.00, delta: 0 },
-          { type: 'THC (CNSHA + USLAX)', contracted: 3914.50, billed: 14254.70, delta: 10340.20 },
-          { type: 'EBS Surcharge', contracted: 2000.00, billed: 5380.00, delta: 3380.00 }
-        ],
-        disputeText: 'Combined THC per Evergreen tariff 2024: $195.73/TEU (20 TEU) = $3,914.50. Invoice at $712.74. Delta $10,340.20. EBS contracted at $100.00/TEU — billed $269.00. Total: $13,720.20.',
-        confidence: 90
-      },
-
-      {
-        id: 'INV-011', source: 'ocean',
-        invoiceId: 'EGLV-2024-23456', carrier: 'EGLV', carrierName: 'Evergreen',
-        portPair: 'SGSIN > USSEA', date: '2024-11-22',
-        billedAmount: 72729.90, contractAmount: 65454.10, overchargeAmount: 7275.80,
-        status: 'Won',
-        containerNumber: 'EGLV2233445', voyageNumber: 'EX6-028W', chargeType: 'D&D',
-        lineItems: [
-          { type: 'Base Ocean Freight (16 TEU)', contracted: 60800.00, billed: 60800.00, delta: 0 },
-          { type: 'D&D Charges', contracted: 3054.10, billed: 9529.90, delta: 6475.80 },
-          { type: 'Lift-On Lift-Off', contracted: 1600.00, billed: 2400.00, delta: 800.00 }
-        ],
-        disputeText: 'Container available 2024-11-10; free time 7 days; pickup 2024-11-17. No D&D should apply. $9,529.90 charged — entirely unwarranted per contract. LoLo fee also above $100.00/TEU schedule. Total: $7,275.80.',
-        confidence: 85
-      },
-
-      {
-        id: 'INV-012', source: 'ocean',
-        invoiceId: 'EGLV-2025-01782', carrier: 'EGLV', carrierName: 'Evergreen',
-        portPair: 'CNSHA > USLGB', date: '2025-01-14',
-        billedAmount: 103382.45, contractAmount: 92091.65, overchargeAmount: 11290.80,
-        status: 'Won',
-        containerNumber: 'EGLV3344556', voyageNumber: 'EX1-034N', chargeType: 'BAF',
-        lineItems: [
-          { type: 'Base Ocean Freight (20 TEU)', contracted: 88000.00, billed: 88000.00, delta: 0 },
-          { type: 'BAF', contracted: 2291.65, billed: 12182.45, delta: 9890.80 },
-          { type: 'AMS / ISF Fee', contracted: 1800.00, billed: 3200.00, delta: 1400.00 }
-        ],
-        disputeText: 'BAF per EGLV contract CNSHA-USLGB: $114.58/TEU (20 TEU) = $2,291.65. Billed at $609.12. Overcharge: $9,890.80. AMS/ISF documentation above contracted $90.00/doc. Total: $11,290.80.',
-        confidence: 93
-      },
-
-      // ── HLCU (Hapag-Lloyd) — 3 rows ────────────────────────────────────────
-
-      {
-        id: 'INV-013', source: 'ocean',
-        invoiceId: 'HLCU-2024-847291', carrier: 'HLCU', carrierName: 'Hapag-Lloyd',
-        portPair: 'DEHAM > USLAX', date: '2024-10-18',
-        billedAmount: 119143.25, contractAmount: 104512.50, overchargeAmount: 14630.75,
-        status: 'Won',
-        containerNumber: 'HLCU4455667', voyageNumber: 'AL5-024W', chargeType: 'BAF',
-        lineItems: [
-          { type: 'Base Ocean Freight (22 TEU)', contracted: 97240.00, billed: 97240.00, delta: 0 },
-          { type: 'BAF Surcharge', contracted: 5612.50, billed: 19043.25, delta: 13430.75 },
-          { type: 'Security Surcharge', contracted: 1660.00, billed: 2860.00, delta: 1200.00 }
-        ],
-        disputeText: 'HLCU BAF for DEHAM-USLAX Q4 2024: $255.11/TEU (22 TEU) = $5,612.50. Invoice at $865.60. Delta $13,430.75. Security surcharge exceeds fixed $75.45/TEU schedule by $1,200.00. Total: $14,630.75.',
-        confidence: 88
-      },
-
-      {
-        id: 'INV-014', source: 'ocean',
-        invoiceId: 'HLCU-2024-903817', carrier: 'HLCU', carrierName: 'Hapag-Lloyd',
-        portPair: 'CNSHA > USLGB', date: '2024-12-05',
-        billedAmount: 95927.30, contractAmount: 83747.10, overchargeAmount: 12180.20,
-        status: 'Won',
-        containerNumber: 'HLCU5566778', voyageNumber: 'AL3-030W', chargeType: 'THC',
-        lineItems: [
-          { type: 'Base Ocean Freight (18 TEU)', contracted: 79200.00, billed: 79200.00, delta: 0 },
-          { type: 'THC Destination (USLGB)', contracted: 2547.10, billed: 13427.30, delta: 10880.20 },
-          { type: 'Chassis Split Fee', contracted: 2000.00, billed: 3300.00, delta: 1300.00 }
-        ],
-        disputeText: 'USLGB THC per HL-VESQ-2024: $141.51/TEU (18 TEU) = $2,547.10. Invoice at $745.96. Overcharge: $10,880.20. Chassis split fee capped at $111.11/TEU per side letter — overbilled by $1,300.00. Total: $12,180.20.',
-        confidence: 86
-      },
-
-      {
-        id: 'INV-015', source: 'ocean',
-        invoiceId: 'HLCU-2025-001284', carrier: 'HLCU', carrierName: 'Hapag-Lloyd',
-        portPair: 'SGSIN > USLAX', date: '2025-01-03',
-        billedAmount: 78218.90, contractAmount: 68874.90, overchargeAmount: 9344.00,
-        status: 'Filed',
-        containerNumber: 'HLCU6677889', voyageNumber: 'AL5-037W', chargeType: 'Unauthorized',
-        lineItems: [
-          { type: 'Base Ocean Freight (18 TEU)', contracted: 64800.00, billed: 64800.00, delta: 0 },
-          { type: 'CO2 Levy', contracted: 0, billed: 9344.00, delta: 9344.00 },
-          { type: 'THC (SGSIN)', contracted: 4074.90, billed: 4074.90, delta: 0 }
-        ],
-        disputeText: 'CO2 levy of $9,344.00 was not included in HL-VESQ-2024 framework. Per opt-out clause 9.1, VESQ explicitly excluded this charge for 2024. No contractual basis for this assessment. Full reversal requested.',
-        confidence: 80
-      },
-
-      // ── PSHA (Pasha Hawaii) — 4 rows ───────────────────────────────────────
-
-      {
-        id: 'INV-016', source: 'ocean',
-        invoiceId: 'PSHA-2024-18472', carrier: 'PSHA', carrierName: 'Pasha Hawaii',
-        portPair: 'USLAX > USHON', date: '2024-10-09',
-        billedAmount: 66382.40, contractAmount: 55441.80, overchargeAmount: 10940.60,
-        status: 'Won',
-        containerNumber: 'PSHA7788990', voyageNumber: 'HW1-042W', chargeType: 'THC',
-        lineItems: [
-          { type: 'Base Freight Rate (18 TEU)', contracted: 50400.00, billed: 50400.00, delta: 0 },
-          { type: 'THC Honolulu', contracted: 3041.80, billed: 12182.40, delta: 9140.60 },
-          { type: 'Fuel Adjustment Factor', contracted: 2000.00, billed: 3800.00, delta: 1800.00 }
-        ],
-        disputeText: 'USHON THC per PH-VESQ-2024: $168.99/TEU (18 TEU) = $3,041.80. Invoice at $676.80. Overcharge: $9,140.60. FAF capped at $111.11/TEU — billed $211.11. Total: $10,940.60.',
-        confidence: 91
-      },
-
-      {
-        id: 'INV-017', source: 'ocean',
-        invoiceId: 'PSHA-2024-21836', carrier: 'PSHA', carrierName: 'Pasha Hawaii',
-        portPair: 'USLAX > USHON', date: '2024-11-13',
-        billedAmount: 58874.65, contractAmount: 47203.30, overchargeAmount: 11671.35,
-        status: 'Won',
-        containerNumber: 'PSHA8899001', voyageNumber: 'HW1-046W', chargeType: 'D&D',
-        lineItems: [
-          { type: 'Base Freight Rate (16 TEU)', contracted: 44800.00, billed: 44800.00, delta: 0 },
-          { type: 'D&D Terminal (Honolulu)', contracted: 1003.30, billed: 10837.65, delta: 9834.35 },
-          { type: 'Port Security', contracted: 1400.00, billed: 3237.00, delta: 1837.00 }
-        ],
-        disputeText: 'Container available 2024-11-03; pickup 2024-11-08 (5 days). Free time per PH-VESQ-2024: 7 days. No D&D applies. $10,837.65 charged — unauthorized in full. Port security also above schedule. Total: $11,671.35.',
-        confidence: 88
-      },
-
-      {
-        id: 'INV-018', source: 'ocean',
-        invoiceId: 'PSHA-2024-25914', carrier: 'PSHA', carrierName: 'Pasha Hawaii',
-        portPair: 'USSEA > USHON', date: '2024-12-01',
-        billedAmount: 52127.80, contractAmount: 45683.60, overchargeAmount: 6444.20,
-        status: 'Filed',
-        containerNumber: 'PSHA9900112', voyageNumber: 'HW3-050W', chargeType: 'BAF',
-        lineItems: [
-          { type: 'Base Freight Rate (14 TEU)', contracted: 42000.00, billed: 42000.00, delta: 0 },
-          { type: 'BAF / CAF', contracted: 1883.60, billed: 7427.80, delta: 5544.20 },
-          { type: 'Chassis Fee', contracted: 1800.00, billed: 2700.00, delta: 900.00 }
-        ],
-        disputeText: 'BAF/CAF for USSEA-USHON: $134.54/TEU (14 TEU) = $1,883.56. Invoice at $530.56/TEU — variance $5,544.20 not supported by any FMC tariff filing. Chassis fee also above contracted $128.57/TEU. Total: $6,444.20.',
-        confidence: 76
-      },
-
-      {
-        id: 'INV-019', source: 'ocean',
-        invoiceId: 'PSHA-2025-00841', carrier: 'PSHA', carrierName: 'Pasha Hawaii',
-        portPair: 'USLAX > USHON', date: '2025-01-17',
-        billedAmount: 47543.20, contractAmount: 45839.20, overchargeAmount: 1704.00,
-        status: 'Recovered',
-        containerNumber: 'PSHA0011223', voyageNumber: 'HW1-054W', chargeType: 'Duplicate',
-        lineItems: [
-          { type: 'Base Freight Rate (14 TEU)', contracted: 44200.00, billed: 44200.00, delta: 0 },
-          { type: 'Port Handling (Duplicate)', contracted: 1639.20, billed: 3343.20, delta: 1704.00 },
-          { type: 'Documentation', contracted: 0, billed: 0, delta: 0 }
-        ],
-        disputeText: 'Port handling billed at $3,343.20 — charged twice in same cycle. Reference PSHA-2025-00738 (same container PSHA0011223) already includes $1,639.20. Duplicate $1,704.00 confirmed; credit issued 2025-01-22.',
-        confidence: 98
-      },
-
-      // ── BNSF Railway — 4 rows (rail) ───────────────────────────────────────
-
-      {
-        id: 'INV-020', source: 'rail',
-        invoiceId: 'BNSF-2024-IT-74821', carrier: 'BNSF', carrierName: 'BNSF Railway',
-        portPair: 'USLAX > USSEA', date: '2024-10-27',
-        billedAmount: 64293.75, contractAmount: 53353.15, overchargeAmount: 10940.60,
-        status: 'Won',
-        containerNumber: 'BNSF1234567', voyageNumber: 'BNSF-Q43-24', chargeType: 'THC',
-        lineItems: [
-          { type: 'Base Intermodal Rate (20 units)', contracted: 48000.00, billed: 48000.00, delta: 0 },
-          { type: 'Intermodal Lift Fee', contracted: 3953.15, billed: 12253.75, delta: 8300.60 },
-          { type: 'Fuel Surcharge', contracted: 1400.00, billed: 4040.00, delta: 2640.00 }
-        ],
-        disputeText: 'Lift fee contracted at $197.66/unit (20) = $3,953.20. Invoice at $612.69 — delta $8,300.60. FSC per BNSF tariff index for Q4 2024: $70.00/unit. Billed at $202.00. Total overcharge: $10,940.60.',
-        confidence: 87
-      },
-
-      {
-        id: 'INV-021', source: 'rail',
-        invoiceId: 'BNSF-2024-IT-81937', carrier: 'BNSF', carrierName: 'BNSF Railway',
-        portPair: 'USLAX > USSEA', date: '2024-11-19',
-        billedAmount: 57827.40, contractAmount: 46446.70, overchargeAmount: 11380.70,
-        status: 'Won',
-        containerNumber: 'BNSF2345678', voyageNumber: 'BNSF-Q45-24', chargeType: 'BAF',
-        lineItems: [
-          { type: 'Base Intermodal Rate (22 units)', contracted: 42240.00, billed: 42240.00, delta: 0 },
-          { type: 'Fuel Surcharge', contracted: 2806.70, billed: 13037.40, delta: 10230.70 },
-          { type: 'Equipment Repositioning', contracted: 1400.00, billed: 2550.00, delta: 1150.00 }
-        ],
-        disputeText: 'FSC billed at $592.61/unit — BNSF public index for this shipment date: $127.58/unit. Overcharge: $10,230.70. Equipment repositioning exceeds contracted $63.64/unit by $1,150.00. Total: $11,380.70.',
-        confidence: 84
-      },
-
-      {
-        id: 'INV-022', source: 'rail',
-        invoiceId: 'BNSF-2024-IT-89274', carrier: 'BNSF', carrierName: 'BNSF Railway',
-        portPair: 'USLGB > USSEA', date: '2024-12-14',
-        billedAmount: 68518.60, contractAmount: 59284.80, overchargeAmount: 9233.80,
-        status: 'Filed',
-        containerNumber: 'BNSF3456789', voyageNumber: 'BNSF-Q50-24', chargeType: 'D&D',
-        lineItems: [
-          { type: 'Base Intermodal Rate (20 units)', contracted: 56000.00, billed: 56000.00, delta: 0 },
-          { type: 'Detention / Dwell', contracted: 1484.80, billed: 9768.60, delta: 8283.80 },
-          { type: 'Ramp Handling', contracted: 1800.00, billed: 2750.00, delta: 950.00 }
-        ],
-        disputeText: 'Dwell at USLGB: 4 days. Contract free time: 5 days. No detention applies. $9,768.60 charged — entirely unauthorized. Contracted rate $74.24/unit/day only after free time. Ramp handling also above schedule. Total: $9,233.80.',
-        confidence: 82
-      },
-
-      {
-        id: 'INV-023', source: 'rail',
-        invoiceId: 'BNSF-2025-IT-00382', carrier: 'BNSF', carrierName: 'BNSF Railway',
-        portPair: 'USLAX > USSEA', date: '2025-01-11',
-        billedAmount: 53294.85, contractAmount: 47294.85, overchargeAmount: 6000.00,
-        status: 'Filed',
-        containerNumber: 'BNSF4567890', voyageNumber: 'BNSF-Q02-25', chargeType: 'Unauthorized',
-        lineItems: [
-          { type: 'Base Intermodal Rate (18 units)', contracted: 43200.00, billed: 43200.00, delta: 0 },
-          { type: 'Congestion Surcharge', contracted: 0, billed: 6000.00, delta: 6000.00 },
-          { type: 'Standard Fuel Surcharge', contracted: 4094.85, billed: 4094.85, delta: 0 }
-        ],
-        disputeText: 'Congestion surcharge of $6,000.00 applied without authorization under BNSF-Q02-25. Per BNSF tariff rules, new surcharges require 30-day advance filing — no such filing found. Removal and credit requested.',
-        confidence: 79
+  // ── Filtering ──────────────────────────────────────────────────────────────
+  function getFilteredData() {
+    const now = new Date();
+    return DATA.filter(row => {
+      if (state.selectedCarrier !== 'ALL' && row.carrier !== state.selectedCarrier) return false;
+      const d = new Date(row.date);
+      if (state.dateRange === '1M') {
+        const cut = new Date(now); cut.setMonth(cut.getMonth() - 1);
+        if (d < cut) return false;
+      } else if (state.dateRange === '3M') {
+        const cut = new Date(now); cut.setMonth(cut.getMonth() - 3);
+        if (d < cut) return false;
       }
+      return true;
+    });
+  }
 
-    ];
+  // ── renderKPIs ─────────────────────────────────────────────────────────────
+  function renderKPIs() {
+    const f = getFilteredData();
+    document.getElementById('kpi-audited').textContent = PORTFOLIO_TOTAL.toLocaleString('en-US');
+    document.getElementById('kpi-overcharges').textContent = f.filter(r => r.overchargeAmount > 0).length.toLocaleString('en-US');
+    const recovery = f.filter(r => r.status === 'Won' || r.status === 'Recovered').reduce((s, r) => s + r.overchargeAmount, 0);
+    document.getElementById('kpi-recovery').textContent = '$' + Math.round(recovery).toLocaleString('en-US');
+    const won = f.filter(r => r.status === 'Won').length;
+    const filed = f.filter(r => r.status === 'Filed').length;
+    document.getElementById('kpi-winrate').textContent = (won + filed) > 0 ? Math.round(won / (won + filed) * 100) + '%' : '0%';
+  }
 
-    // ── Portfolio constant (marketing context label, NOT filtered) ──────────
-    const PORTFOLIO_TOTAL = 847;
-
-    // ── State ────────────────────────────────────────────────────────────────
-    const state = {
-      selectedCarrier: 'ALL',
-      dateRange: '3M',
-      expandedRowId: null,
-      roiInput: null
-    };
-
-    function setState(patch) {
-      Object.assign(state, patch);
-      render();
+  // ── renderTable ────────────────────────────────────────────────────────────
+  function renderTable() {
+    const f = getFilteredData();
+    const tbody = document.getElementById('invoiceTableBody');
+    if (f.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="10"><div class="table-empty"><h3>No invoices match your filters</h3><p>Try selecting a different carrier or date range.</p></div></td></tr>`;
+      return;
     }
-
-    // ── Filtered data ─────────────────────────────────────────────────────────
-    function getFilteredData() {
-      const now = new Date();
-      return DATA.filter(row => {
-        if (state.selectedCarrier !== 'ALL' && row.carrier !== state.selectedCarrier) return false;
-        const rowDate = new Date(row.date);
-        if (state.dateRange === '1M') {
-          const oneMonthAgo = new Date(now);
-          oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-          if (rowDate < oneMonthAgo) return false;
-        } else if (state.dateRange === '3M') {
-          const threeMonthsAgo = new Date(now);
-          threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-          if (rowDate < threeMonthsAgo) return false;
-        }
-        // YTD: show all data (data is within current year range)
-        return true;
-      });
-    }
-
-    // ── renderKPIs: computes tiles 2-4 from getFilteredData() ────────────────
-    function renderKPIs() {
-      const filtered = getFilteredData();
-
-      // Tile 1: Portfolio total (static context label, not filtered)
-      document.getElementById('kpi-audited').textContent =
-        PORTFOLIO_TOTAL.toLocaleString('en-US');
-
-      // Tile 2: Overcharges found in current filter
-      const overchargeCount = filtered.filter(r => r.overchargeAmount > 0).length;
-      document.getElementById('kpi-overcharges').textContent =
-        overchargeCount.toLocaleString('en-US');
-
-      // Tile 3: Recovery amount — sum of overcharge for Won + Recovered rows
-      const recoveryAmount = filtered
-        .filter(r => r.status === 'Won' || r.status === 'Recovered')
-        .reduce((sum, r) => sum + r.overchargeAmount, 0);
-      document.getElementById('kpi-recovery').textContent =
-        '$' + Math.round(recoveryAmount).toLocaleString('en-US');
-
-      // Tile 4: Win rate — Won / (Won + Filed)
-      const wonCount = filtered.filter(r => r.status === 'Won').length;
-      const filedCount = filtered.filter(r => r.status === 'Filed').length;
-      const winRate = (wonCount + filedCount) > 0
-        ? Math.round((wonCount / (wonCount + filedCount)) * 100)
-        : 0;
-      document.getElementById('kpi-winrate').textContent = winRate + '%';
-    }
-
-    // ── renderTable ───────────────────────────────────────────────────────────
-    function renderTable() {
-      const filtered = getFilteredData();
-      const tbody = document.getElementById('invoiceTableBody');
-
-      if (filtered.length === 0) {
-        tbody.innerHTML = `
-          <tr><td colspan="10">
-            <div class="table-empty">
-              <h3>No invoices match your filters</h3>
-              <p>Try selecting a different carrier or date range.</p>
+    const fmt = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    let html = '';
+    f.forEach(row => {
+      const exp = state.expandedRowId === row.id;
+      html += `
+        <tr class="data-row" data-invoice-id="${row.id}">
+          <td><span class="source-badge ${row.source}">${row.source === 'ocean' ? 'Ocean' : 'Rail'}</span></td>
+          <td class="mono">${row.invoiceId}</td>
+          <td>${row.carrierName}</td>
+          <td class="mono">${row.portPair}</td>
+          <td>${row.date}</td>
+          <td class="amount">${fmt(row.billedAmount)}</td>
+          <td class="amount">${fmt(row.contractAmount)}</td>
+          <td class="overcharge">+${fmt(row.overchargeAmount)}</td>
+          <td><span class="status-badge ${row.status.toLowerCase()}">${row.status}</span></td>
+          <td style="text-align:center"><button class="expand-chevron${exp ? ' expanded' : ''}" aria-label="${exp ? 'Collapse' : 'Expand'}">&#8964;</button></td>
+        </tr>`;
+      if (exp) {
+        const liRows = row.lineItems.map(li => `<tr><td>${li.type}</td><td>${fmt(li.contracted)}</td><td>${fmt(li.billed)}</td><td class="delta-cell">${li.delta > 0 ? '+' + fmt(li.delta) : '&mdash;'}</td></tr>`).join('');
+        html += `
+          <tr class="row-detail"><td colspan="10">
+            <div class="row-detail-inner open">
+              <div>
+                <div class="detail-section-title">Line-Item Breakdown</div>
+                <table class="breakdown-table">
+                  <thead><tr><th>Charge Type</th><th>Contracted</th><th>Billed</th><th>Delta</th></tr></thead>
+                  <tbody>${liRows}</tbody>
+                </table>
+              </div>
+              <div>
+                <div class="detail-section-title">Discrepancy Type</div>
+                <div class="charge-type-badge">${row.chargeType}</div>
+                <div class="detail-section-title" style="margin-top:12px">Dispute Confidence</div>
+                <div class="confidence-bar-wrap">
+                  <div class="confidence-bar-bg"><div class="confidence-bar-fill" style="width:${row.confidence}%"></div></div>
+                  <span class="confidence-pct">${row.confidence}%</span>
+                </div>
+              </div>
+              <div>
+                <div class="detail-section-title">Dispute Language</div>
+                <div class="dispute-text-block">${row.disputeText}</div>
+              </div>
             </div>
           </td></tr>`;
-        return;
       }
+    });
+    tbody.innerHTML = html;
+  }
 
-      const fmt = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  // ── Charts ─────────────────────────────────────────────────────────────────
+  let barChart = null, donutChart = null;
 
-      let html = '';
-      filtered.forEach(row => {
-        const isExpanded = state.expandedRowId === row.id;
-        const sourceCls = row.source === 'ocean' ? 'ocean' : 'rail';
-        const sourceLabel = row.source === 'ocean' ? 'Ocean' : 'Rail';
-        const statusCls = row.status.toLowerCase();
+  function getBarChartData() {
+    const f = getFilteredData();
+    const carriers = ['MAEU','MSCU','EGLV','HLCU','PSHA','BNSF'];
+    return { carriers, amounts: carriers.map(c => Math.round(f.filter(r => r.carrier === c).reduce((s, r) => s + r.overchargeAmount, 0))) };
+  }
 
-        html += `
-          <tr class="data-row" data-invoice-id="${row.id}">
-            <td><span class="source-badge ${sourceCls}">${sourceLabel}</span></td>
-            <td class="mono">${row.invoiceId}</td>
-            <td>${row.carrierName}</td>
-            <td class="mono">${row.portPair}</td>
-            <td>${row.date}</td>
-            <td class="amount">${fmt(row.billedAmount)}</td>
-            <td class="amount">${fmt(row.contractAmount)}</td>
-            <td class="overcharge">+${fmt(row.overchargeAmount)}</td>
-            <td><span class="status-badge ${statusCls}">${row.status}</span></td>
-            <td style="text-align:center">
-              <button class="expand-chevron${isExpanded ? ' expanded' : ''}"
-                aria-label="${isExpanded ? 'Collapse invoice details' : 'Expand invoice details'}">
-                &#8964;
-              </button>
-            </td>
-          </tr>`;
+  function getDonutChartData() {
+    const f = getFilteredData();
+    const types = ['BAF','Unauthorized','Duplicate','THC','D&D'];
+    return { types, counts: types.map(t => f.filter(r => r.chargeType === t).length) };
+  }
 
-        if (isExpanded) {
-          const lineItemRows = row.lineItems.map(li => `
-            <tr>
-              <td>${li.type}</td>
-              <td>${fmt(li.contracted)}</td>
-              <td>${fmt(li.billed)}</td>
-              <td class="delta-cell">${li.delta > 0 ? '+' + fmt(li.delta) : '&mdash;'}</td>
-            </tr>`).join('');
+  function renderCharts() {
+    if (!barChart || !donutChart) return;
+    const bd = getBarChartData();
+    barChart.updateSeries([{ name: 'Overcharge', data: bd.amounts }]);
+    const dd = getDonutChartData();
+    donutChart.updateSeries(dd.counts);
+  }
 
-          html += `
-            <tr class="row-detail">
-              <td colspan="10">
-                <div class="row-detail-inner open">
-                  <div>
-                    <div class="detail-section-title">Line-Item Breakdown</div>
-                    <table class="breakdown-table">
-                      <thead><tr>
-                        <th>Charge Type</th><th>Contracted</th><th>Billed</th><th>Delta</th>
-                      </tr></thead>
-                      <tbody>${lineItemRows}</tbody>
-                    </table>
-                  </div>
-                  <div>
-                    <div class="detail-section-title">Discrepancy Type</div>
-                    <div class="charge-type-badge">${row.chargeType}</div>
-                    <div class="detail-section-title" style="margin-top:12px">Dispute confidence</div>
-                    <div class="confidence-bar-wrap">
-                      <div class="confidence-bar-bg">
-                        <div class="confidence-bar-fill" style="width:${row.confidence}%"></div>
-                      </div>
-                      <span class="confidence-pct">${row.confidence}%</span>
-                    </div>
-                  </div>
-                  <div>
-                    <div class="detail-section-title">Dispute Language</div>
-                    <div class="dispute-text-block">${row.disputeText}</div>
-                  </div>
-                </div>
-              </td>
-            </tr>`;
-        }
+  function initCharts() {
+    const bd = getBarChartData();
+    barChart = new ApexCharts(document.getElementById('barChart'), {
+      chart: { type: 'bar', height: 260, background: 'transparent', toolbar: { show: false } },
+      theme: { mode: 'light' },
+      plotOptions: { bar: { horizontal: true, borderRadius: 4 } },
+      series: [{ name: 'Overcharge', data: bd.amounts }],
+      xaxis: {
+        categories: bd.carriers,
+        labels: { style: { fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', colors: '#64748B' }, formatter: v => '$' + Number(v).toLocaleString('en-US') },
+        axisBorder: { show: false }, axisTicks: { show: false }
+      },
+      yaxis: { labels: { style: { fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', colors: '#64748B' } } },
+      colors: ['#1A56A0'],
+      tooltip: { theme: 'light', y: { formatter: v => '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 2 }) } },
+      grid: { borderColor: '#E2E8F0' },
+      dataLabels: { enabled: false }
+    });
+    barChart.render();
+
+    const dd = getDonutChartData();
+    donutChart = new ApexCharts(document.getElementById('donutChart'), {
+      chart: { type: 'donut', height: 260, background: 'transparent' },
+      theme: { mode: 'light' },
+      series: dd.counts,
+      labels: dd.types,
+      colors: ['#0EA5E9','#1A56A0','#10B981','#F59E0B','#EF4444'],
+      plotOptions: { pie: { donut: { size: '55%', labels: { show: true,
+        name: { show: true, color: '#64748B', fontSize: '12px' },
+        value: { show: true, color: '#0F172A', fontSize: '22px', fontWeight: 700 },
+        total: { show: true, label: 'Total', color: '#64748B', fontSize: '12px', formatter: w => w.globals.seriesTotals.reduce((a, b) => a + b, 0).toString() }
+      }}}},
+      legend: { position: 'bottom', fontSize: '12px', fontWeight: 700, labels: { colors: '#64748B' } },
+      dataLabels: { enabled: false },
+      tooltip: { theme: 'light' }
+    });
+    donutChart.render();
+  }
+
+  // ── Master render ──────────────────────────────────────────────────────────
+  function render() { renderKPIs(); renderTable(); renderCharts(); }
+
+  // ── ROI Calculator ─────────────────────────────────────────────────────────
+  function handleRoiInput(raw) {
+    const n = parseFloat(raw.replace(/[^0-9.]/g, ''));
+    const dash = '$\u2014';
+    if (!n) { ['roiRecovery','roiFee','roiNet'].forEach(id => document.getElementById(id).textContent = dash); return; }
+    const annual = n * 12 * 0.035, fee = annual * 0.25, net = annual - fee;
+    const fmt = v => v.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    document.getElementById('roiRecovery').textContent = fmt(annual);
+    document.getElementById('roiFee').textContent = fmt(fee);
+    document.getElementById('roiNet').textContent = fmt(net);
+  }
+
+  // ── Event listeners ────────────────────────────────────────────────────────
+  document.getElementById('carrierFilters').addEventListener('click', e => {
+    const pill = e.target.closest('.filter-pill');
+    if (!pill) return;
+    document.querySelectorAll('#carrierFilters .filter-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    setState({ selectedCarrier: pill.dataset.carrier });
+  });
+
+  document.getElementById('dateFilters').addEventListener('click', e => {
+    const btn = e.target.closest('.date-btn');
+    if (!btn) return;
+    document.querySelectorAll('#dateFilters .date-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    setState({ dateRange: btn.dataset.range });
+  });
+
+  document.getElementById('invoiceTableBody').addEventListener('click', e => {
+    const row = e.target.closest('tr[data-invoice-id]');
+    if (!row) return;
+    const id = row.dataset.invoiceId;
+    setState({ expandedRowId: state.expandedRowId === id ? null : id });
+  });
+
+  // ── Tab navigation ─────────────────────────────────────────────────────────
+  let chartsInitialized = false;
+  const progressMap = [25, 50, 75, 100];
+
+  function showPanel(n) {
+    [1,2,3,4].forEach(i => {
+      document.getElementById('panel'+i).classList.remove('active');
+      document.getElementById('tab'+i).classList.remove('active');
+      if (i < n) { document.getElementById('tab'+i).classList.add('done'); document.getElementById('num'+i).textContent = '✓'; }
+      else { document.getElementById('tab'+i).classList.remove('done'); document.getElementById('num'+i).textContent = i; }
+    });
+    document.getElementById('panel'+n).classList.add('active');
+    document.getElementById('tab'+n).classList.add('active');
+    document.getElementById('num'+n).textContent = n;
+    document.getElementById('progressFill').style.width = progressMap[n-1] + '%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (n === 2 && !chartsInitialized) { initCharts(); chartsInitialized = true; }
+    else if (n === 2) { renderCharts(); }
+  }
+
+  // ── DOMContentLoaded: GSAP entrance + counter animation ───────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    gsap.from('.kpi-tile', { y: 20, opacity: 0, stagger: 0.08, duration: 0.5 });
+
+    const all = DATA;
+    const initRecovery = all.filter(r => r.status === 'Won' || r.status === 'Recovered').reduce((s, r) => s + r.overchargeAmount, 0);
+    const initWon = all.filter(r => r.status === 'Won').length;
+    const initFiled = all.filter(r => r.status === 'Filed').length;
+    const targets = [
+      { id: 'kpi-audited',    val: PORTFOLIO_TOTAL,          prefix: '',  suffix: '' },
+      { id: 'kpi-overcharges', val: all.filter(r => r.overchargeAmount > 0).length, prefix: '', suffix: '' },
+      { id: 'kpi-recovery',   val: Math.round(initRecovery), prefix: '$', suffix: '' },
+      { id: 'kpi-winrate',    val: Math.round(initWon / (initWon + initFiled) * 100), prefix: '', suffix: '%' }
+    ];
+
+    targets.forEach(({ id, val, prefix, suffix }) => {
+      const el = document.getElementById(id);
+      const obj = { v: 0 };
+      gsap.to(obj, { v: val, duration: 1.2, ease: 'power2.out',
+        onUpdate: () => { el.textContent = prefix + Math.round(obj.v).toLocaleString('en-US') + suffix; }
       });
-
-      tbody.innerHTML = html;
-    }
-
-    // ── ApexCharts instances ──────────────────────────────────────────────────
-    let barChart  = null;
-    let donutChart = null;
-
-    function getBarChartData() {
-      const filtered = getFilteredData();
-      const carriers = ['MAEU', 'MSCU', 'EGLV', 'HLCU', 'PSHA', 'BNSF'];
-      const amounts = carriers.map(c =>
-        Math.round(filtered.filter(r => r.carrier === c)
-          .reduce((s, r) => s + r.overchargeAmount, 0))
-      );
-      return { carriers, amounts };
-    }
-
-    function getDonutChartData() {
-      const filtered = getFilteredData();
-      const types = ['BAF', 'Unauthorized', 'Duplicate', 'THC', 'D&D'];
-      const counts = types.map(t => filtered.filter(r => r.chargeType === t).length);
-      return { types, counts };
-    }
-
-    function renderCharts() {
-      if (!barChart || !donutChart) return;
-
-      const barData = getBarChartData();
-      barChart.updateSeries([{ name: 'Overcharge', data: barData.amounts }]);
-
-      const donutData = getDonutChartData();
-      donutChart.updateSeries(donutData.counts);
-    }
-
-    // ── Master render ─────────────────────────────────────────────────────────
-    function render() {
-      renderKPIs();
-      renderTable();
-      renderCharts();
-    }
-
-    // ── ROI Calculator ────────────────────────────────────────────────────────
-    function handleRoiInput(raw) {
-      const numeric = parseFloat(raw.replace(/[^0-9.]/g, ''));
-      const dash = '$\u2014';
-      if (!numeric || numeric === 0) {
-        document.getElementById('roiRecovery').textContent = dash;
-        document.getElementById('roiFee').textContent      = dash;
-        document.getElementById('roiNet').textContent      = dash;
-        return;
-      }
-      const annual   = numeric * 12 * 0.035;
-      const fee      = annual * 0.25;
-      const net      = annual - fee;
-      const fmt      = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-      document.getElementById('roiRecovery').textContent = fmt(annual);
-      document.getElementById('roiFee').textContent      = fmt(fee);
-      document.getElementById('roiNet').textContent      = fmt(net);
-    }
-
-    // ── Carrier filter ────────────────────────────────────────────────────────
-    document.getElementById('carrierFilters').addEventListener('click', e => {
-      const pill = e.target.closest('.filter-pill');
-      if (!pill) return;
-      document.querySelectorAll('#carrierFilters .filter-pill').forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-      setState({ selectedCarrier: pill.dataset.carrier });
     });
 
-    // ── Date range filter ─────────────────────────────────────────────────────
-    document.getElementById('dateFilters').addEventListener('click', e => {
-      const btn = e.target.closest('.date-btn');
-      if (!btn) return;
-      document.querySelectorAll('#dateFilters .date-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      setState({ dateRange: btn.dataset.range });
-    });
-
-    // ── Row expand / collapse (event delegation) ──────────────────────────────
-    document.getElementById('invoiceTableBody').addEventListener('click', e => {
-      const row = e.target.closest('tr[data-invoice-id]');
-      if (!row) return;
-      const id = row.dataset.invoiceId;
-      setState({ expandedRowId: state.expandedRowId === id ? null : id });
-    });
-
-    // ── DOMContentLoaded: GSAP entrance + counter animation ──────────────────
-    document.addEventListener('DOMContentLoaded', () => {
-
-      // KPI tile entrance slide-up
-      gsap.from('.kpi-tile', {
-        y: 20,
-        opacity: 0,
-        stagger: 0.08,
-        duration: 0.5
-      });
-
-      // Compute initial values from unfiltered DATA
-      const allData = DATA;
-      const initOvercharges = allData.filter(r => r.overchargeAmount > 0).length;
-      const initRecovery = allData
-        .filter(r => r.status === 'Won' || r.status === 'Recovered')
-        .reduce((sum, r) => sum + r.overchargeAmount, 0);
-      const initWon    = allData.filter(r => r.status === 'Won').length;
-      const initFiled  = allData.filter(r => r.status === 'Filed').length;
-      const initWinRate = (initWon + initFiled) > 0
-        ? Math.round((initWon / (initWon + initFiled)) * 100) : 0;
-
-      // Count-up animation for each KPI tile
-      const kpis = [
-        { el: document.getElementById('kpi-audited'),    target: PORTFOLIO_TOTAL,           prefix: '',  suffix: '' },
-        { el: document.getElementById('kpi-overcharges'), target: initOvercharges,           prefix: '',  suffix: '' },
-        { el: document.getElementById('kpi-recovery'),   target: Math.round(initRecovery),  prefix: '$', suffix: '' },
-        { el: document.getElementById('kpi-winrate'),    target: initWinRate,               prefix: '',  suffix: '%' }
-      ];
-
-      kpis.forEach(({ el, target, prefix, suffix }) => {
-        const obj = { val: 0 };
-        gsap.to(obj, {
-          val: target,
-          duration: 1.2,
-          ease: 'power2.out',
-          onUpdate: () => {
-            const v = Math.round(obj.val);
-            el.textContent = prefix + v.toLocaleString('en-US') + suffix;
-          }
-        });
-      });
-
-      // Initialize charts (once) then trigger initial render
-      const barData = getBarChartData();
-      barChart = new ApexCharts(document.getElementById('barChart'), {
-        chart: { type: 'bar', height: 260, background: 'transparent', toolbar: { show: false } },
-        theme: { mode: 'dark' },
-        plotOptions: { bar: { horizontal: true, borderRadius: 4 } },
-        series: [{ name: 'Overcharge', data: barData.amounts }],
-        xaxis: {
-          categories: barData.carriers,
-          labels: {
-            style: { fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', colors: '#94A3B8' },
-            formatter: v => '$' + Number(v).toLocaleString('en-US')
-          },
-          axisBorder: { show: false },
-          axisTicks: { show: false }
-        },
-        yaxis: {
-          labels: { style: { fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', colors: '#94A3B8' } }
-        },
-        colors: ['#0EA5E9'],
-        tooltip: { theme: 'dark', y: { formatter: v => '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 2 }) } },
-        grid: { show: false },
-        dataLabels: { enabled: false }
-      });
-      barChart.render();
-
-      const donutData = getDonutChartData();
-      donutChart = new ApexCharts(document.getElementById('donutChart'), {
-        chart: { type: 'donut', height: 260, background: 'transparent' },
-        theme: { mode: 'dark' },
-        series: donutData.counts,
-        labels: donutData.types,
-        colors: ['#0EA5E9', '#1A56A0', '#10B981', '#F59E0B', '#EF4444'],
-        plotOptions: {
-          pie: {
-            donut: {
-              size: '55%',
-              labels: {
-                show: true,
-                name: { show: true, color: '#94A3B8', fontSize: '12px' },
-                value: { show: true, color: '#FFFFFF', fontSize: '24px', fontWeight: 700 },
-                total: {
-                  show: true,
-                  label: 'Total',
-                  color: '#94A3B8',
-                  fontSize: '12px',
-                  formatter: w => w.globals.seriesTotals.reduce((a, b) => a + b, 0).toString()
-                }
-              }
-            }
-          }
-        },
-        legend: { position: 'bottom', fontSize: '12px', fontWeight: 700, labels: { colors: '#94A3B8' } },
-        dataLabels: { enabled: false },
-        tooltip: { theme: 'dark' }
-      });
-      donutChart.render();
-
-      // Initial full render (renderCharts will call updateSeries on already-initialized charts)
-      render();
-    });
-  </script>
+    render();
+  });
+</script>
 </body>
 </html>
