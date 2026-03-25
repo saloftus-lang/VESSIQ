@@ -31,7 +31,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [x] 01-01-PLAN.md — Foundation: design system, fonts, header, KPI tiles with GSAP animation, DATA array
-- [ ] 01-02-PLAN.md — Interactive table: filter bar, invoice table, expandable rows, dispute badges
+- [x] 01-02-PLAN.md — Interactive table: filter bar, invoice table, expandable rows, dispute badges
 - [ ] 01-03-PLAN.md — Charts, ROI calculator, and final demo verification
 
 **UI hint**: yes

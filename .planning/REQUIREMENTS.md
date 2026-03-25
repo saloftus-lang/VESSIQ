@@ -20,10 +20,10 @@
 - [x] **INV-01**: Header with VESSIQ logo, nav links, and "Book Demo" CTA
 - [x] **INV-02**: KPI summary row — 4 tiles: Total Invoices Audited, Total Overcharges Found, Recovery Amount ($), Dispute Win Rate (%)
 - [x] **INV-03**: KPI tile numbers animate (count up) on page load using GSAP
-- [ ] **INV-04**: Invoice table showing ocean freight and rail/terminal charges in a unified view, with source badge (Ocean / Rail) per row
-- [ ] **INV-05**: Table filterable by carrier and date range — filter state managed via centralized JS state object
-- [ ] **INV-06**: Each invoice row expandable on click (event delegation on table container) to reveal line-item breakdown: billed amount vs. contract amount, discrepancy type (BAF, THC, D&D, per diem), and dispute status
-- [ ] **INV-07**: Dispute status badges (Pending / Filed / Won / Recovered) with color coding
+- [x] **INV-04**: Invoice table showing ocean freight and rail/terminal charges in a unified view, with source badge (Ocean / Rail) per row
+- [x] **INV-05**: Table filterable by carrier and date range — filter state managed via centralized JS state object
+- [x] **INV-06**: Each invoice row expandable on click (event delegation on table container) to reveal line-item breakdown: billed amount vs. contract amount, discrepancy type (BAF, THC, D&D, per diem), and dispute status
+- [x] **INV-07**: Dispute status badges (Pending / Filed / Won / Recovered) with color coding
 - [ ] **INV-08**: ROI calculator panel — single input (monthly freight spend $) → output (estimated annual recovery minus VESSIQ fee) using industry benchmark recovery rate
 - [x] **INV-09**: Realistic fake data: Maersk, MSC, Evergreen, Hapag-Lloyd (ocean) + Pasha Hawaii, BNSF (rail/terminal) — correct SCAC codes, UN/LOCODE port codes, ISO 6346 container number format
 - [x] **INV-10**: All KPI totals mathematically reconcile with the invoice table data (no disconnected numbers)
@@ -46,7 +46,7 @@
 - [x] **REL-01**: All external assets (fonts, chart libraries, GSAP) either served locally or from a single pinned CDN URL — no multi-origin loading that can partially fail
 - [x] **REL-02**: Page renders correctly at 1280×800 and 1440×900 (common laptop screen share resolutions)
 - [ ] **REL-03**: No console errors on load or during interactions
-- [ ] **REL-04**: Expandable rows, filters, and ROI calculator all work without page reload
+- [x] **REL-04**: Expandable rows, filters, and ROI calculator all work without page reload
 - [x] **REL-05**: Fake maritime data passes credibility check: valid SCAC codes (MAEU, MSCU, EGLV, HLCU, PSHA), valid LOCODEs (USLAX, USLGB, USSEA, USHON), ISO 6346 container format (4-letter prefix + 7 digits + check digit pattern)
 
 ## v2 Requirements
@@ -86,10 +86,10 @@
 | INV-01 | Phase 1: Invoice Demo Dashboard | Complete |
 | INV-02 | Phase 1: Invoice Demo Dashboard | Complete |
 | INV-03 | Phase 1: Invoice Demo Dashboard | Complete |
-| INV-04 | Phase 1: Invoice Demo Dashboard | Pending |
-| INV-05 | Phase 1: Invoice Demo Dashboard | Pending |
-| INV-06 | Phase 1: Invoice Demo Dashboard | Pending |
-| INV-07 | Phase 1: Invoice Demo Dashboard | Pending |
+| INV-04 | Phase 1: Invoice Demo Dashboard | Complete |
+| INV-05 | Phase 1: Invoice Demo Dashboard | Complete |
+| INV-06 | Phase 1: Invoice Demo Dashboard | Complete |
+| INV-07 | Phase 1: Invoice Demo Dashboard | Complete |
 | INV-08 | Phase 1: Invoice Demo Dashboard | Pending |
 | INV-09 | Phase 1: Invoice Demo Dashboard | Complete |
 | INV-10 | Phase 1: Invoice Demo Dashboard | Complete |
@@ -99,7 +99,7 @@
 | REL-01 | Phase 1: Invoice Demo Dashboard | Complete |
 | REL-02 | Phase 1: Invoice Demo Dashboard | Complete |
 | REL-03 | Phase 1: Invoice Demo Dashboard | Pending |
-| REL-04 | Phase 1: Invoice Demo Dashboard | Pending |
+| REL-04 | Phase 1: Invoice Demo Dashboard | Complete |
 | REL-05 | Phase 1: Invoice Demo Dashboard | Complete |
 | FND-01 | Phase 2: Founder Ops Dashboard | Pending |
 | FND-02 | Phase 2: Founder Ops Dashboard | Pending |
