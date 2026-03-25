@@ -45,7 +45,12 @@ Plans:
   2. The ops tasks widget lets Sean add, complete, and delete to-do items — state survives a browser refresh via localStorage
   3. The notes widget accepts freeform text and persists it to localStorage on input with no save button required
   4. The industry benchmarks section shows "Industry avg" vs "VESSIQ target" comparisons with a visual indicator (progress bar or delta badge) for all 3 benchmark cards
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Foundation: design system, header, KPI tiles, tasks widget, notes widget
+- [ ] 02-02-PLAN.md — Industry benchmark cards with progress bars, delta badges, and visual verification
+
 **UI hint**: yes
 
 ## Progress
@@ -56,4 +61,4 @@ Phases execute in numeric order: 1 → 2
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Invoice Demo Dashboard | 1/3 | In Progress|  |
-| 2. Founder Ops Dashboard | 0/TBD | Not started | - |
+| 2. Founder Ops Dashboard | 0/2 | Planned | - |
