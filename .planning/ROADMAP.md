@@ -27,7 +27,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Filtering by carrier or date range instantly updates the table — filter state is managed via a centralized JS state object with no page reload
   4. The ROI calculator accepts a monthly freight spend dollar amount and outputs an estimated annual recovery and net benefit after VESSIQ fee
   5. The page renders without console errors at 1280x800 and 1440x900, works when served via python3 -m http.server, and passes the maritime data credibility checklist (valid SCAC codes, LOCODEs, ISO 6346 container format)
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Foundation: design system, fonts, header, KPI tiles with GSAP animation, DATA array
+- [ ] 01-02-PLAN.md — Interactive table: filter bar, invoice table, expandable rows, dispute badges
+- [ ] 01-03-PLAN.md — Charts, ROI calculator, and final demo verification
+
 **UI hint**: yes
 
 ### Phase 2: Founder Ops Dashboard
@@ -49,5 +55,5 @@ Phases execute in numeric order: 1 → 2
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Invoice Demo Dashboard | 0/TBD | Not started | - |
+| 1. Invoice Demo Dashboard | 0/3 | Planning complete | - |
 | 2. Founder Ops Dashboard | 0/TBD | Not started | - |
