@@ -771,11 +771,11 @@
     <div class="charts-row" id="overview">
       <div class="glass-card chart-panel">
         <div class="chart-title">Overcharge Amount by Carrier</div>
-        <div id="chart-carrier" class="chart-container"></div>
+        <div id="barChart" class="chart-container"></div>
       </div>
       <div class="glass-card chart-panel">
         <div class="chart-title">Breakdown by Charge Type</div>
-        <div id="chart-type" class="chart-container"></div>
+        <div id="donutChart" class="chart-container"></div>
       </div>
     </div>
 
@@ -788,7 +788,7 @@
         <input
           type="text"
           class="roi-input"
-          id="roi-input"
+          id="roiInput"
           placeholder="500,000"
           oninput="handleRoiInput(this.value)"
           autocomplete="off"
@@ -796,16 +796,16 @@
       </div>
       <div class="roi-output-grid">
         <div class="roi-output-tile">
-          <div class="roi-output-label">Estimated Annual Recovery</div>
-          <div class="roi-output-value green" id="roi-recovery">$&mdash;</div>
+          <div class="roi-output-label">ESTIMATED ANNUAL RECOVERY</div>
+          <div class="roi-output-value green" id="roiRecovery">$&mdash;</div>
         </div>
         <div class="roi-output-tile">
-          <div class="roi-output-label">VESSIQ Fee (25% Gainshare)</div>
-          <div class="roi-output-value accent" id="roi-fee">$&mdash;</div>
+          <div class="roi-output-label">VESSIQ FEE (25% GAINSHARE)</div>
+          <div class="roi-output-value accent" id="roiFee">$&mdash;</div>
         </div>
         <div class="roi-output-tile">
-          <div class="roi-output-label">Net Benefit to You</div>
-          <div class="roi-output-value white" id="roi-net">$&mdash;</div>
+          <div class="roi-output-label">NET BENEFIT TO YOU</div>
+          <div class="roi-output-value white" id="roiNet">$&mdash;</div>
         </div>
       </div>
     </div>
@@ -1370,71 +1370,34 @@
     }
 
     // ── ApexCharts instances ──────────────────────────────────────────────────
-    let chartCarrier = null;
-    let chartType    = null;
+    let barChart  = null;
+    let donutChart = null;
 
-    function renderCharts() {
+    function getBarChartData() {
       const filtered = getFilteredData();
       const carriers = ['MAEU', 'MSCU', 'EGLV', 'HLCU', 'PSHA', 'BNSF'];
-      const carrierAmounts = carriers.map(c =>
+      const amounts = carriers.map(c =>
         Math.round(filtered.filter(r => r.carrier === c)
           .reduce((s, r) => s + r.overchargeAmount, 0))
       );
+      return { carriers, amounts };
+    }
 
-      if (!chartCarrier) {
-        chartCarrier = new ApexCharts(document.getElementById('chart-carrier'), {
-          chart: { type: 'bar', height: 260, background: 'transparent', toolbar: { show: false } },
-          theme: { mode: 'dark' },
-          plotOptions: { bar: { horizontal: true, borderRadius: 4 } },
-          series: [{ name: 'Overcharge', data: carrierAmounts }],
-          xaxis: {
-            categories: carriers,
-            labels: {
-              style: { fontFamily: 'JetBrains Mono, monospace', fontSize: '11px' },
-              formatter: v => '$' + Number(v).toLocaleString('en-US')
-            }
-          },
-          yaxis: {
-            labels: { style: { fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', colors: '#94A3B8' } }
-          },
-          colors: ['rgba(14,165,233,0.8)'],
-          tooltip: { y: { formatter: v => '$' + v.toLocaleString('en-US') } },
-          grid: { show: false },
-          dataLabels: { enabled: false }
-        });
-        chartCarrier.render();
-      } else {
-        chartCarrier.updateSeries([{ name: 'Overcharge', data: carrierAmounts }]);
-      }
+    function getDonutChartData() {
+      const filtered = getFilteredData();
+      const types = ['BAF', 'Unauthorized', 'Duplicate', 'THC', 'D&D'];
+      const counts = types.map(t => filtered.filter(r => r.chargeType === t).length);
+      return { types, counts };
+    }
 
-      if (!chartType) {
-        chartType = new ApexCharts(document.getElementById('chart-type'), {
-          chart: { type: 'donut', height: 260, background: 'transparent' },
-          theme: { mode: 'dark' },
-          series: [28, 22, 19, 17, 14],
-          labels: ['BAF', 'Unauthorized', 'Duplicate', 'THC', 'D&D'],
-          colors: ['#0EA5E9', '#1A56A0', '#10B981', '#F59E0B', '#EF4444'],
-          plotOptions: {
-            pie: {
-              donut: {
-                size: '65%',
-                labels: {
-                  show: true,
-                  total: {
-                    show: true,
-                    label: 'Cases',
-                    formatter: () => String(filtered.length)
-                  }
-                }
-              }
-            }
-          },
-          legend: { position: 'bottom', fontSize: '12px' },
-          dataLabels: { enabled: false },
-          tooltip: { y: { formatter: v => v + '%' } }
-        });
-        chartType.render();
-      }
+    function renderCharts() {
+      if (!barChart || !donutChart) return;
+
+      const barData = getBarChartData();
+      barChart.updateSeries([{ name: 'Overcharge', data: barData.amounts }]);
+
+      const donutData = getDonutChartData();
+      donutChart.updateSeries(donutData.counts);
     }
 
     // ── Master render ─────────────────────────────────────────────────────────
@@ -1449,18 +1412,18 @@
       const numeric = parseFloat(raw.replace(/[^0-9.]/g, ''));
       const dash = '$\u2014';
       if (!numeric || numeric === 0) {
-        document.getElementById('roi-recovery').textContent = dash;
-        document.getElementById('roi-fee').textContent      = dash;
-        document.getElementById('roi-net').textContent      = dash;
+        document.getElementById('roiRecovery').textContent = dash;
+        document.getElementById('roiFee').textContent      = dash;
+        document.getElementById('roiNet').textContent      = dash;
         return;
       }
       const annual   = numeric * 12 * 0.035;
       const fee      = annual * 0.25;
       const net      = annual - fee;
       const fmt      = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-      document.getElementById('roi-recovery').textContent = fmt(annual);
-      document.getElementById('roi-fee').textContent      = fmt(fee);
-      document.getElementById('roi-net').textContent      = fmt(net);
+      document.getElementById('roiRecovery').textContent = fmt(annual);
+      document.getElementById('roiFee').textContent      = fmt(fee);
+      document.getElementById('roiNet').textContent      = fmt(net);
     }
 
     // ── Carrier filter ────────────────────────────────────────────────────────
@@ -1532,7 +1495,65 @@
         });
       });
 
-      // Initial full render
+      // Initialize charts (once) then trigger initial render
+      const barData = getBarChartData();
+      barChart = new ApexCharts(document.getElementById('barChart'), {
+        chart: { type: 'bar', height: 260, background: 'transparent', toolbar: { show: false } },
+        theme: { mode: 'dark' },
+        plotOptions: { bar: { horizontal: true, borderRadius: 4 } },
+        series: [{ name: 'Overcharge', data: barData.amounts }],
+        xaxis: {
+          categories: barData.carriers,
+          labels: {
+            style: { fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', colors: '#94A3B8' },
+            formatter: v => '$' + Number(v).toLocaleString('en-US')
+          },
+          axisBorder: { show: false },
+          axisTicks: { show: false }
+        },
+        yaxis: {
+          labels: { style: { fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', colors: '#94A3B8' } }
+        },
+        colors: ['#0EA5E9'],
+        tooltip: { theme: 'dark', y: { formatter: v => '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 2 }) } },
+        grid: { show: false },
+        dataLabels: { enabled: false }
+      });
+      barChart.render();
+
+      const donutData = getDonutChartData();
+      donutChart = new ApexCharts(document.getElementById('donutChart'), {
+        chart: { type: 'donut', height: 260, background: 'transparent' },
+        theme: { mode: 'dark' },
+        series: donutData.counts,
+        labels: donutData.types,
+        colors: ['#0EA5E9', '#1A56A0', '#10B981', '#F59E0B', '#EF4444'],
+        plotOptions: {
+          pie: {
+            donut: {
+              size: '55%',
+              labels: {
+                show: true,
+                name: { show: true, color: '#94A3B8', fontSize: '12px' },
+                value: { show: true, color: '#FFFFFF', fontSize: '24px', fontWeight: 700 },
+                total: {
+                  show: true,
+                  label: 'Total',
+                  color: '#94A3B8',
+                  fontSize: '12px',
+                  formatter: w => w.globals.seriesTotals.reduce((a, b) => a + b, 0).toString()
+                }
+              }
+            }
+          }
+        },
+        legend: { position: 'bottom', fontSize: '12px', fontWeight: 700, labels: { colors: '#94A3B8' } },
+        dataLabels: { enabled: false },
+        tooltip: { theme: 'dark' }
+      });
+      donutChart.render();
+
+      // Initial full render (renderCharts will call updateSeries on already-initialized charts)
       render();
     });
   </script>
