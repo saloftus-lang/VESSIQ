@@ -22,12 +22,15 @@ A demo-quality invoice chargeback dashboard that makes any prospect say "we need
 
 ### Active
 
-- [ ] `dashboard.html` — Invoice chargeback demo (ocean freight + rail/terminal, fully interactive, realistic fake data)
-- [ ] `founder.html` — Founder ops dashboard (pilot metrics, tasks/notes, industry benchmarks)
-- [ ] Subtle 3D depth design system (CSS 3D transforms, glassmorphism, layered floating cards) applied across both files
-- [ ] Consistent VESSIQ dark navy visual language (#0B1F3A, #1A56A0, #0EA5E9) across both dashboards
 - [ ] Invoice dashboard: filter by carrier/date, expandable invoice rows, responsive dispute status buttons
-- [ ] Founder dashboard: KPI tiles (active pilots, invoices processed, savings found), task/notes widget, industry benchmark cards
+
+### Validated
+
+- ✓ `dashboard.html` — Invoice chargeback demo (ocean freight + rail/terminal, fully interactive, realistic fake data) — Validated in Phase 01
+- ✓ `founder.html` — Founder ops dashboard (pilot metrics, tasks/notes, industry benchmarks) — Validated in Phase 02
+- ✓ Subtle 3D depth design system (CSS 3D transforms, glassmorphism, layered floating cards) applied across both files — Validated in Phase 01
+- ✓ Consistent VESSIQ dark navy visual language (#0B1F3A, #1A56A0, #0EA5E9) across both dashboards — Validated in Phase 01
+- ✓ Founder dashboard: KPI tiles (active pilots, invoices processed, savings found), task/notes widget, industry benchmark cards — Validated in Phase 02
 
 ### Out of Scope
 
@@ -81,4 +84,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-24 after initialization*
+*Last updated: 2026-03-26 — Phase 02 complete (founder.html all FND requirements verified)*
