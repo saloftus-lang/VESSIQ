@@ -13,7 +13,7 @@ Two standalone HTML dashboards built to coarse granularity. Phase 1 delivers the
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Invoice Demo Dashboard** - Sales-ready invoice chargeback demo with design system, charts, interactive table, and ROI calculator
-- [ ] **Phase 2: Founder Ops Dashboard** - Internal founder dashboard with pilot metrics, task/notes widgets, and industry benchmarks
+- [x] **Phase 2: Founder Ops Dashboard** - Internal founder dashboard with pilot metrics, task/notes widgets, and industry benchmarks (completed 2026-03-26)
 
 ## Phase Details
 
@@ -49,7 +49,7 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md — Foundation: design system, header, KPI tiles, tasks widget, notes widget
-- [ ] 02-02-PLAN.md — Industry benchmark cards with progress bars, delta badges, and visual verification
+- [x] 02-02-PLAN.md — Industry benchmark cards with progress bars, delta badges, and visual verification
 
 **UI hint**: yes
 
@@ -61,4 +61,4 @@ Phases execute in numeric order: 1 → 2
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Invoice Demo Dashboard | 1/3 | In Progress|  |
-| 2. Founder Ops Dashboard | 1/2 | In Progress|  |
+| 2. Founder Ops Dashboard | 2/2 | Complete   | 2026-03-26 |

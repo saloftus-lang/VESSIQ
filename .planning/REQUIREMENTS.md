@@ -37,8 +37,8 @@
 - [x] **FND-02**: Pilot metrics section — 3 KPI tiles: Active Pilots, Invoices Processed (total), Total Savings Identified ($)
 - [x] **FND-03**: Ops tasks widget — weekly goal (editable text), to-do list with add/complete/delete (persisted in localStorage)
 - [x] **FND-04**: Notes widget — freeform textarea, saved to localStorage on input
-- [ ] **FND-05**: Industry benchmarks section — 3 benchmark cards: Average Invoice Error Rate (industry 30–45%), Average Detention Days, Dispute Win Rate (industry avg vs. VESSIQ target)
-- [ ] **FND-06**: Benchmark cards show "Industry avg" vs "VESSIQ target" comparison with visual indicator (progress bar or delta badge)
+- [x] **FND-05**: Industry benchmarks section — 3 benchmark cards: Average Invoice Error Rate (industry 30–45%), Average Detention Days, Dispute Win Rate (industry avg vs. VESSIQ target)
+- [x] **FND-06**: Benchmark cards show "Industry avg" vs "VESSIQ target" comparison with visual indicator (progress bar or delta badge)
 - [x] **FND-07**: Same design system as dashboard.html (shared CSS token values, same glassmorphism card style)
 
 ### Demo Reliability
@@ -105,8 +105,8 @@
 | FND-02 | Phase 2: Founder Ops Dashboard | Complete |
 | FND-03 | Phase 2: Founder Ops Dashboard | Complete |
 | FND-04 | Phase 2: Founder Ops Dashboard | Complete |
-| FND-05 | Phase 2: Founder Ops Dashboard | Pending |
-| FND-06 | Phase 2: Founder Ops Dashboard | Pending |
+| FND-05 | Phase 2: Founder Ops Dashboard | Complete |
+| FND-06 | Phase 2: Founder Ops Dashboard | Complete |
 | FND-07 | Phase 2: Founder Ops Dashboard | Complete |
 
 **Coverage:**
